@@ -11,11 +11,11 @@ sessionRouter.post("", async (req, res) => {
   try {
     const { email, password } = req.body;
     await signIn.validate({ email, password });
-
+    console.log(req.body)
     const user = await User.findOne({ email });
     if (user && user.comparePasswords(password)) {
       const sessionUser = sessionizeUser(user);
-
+      console.log(sessionUser)
       req.session.user = sessionUser
       res.send(sessionUser);
     } else {

@@ -8,12 +8,12 @@ class LoginForm extends React.Component{
 	constructor(props){
 		super(props);
 		this.state = {
-			username: '',
+			email: '',
 			password: '',
 			buttonDisabled: false
 		}
 	}
-   
+
 	setInputValue(property, val){
 		val = val.trim();
 		if(val.length > 12){
@@ -26,7 +26,7 @@ class LoginForm extends React.Component{
 
 	resetForm(){
 		this.setState({
-			username: '',
+			email: '',
 			password: '',
 			buttonDisabled: false
 		})
@@ -34,7 +34,7 @@ class LoginForm extends React.Component{
 
 	async doLogin(){
 
-		if(!this.state.username){
+		if(!this.state.email){
 			return;
 		}
 		if (!this.state.password){
@@ -47,22 +47,22 @@ class LoginForm extends React.Component{
 
 
 		try {
-			let res = await fetch('/login', {
+			let res = await fetch('/api/session', {
 				method: 'post',
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					username: this.state.username,
+					email: this.state.email,
 					password: this.state.password
 				})
 			});
-			
+
 			let result	= await res.json();
 			if(result && result.success){
 				UserStore.isLoggedIn = true;
-				UserStore.username = result.username;
+				UserStore.email = result.email;
 			}
 
 			else if (result && result.success === false){
@@ -81,13 +81,13 @@ class LoginForm extends React.Component{
  	render() {
     	return (
     		<div className="loginForm">
-        		
+
         		Log In
         		<InputField
         			type = 'text'
-        			placeholder = 'Username'
-        			value = {this.state.username ? this.state.username : ''}
-        			onChange = { (val) => this.setInputValue('username', val)  }
+        			placeholder = 'email'
+        			value = {this.state.email ? this.state.email : ''}
+        			onChange = { (val) => this.setInputValue('email', val)  }
         		/>
 
         		<InputField
