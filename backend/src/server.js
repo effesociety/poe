@@ -5,7 +5,7 @@ import connectStore from "connect-mongo";
 import { userRoutes, sessionRoutes } from './routes/index';
 import {
   PORT, NODE_ENV, MONGO_URI, SESS_NAME, SESS_SECRET, SESS_LIFETIME
-} from "../configure";
+} from "./config";
 
 (async () => {
   try {
