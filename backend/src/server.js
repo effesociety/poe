@@ -2,10 +2,10 @@ import express from 'express';
 import mongoose from 'mongoose';
 import session from "express-session";
 import connectStore from "connect-mongo";
-import { userRoutes, sessionRoutes } from './routes/index'; 
+import { userRoutes, sessionRoutes } from './routes/index';
 import {
   PORT, NODE_ENV, MONGO_URI, SESS_NAME, SESS_SECRET, SESS_LIFETIME
-} from "./config";
+} from "../configure";
 
 (async () => {
   try {
@@ -47,4 +47,4 @@ import {
   } catch (err) {
     console.log(err);
   }
-})(); 
+})();

@@ -10,7 +10,7 @@ const message =
   "and one special character";
 const password = Joi.string()
   .regex(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)
-  .options({
+  /*.options({
     language: {
       string: {
         regex: {
@@ -18,7 +18,7 @@ const password = Joi.string()
         }
       }
     }
-  });
+  });*/
 
 export const signUp = Joi.object().keys({
   email,

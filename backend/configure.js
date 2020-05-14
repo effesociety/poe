@@ -4,6 +4,5 @@ export const {
     SESS_NAME = 'sid',
     SESS_SECRET = 'secret!session',
     SESS_LIFETIME = 1000 * 60 * 60 * 2,
-    MONGO_URI = 'mongodb+srv://poe:XDrsCNfTx9iOc5Dy@cosmoscluster-ctn6b.mongodb.net/test?retryWrites=true&w=majority'
+    MONGO_URI = 'mongodb://localhost:27017/poe'
 } = process.env;
-
