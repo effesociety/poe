@@ -13,15 +13,15 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "connect-mongo": "^2.0.3",
-    "crypto-js": "^3.1.9-1",
-    "esm": "^3.2.20",
-    "express": "^4.16.4",
-    "express-session": "^1.15.6",
-    "joi": "^14.3.1",
-    "mongoose": "^5.4.19"
+    "connect-mongo": "^3.0.0",
+    "crypto-js": "^3.2.1",
+    "esm": "^3.2.25",
+    "express": "^4.17.0",
+    "express-session": "^1.17.1",
+    "@hapi/joi": "^17.1.1",
+    "mongoose": "^5.9.14"
   },
   "devDependencies": {
-    "nodemon": "^1.18.10"
+    "nodemon": "^2.0.4"
   }
 }

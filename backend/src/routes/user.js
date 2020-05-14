@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import express from 'express';
 import User from '../models/user';
 import { signUp } from '../validations/user';

@@ -1,5 +1,5 @@
 import express from "express";
-import Joi from "joi";
+import Joi from "@hapi/joi";
 import User from "../models/user";
 import { signIn } from "../validations/user";
 import { SESS_NAME } from "../config";
