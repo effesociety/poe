@@ -2,16 +2,26 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "./src/index.js",
+  "module": "./src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "mongoose": "^5.9.14",
-    "oauth2-server": "^3.0.1"
+    "bcryptjs": "^2.4.3",
+    "connect-mongo": "^2.0.3",
+    "crypto-js": "^3.1.9-1",
+    "esm": "^3.2.20",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "joi": "^14.3.1",
+    "mongoose": "^5.4.19"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }
