@@ -1,50 +1,18 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import session from "express-session";
-import connectStore from "connect-mongo";
-import { userRoutes, sessionRoutes } from './routes/index';
-import {
-  PORT, NODE_ENV, MONGO_URI, SESS_NAME, SESS_SECRET, SESS_LIFETIME
-} from "./config";
+const express = require('express')
+const app = express()
+const apiRouter = express.Router()
+const mongo = require('./utils/db')
+const utils = require('./utils/config')
+const PORT = utils.PORT
+const userRoutes = require('./routes/auth-api')
+const coursesRoutes = require('./routes/courses-api')
 
-(async () => {
-  try {
-    await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log('MongoDB connected');
+const server = app.listen(PORT, () => {
+		console.log("App running on port ", PORT)
+})
 
-    const app = express();
+mongo()
 
-    app.disable('x-powered-by');
-
-    app.use(express.urlencoded({ extended: true }));
-    app.use(express.json());
-
-    const MongoStore = connectStore(session);
-
-    app.use(session({
-      name: SESS_NAME,
-      secret: SESS_SECRET,
-      store: new MongoStore({
-        mongooseConnection: mongoose.connection,
-        collection: 'session',
-        ttl: parseInt(SESS_LIFETIME) / 1000,
-      }),
-      saveUninitialized: false,
-      resave: false,
-      cookie: {
-        sameSite: true,
-        secure: NODE_ENV === 'production',
-        maxAge: parseInt(SESS_LIFETIME)
-      }
-    }));
-
-    const apiRouter = express.Router();
-    app.use('/api', apiRouter);
-    apiRouter.use('/users', userRoutes);
-    apiRouter.use('/session', sessionRoutes);
-
-    app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
-  } catch (err) {
-    console.log(err);
-  }
-})();
+app.use('/api', apiRouter)
+apiRouter.use('/users', userRoutes)
+apiRouter.use('/courses', coursesRoutes)
