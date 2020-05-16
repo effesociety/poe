@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const utils = require('../utils/config')
-const JWT_SIGN = utils.JWT_SIGN
+const JWT_SECRET = utils.JWT_SECRET
 const usersSchema = require('../schemas/users-schema')
 const userRouter = express.Router()
 
@@ -62,13 +62,12 @@ userRouter.post(
 
       jwt.sign(
         payload,
-        JWT_SIGN,
+        JWT_SECRET,
         {
           expiresIn: '24h'
         },
         (err, token) => {
           if (err) throw err;
-          //res.cookie('token', token, { domain: 'localhost', path:'/', maxAge: 24 * 60 * 60 * 1000, httpOnly: true })
           res.cookie('token', token, { httpOnly: true })
           res.status(200).json({
             message: "Success"
@@ -124,13 +123,12 @@ userRouter.post(
 
       jwt.sign(
         payload,
-        JWT_SIGN,
+        JWT_SECRET,
         {
           expiresIn: '24h'
         },
         (err, token) => {
           if (err) throw err;
-          //res.cookie('token', token, { domain: 'localhost', path:'/', maxAge: 24 * 60 * 60 * 1000, httpOnly: true })
           res.cookie('token', token, { httpOnly: true })
           res.status(200).json({
             message: "Success"
@@ -146,10 +144,12 @@ userRouter.post(
     }
   }
 )
-/*
+
 userRouter.post(
   "/logout",
-  //res.clearCookie()
+  (req, res) => {
+	  res.clearCookie()
+  }
 )
-*/
+
 module.exports = userRouter
