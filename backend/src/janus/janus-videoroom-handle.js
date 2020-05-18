@@ -51,7 +51,7 @@ module.exports = class JanusHandle{
         return this.send("trickle", {candidate: candidate});
     }
 
-    join(room,ptype){
+    join(room,ptype,feed){
         if(this.session.options.verbose === true){
             console.log("[" + this.id  + "] Joining room " + room + " as " + ptype)
         }
@@ -61,6 +61,11 @@ module.exports = class JanusHandle{
             "ptype": ptype,
             "room": room
         };
+
+        if(ptype === "subscriber" && feed !== undefined){
+            body = Object.assign({"feed": feed}, body);
+        }
+
         return this.sendMessage(body);
     }
 
@@ -126,6 +131,18 @@ module.exports = class JanusHandle{
             "room": room
         }
         return this.sendMessage(body);
+    }
+
+    start(jsep){
+        if(this.session.options.verbose === true){
+            console.log("[" + this.id  + "] Starting...")
+        }
+
+        let body = {
+            "request": "start",
+
+        }
+        return this.sendJsep(jsep,body);
     }
 
 

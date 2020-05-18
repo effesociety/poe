@@ -9,8 +9,6 @@ module.exports = class JanusSession{
             timeoutMs: 10000,
             keepaliveMs: 30000
         };
-
-        //this.bindSocket()
     }
 
     bindSocket(){
@@ -61,7 +59,7 @@ module.exports = class JanusSession{
             }
             this.txns[signal.transaction] = { resolve: resolve, reject: reject, timeout: timeout, type: type };
             this._transmit(type, signal);
-          });       
+        });       
     }
 
     receive(signal){
@@ -100,7 +98,7 @@ module.exports = class JanusSession{
 
     on(ev, callback){
         var handlers = this.eventHandlers[ev];
-        if(handlers === null){
+        if(handlers === null || handlers === undefined){
             handlers = this.eventHandlers[ev] = [];
         }
         handlers.push(callback);
