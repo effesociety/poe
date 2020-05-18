@@ -44,7 +44,6 @@ wss.on('connection', ws => {
       console.log("Received publish message")
       let offer = object.offer;
       let remote = await handle.publish(offer,true,true);
-      
       let body = {
         "message": "answer",
         "jsep": remote.jsep
