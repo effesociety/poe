@@ -20,7 +20,7 @@ userRouter.post(
     })
   ],
   async (req, res) => {
-    const errors = validationResult(req);
+    const errors = validationResult(req)
     if (!errors.isEmpty()) {
       return res.status(400).json({
         errors: errors.array()
@@ -29,9 +29,7 @@ userRouter.post(
 
     const { email, password } = req.body;
     try {
-      let user = await usersSchema.findOne({
-        email
-      });
+      let user = await usersSchema.findOne({email})
       if (user) {
         return res.status(400).json({
           msg: "User Already Exists"
@@ -47,7 +45,7 @@ userRouter.post(
       })
 
       const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
+      user.password = await bcrypt.hash(password, salt)
 
       await user.save()
 
@@ -68,7 +66,9 @@ userRouter.post(
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
           res.status(200).json({
-            message: "Success"
+            email: user.email,
+            role: user.role,
+            courses: user.courses
           })
         }
       )
@@ -88,7 +88,7 @@ userRouter.post(
     })
   ],
   async (req, res) => {
-    const errors = validationResult(req);
+    const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -96,17 +96,15 @@ userRouter.post(
       })
     }
 
-    const { email, password } = req.body;
+    const { email, password } = req.body
     try {
-      let user = await usersSchema.findOne({
-        email
-      })
+      let user = await usersSchema.findOne({email})
       if (!user)
         return res.status(400).json({
           message: "User Not Exist"
         })
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
         return res.status(400).json({
           message: "Incorrect Password !"
@@ -129,8 +127,10 @@ userRouter.post(
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
           res.status(200).json({
-            message: "Success"
-          });
+            email: user.email,
+            role: user.role,
+            courses: user.courses
+          })
         }
       )
 
@@ -147,6 +147,46 @@ userRouter.post(
   "/logout",
   (req, res) => {
 	  res.clearCookie()
+    res.status(200).json({
+      message: "Success"
+    })
+  }
+)
+
+userRouter.post(
+  "/auth",
+  async (req,res) => {
+    var cookies = cookie.parse(req.headers.cookie || '')
+    var token = cookies.token
+    if(token){
+      var decoded = jwt.verify(token,process.env.JWT_SECRET)
+      var email = decoded.user.email
+      try {
+        let user = await usersSchema.findOne({email})
+        if(user){
+          return res.status(200).json({
+            email: user.email,
+            role: user.role,
+            courses: user.courses
+          })
+        }
+        else {
+          return res.status(400).json({
+            message: "User Not Exist"
+          })
+        }
+      } catch (err){
+        console.error(err)
+        res.status(500).json({
+          message: "Server Error"
+        })
+      }
+    }
+    else {
+      res.status(500).json({
+        message: "Unidentified Token"
+      })
+    }
   }
 )
 

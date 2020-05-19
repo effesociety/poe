@@ -1,120 +1,65 @@
-import React          from 'react';
-import { observer }   from 'mobx-react';
-import UserStore      from './stores/UserStore';
-import LoginForm      from './LoginForm';
-import SubmitButton   from './SubmitButton';
-import './App.css';
+import React from "react";
+import Header from "./Header";
 
-class App extends React.Component{
-
-
-    async componentDidMount(){
-
-        try{
-            let res = await fetch('/isLoggedIn', {
-                method: 'post',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            let result = await res.json();
-
-            if(result && result.success){
-
-                UserStore.loading = false;
-                UserStore.isLoggedIn = true;
-                UserStore.username = result.username;
-            }
-            else{
-                UserStore.loading = false;
-                UserStore.isLoggedIn = false;
-            }
-        }
-
-        catch(e){
-            UserStore.loading = false;
-            UserStore.isLoggedIn = false;
-        }
+class App extends React.Component {
+  constructor(){
+    super();
+    this.state = {
+      "isLoggedIn": false,
+      "loading": true,
+      "username": undefined
     }
+  }
+  async componentDidMount() {
+    this.setState({
+      "loading": false
+    })
 
-    async doLogout(){
-
-        try{
-            let res = await fetch('/logout', {
-                method: 'post',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            let result = await res.json();
-
-            if(result && result.success){
-
-                UserStore.isLoggedIn = false;
-                UserStore.username = '';
-            }            
+    //Uncomment the following and delete previous setState once the authentication is completed
+    /*
+    try {
+      const requestOptions = {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
         }
+      };
+      let response = await fetch("/api/users/auth", requestOptions);
+      let result = await response.json();
 
-        catch(e){
-            console.log(e)
-        }
+      if (result && result.success) {
+        this.setState({
+          "isLoggedIn": true,
+          "loading": false
+        })
+      } else {
+        this.setState({
+          "isLoggedIn": false,
+          "loading": false
+        })
+      }
+    } catch (err) {
+      console.log("An error occurred: ");
+      console.log(err);
     }
+  */
+  }
 
-    render() {
+  onSuccess(){
+    this.setState({
+      "isLoggedIn": true
+    })
+  }
 
 
-        if(UserStore.loading) {
-            return(
-            <div className="app">
-                <div className="container">
-                Loading, please wait...
-                </div>
-            </div>
-
-            );
-        }
-
-        else{
-
-            if(UserStore.isLoggedIn){
-                return(
-                    <div className="app">
-                        <div className="container">
-                            Welcome {UserStore.username}
-
-                            <SubmitButton
-                                text = {'Log out'}
-                                disabled={false}
-                                onClick={ () => this.doLogout() }
-                            />
-
-                        </div>
-                    </div>
-                );
-
-            }
-            return (
-                <div className="app">
-                    <div className="container">
-                        <LoginForm/>
-
-                    </div>
-                </div>
-            );
-        }
-
-/*        return (
-            <div className="app">
-                asdasd
-            </div>
-        );
-*/
-    }
+  render() {
+    return (
+      <div>
+        <Header isLoggedIn={this.state.isLoggedIn} username={this.state.username} onSuccess={this.state.onSuccess} />
+      </div>
+    )
+  }
 }
 
-
-export default observer(App);
+export default App;

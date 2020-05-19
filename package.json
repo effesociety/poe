@@ -1,0 +1,12 @@
+{
+	"name": "poe-webrtc",
+	"version": "0.0.1",
+	"description": "poe - Pretty Open Education. A webapp to take exams online using WebRTC",
+	"scripts": {
+		"start": "node backend/src/server.js",
+		"heroku-postbuild": "cd backend && npm install && cd ../frontend && npm install --only=dev && npm install && npm run build"
+	},
+	"engines": {
+		"node": "12.16.1"
+	}
+}
