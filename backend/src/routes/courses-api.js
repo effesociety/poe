@@ -9,5 +9,16 @@ coursesRouter.post(
   "/createCourse",
 
 )
+
+
+coursesRouter.post(
+  "/destroyCourse",
+
+)
+
+coursesRouter.post(
+  "/joinCourse",
+
+)
 */
 module.exports = coursesRouter

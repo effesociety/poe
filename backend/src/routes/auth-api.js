@@ -143,7 +143,7 @@ userRouter.post(
   }
 )
 
-userRouter.post(
+userRouter.delete(
   "/logout",
   (req, res) => {
 	  res.clearCookie()
@@ -153,7 +153,7 @@ userRouter.post(
   }
 )
 
-userRouter.post(
+userRouter.get(
   "/auth",
   async (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
