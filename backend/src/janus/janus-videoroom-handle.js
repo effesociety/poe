@@ -1,4 +1,4 @@
-module.exports = class JanusHandle{
+module.exports = class JanusVideoroomHandle{
     constructor(session){
         this.session = session;
         this.id = undefined;

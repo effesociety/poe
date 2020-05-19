@@ -3,8 +3,6 @@ const { check, validationResult } = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
-const utils = require('../utils/config')
-const JWT_SECRET = utils.JWT_SECRET
 const usersSchema = require('../schemas/users-schema')
 const userRouter = express.Router()
 
@@ -62,7 +60,7 @@ userRouter.post(
 
       jwt.sign(
         payload,
-        JWT_SECRET,
+        process.env.JWT_SECRET,
         {
           expiresIn: '24h'
         },
@@ -123,7 +121,7 @@ userRouter.post(
 
       jwt.sign(
         payload,
-        JWT_SECRET,
+        process.env.JWT_SECRET,
         {
           expiresIn: '24h'
         },

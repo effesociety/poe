@@ -1,11 +1,9 @@
 const mongoose = require('mongoose')
-const utils = require('./config')
-const MONGO_URI = utils.MONGO_URI
 
 const mongoServer = async () => {
   try {
-    await mongoose.connect(MONGO_URI,{useNewUrlParser: true, useUnifiedTopology: true})
-    console.log("Connected to ",MONGO_URI)
+    await mongoose.connect(process.env.MONGO_URI,{useNewUrlParser: true, useUnifiedTopology: true})
+    console.log("Connected to ",process.env.MONGO_URI)
   } catch (e) {
     console.log(e)
     throw e

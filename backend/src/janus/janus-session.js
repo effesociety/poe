@@ -11,6 +11,7 @@ module.exports = class JanusSession{
         };
     }
 
+    /*
     bindSocket(){
         const webSocketURI = "wss://janus.conf.meetecho.com/ws";
         let ws = new WebSocket(webSocketURI,"janus-protocol");
@@ -18,6 +19,7 @@ module.exports = class JanusSession{
             this.output = ws.send.bind(ws);
         }
     }
+    */
 
     create(){
         return this.send('create').then(res => {
