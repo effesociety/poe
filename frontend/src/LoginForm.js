@@ -146,11 +146,11 @@ class LoginForm extends React.Component {
 
   render() {
     var userInfo;
-    const username = this.props.username
-    if(this.props.isLoggedIn && username !== undefined){
+    const email = this.props.email
+    if(this.props.isLoggedIn && email !== undefined){
         userInfo = (
           <Typography style={styles.userInfo} variant="subtitle2" align="right">
-            Hi, {username}!
+            Hi, {email}!
             <Button variant="contained" style={styles.button} onClick={this.doLogout}>
              Logout
            </Button>          
@@ -186,10 +186,10 @@ class LoginForm extends React.Component {
               required
               fullWidth
               inputRef={this.email}
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
+              id="email"
+              label="email"
+              name="email"
+              autoComplete="email"
               autoFocus
             />
             <TextField

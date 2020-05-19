@@ -24,7 +24,7 @@ class App extends React.Component {
     this.state = {
       "isLoggedIn": false,
       "loading": true,
-      "username": undefined,
+      "email": undefined,
     }
   }
   async componentDidMount() {
@@ -75,7 +75,7 @@ class App extends React.Component {
   render() {
     var Main;
     if(this.state.isLoggedIn){
-      Main = (<Courses courses={this.state.courses} />)
+      Main = (<Courses courses={this.state.courses} role={this.state.role}/>)
     }
     else{
       Main = (<Info />)
@@ -84,7 +84,7 @@ class App extends React.Component {
     return (
       <div style={styles.parallax}>
         <FullBackdrop backdrop={this.state.loading}/>
-        <Header isLoggedIn={this.state.isLoggedIn} username={this.state.username} onSuccess={this.state.onSuccess} />
+        <Header isLoggedIn={this.state.isLoggedIn} email={this.state.email} onSuccess={this.state.onSuccess} />
         {Main}
         <Team />
         <Footer />
