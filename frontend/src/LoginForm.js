@@ -4,14 +4,25 @@ import Dialog from "@material-ui/core/Dialog";
 import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
+import LockOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
 
-const style = {
+const styles = {
+  userInfo:{
+    color: "#f50057",
+    fontSize: "1.2rem"
+  },
+  avatar: {
+    backgroundColor: "#009688",
+    margin: "auto",
+    marginTop: "20px"
+  },
   button: {
     margin: "24px 0 16px",
+    backgroundColor: "#009688",
+    color: "#fff"
   },
   buttonL: {
     width: "calc(50% - 6px)",
@@ -129,65 +140,93 @@ class LoginForm extends React.Component {
     }
   }
 
+  async doLogout(){
+
+  }
+
   render() {
+    var userInfo;
+    const username = this.props.username
+    if(this.props.isLoggedIn && username !== undefined){
+        userInfo = (
+          <Typography style={styles.userInfo} variant="subtitle2" align="right">
+            Hi, {username}!
+            <Button variant="contained" style={styles.button} onClick={this.doLogout}>
+             Logout
+           </Button>          
+          </Typography>
+        )
+    }else{
+      userInfo = (
+        <Typography style={styles.userInfo} variant="subtitle2" align="right">
+          <Button variant="contained" style={styles.button} onClick={this.openForm}>
+            Login
+          </Button>
+        </Typography>
+      )
+    }
+
     return (
       <div>
-        <Button variant="contained" color="primary" onClick={this.openForm}>
-          Login
-        </Button>
+        {userInfo}
         <Dialog open={this.state.open} onClose={this.closeForm} aria-labelledby="form-dialog-title">
           <Container fixed>
-            <div>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                inputRef={this.email}
-                id="username"
-                label="Username"
-                name="username"
-                autoComplete="username"
-                autoFocus
-              />
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                inputRef={this.password}
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-              />
+            <Box>
+              <Avatar style={styles.avatar} align="center">
+                <LockOutlinedIcon />
+              </Avatar>
+            </Box>
 
-              <Grid container>
-                <Grid item style={style.buttonL}>
-                  <Button
-                    onClick={this.doLogin}
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    style={style.button}
-                  >
-                    Login
-                  </Button>
-                </Grid>
-                <Grid item style={style.buttonR}>
-                  <Button
-                    onClick={this.doSignUp}
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    style={style.button}
-                  >
-                    Sign Up
-                  </Button>
-                </Grid>
+            <Typography component="h1" variant="h5" align="center">
+              Welcome
+            </Typography>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              inputRef={this.email}
+              id="username"
+              label="Username"
+              name="username"
+              autoComplete="username"
+              autoFocus
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              inputRef={this.password}
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+
+            <Grid container>
+              <Grid item style={styles.buttonL}>
+                <Button
+                  onClick={this.doLogin}
+                  fullWidth
+                  variant="contained"
+                  style={styles.button}
+                >
+                  Login
+                </Button>
               </Grid>
-            </div>
+              <Grid item style={styles.buttonR}>
+                <Button
+                  onClick={this.doSignUp}
+                  fullWidth
+                  variant="contained"
+                  style={styles.button}
+                >
+                  Sign Up
+                </Button>
+              </Grid>
+            </Grid>
           </Container>
         </Dialog>
       </div>

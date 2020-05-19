@@ -2,35 +2,47 @@ import React from "react";
 import LoginForm from "./LoginForm";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
-import Telecommuting from "./images/Telecommuting.svg";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import Logo from './images/logo_white.png';
+import Typography from "@material-ui/core/Typography";
 
-const style = {
-  header: {
-    alignItems: "center",
-    paddingTop: "25px",
-    paddingBottom: "px",
-    paddingRight: "25px",
-    backgroundImage: "url(" + Telecommuting + ")",
+const styles = {
+  logo :{
+    backgroundImage: "url(" + Logo + ")",
     width: "100%",
-    backgroundSize: "cover",
-  },
+    minHeight: "75px",
+    backgroundSize: "contain",
+    backgroundRepeat: "no-repeat"
+  }
 };
 
 class Header extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   render() {
     return (
-      <header style={style.header}>
+      <header>
         <CssBaseline />
-        <LoginForm isLoggedIn={this.props.isLoggedIn} onSuccess={this.props.onSuccess} username={this.props.username}/>
-        <Container className="Header">
+        <Container className="header">
           <Grid container>
-            <Grid item xs={11} />
-            <Grid item xs={1}>
+            <Grid item sm={6} md={2}>
+              <div style={styles.logo} />
+            </Grid>
+            <Grid item sm={4} md={9}/>
+            <Grid item sm={2} md={1}>
+              <LoginForm isLoggedIn={this.props.isLoggedIn} onSuccess={this.props.onSuccess} username={this.props.username}/>
+            </Grid>
+          </Grid>
+        </Container>
+        
+        <Container className="header-text">
+          <Grid container>
+            <Grid item sm={12}>
+              <Typography  variant="h1" align="center" className="header-text-title">
+                Lorem ipsum
+              </Typography>
+              <Typography  variant="h4" align="center" className="header-text-title">
+                dolor sit amet, consectetur adipiscing elit. Aenean consequat convallis sem vitae rutrum. Morbi auctor condimentum nisl, non interdum eros viverra ac. In eu risus efficitur, egestas purus id, finibus neque. 
+              </Typography>             
             </Grid>
           </Grid>
         </Container>

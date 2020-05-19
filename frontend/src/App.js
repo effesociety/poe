@@ -1,5 +1,18 @@
 import React from "react";
 import Header from "./Header";
+import Main from "./Main";
+import OverlayBackground from './images/overlay_bg.jpg'
+
+const styles = {
+  parallax: {
+    backgroundImage: 'url('+OverlayBackground+')',
+    height: "100%",
+    backgroundAttachment: "fixed",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover"
+  }
+}
 
 class App extends React.Component {
   constructor(){
@@ -55,8 +68,9 @@ class App extends React.Component {
 
   render() {
     return (
-      <div>
+      <div style={styles.parallax}>
         <Header isLoggedIn={this.state.isLoggedIn} username={this.state.username} onSuccess={this.state.onSuccess} />
+        <Main />
       </div>
     )
   }

@@ -1,0 +1,21 @@
+html,body{
+	height: 100%
+}
+#root{
+	height: 100%;
+}
+.header{
+	padding-top: 25px;
+}
+.header-text{
+	color: #fff;
+}
+.header-text-title{
+	font-family: 'Poiret One', cursive !important;
+}
+.header-text-subtitle{
+	font-family: 'Poiret One', cursive !important;
+}
+.main{
+	margin-top: 50px;
+}
