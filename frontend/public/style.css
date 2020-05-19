@@ -16,6 +16,78 @@ html,body{
 .header-text-subtitle{
 	font-family: 'Poiret One', cursive !important;
 }
-.main{
+.info{
 	margin-top: 50px;
+	overflow: hidden;
+	padding-bottom: 1px;
+	margin-bottom: 40px;
+}
+.info-card-content{
+	padding-bottom: 0!important;
+}
+.info h6{
+	padding: 0 40px;
+}
+.info h3{
+	font-family: 'Poiret One', cursive !important;
+	padding: 30px 0;
+}
+.info img{
+	max-width: 100%;
+	display: block;
+}
+.info-img-left{
+	margin-left: -20px;
+}
+.info-img-right{
+	margin-left: 20px;;
+}
+.course-box{
+	margin-top: 100px;
+	padding-top: 30px;
+	padding-bottom: 70px;
+	background: #f4f4f4
+}
+.course-card{
+	width: calc(100% - 30px);
+	margin-left: 15px;
+	margin-top: 40px;
+}
+.course-avatar{
+	width: 75px;
+	height: 75px;
+	background-color: #009688;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: auto;
+	font-size: 1.2rem;
+	color: #fff;
+}
+.course-name{
+	width: 100%;
+	text-align: center;
+	margin-top: 20px;
+	font-size: 1.2rem;
+}
+.team{
+	text-align: center;
+	padding: 30px 0;
+}
+.team-avatar{
+	display: block;
+	width: 60%;
+	margin-left: 20%;
+	margin-bottom: 20px;
+	border-radius:50%;
+	border:3px solid #fff;
+}
+.team-member{
+	font-family: 'Poiret One', cursive !important;
+	color: #fff;
+	font-size: 1.7rem;
+}
+.footer{
+	margin-top: 30px;
+	padding-bottom: 20px;
 }

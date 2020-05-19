@@ -1,6 +1,10 @@
 import React from "react";
+import FullBackdrop from './FullBackdrop'
 import Header from "./Header";
-import Main from "./Main";
+import Info from "./Info";
+import Courses from "./Courses";
+import Team from "./Team";
+import Footer from "./Footer";
 import OverlayBackground from './images/overlay_bg.jpg'
 
 const styles = {
@@ -20,10 +24,12 @@ class App extends React.Component {
     this.state = {
       "isLoggedIn": false,
       "loading": true,
-      "username": undefined
+      "username": undefined,
     }
   }
   async componentDidMount() {
+    window.scrollTo(0, 0)
+    
     this.setState({
       "loading": false
     })
@@ -67,10 +73,21 @@ class App extends React.Component {
 
 
   render() {
+    var Main;
+    if(this.state.isLoggedIn){
+      Main = (<Courses courses={this.state.courses} />)
+    }
+    else{
+      Main = (<Info />)
+    }
+
     return (
       <div style={styles.parallax}>
+        <FullBackdrop backdrop={this.state.loading}/>
         <Header isLoggedIn={this.state.isLoggedIn} username={this.state.username} onSuccess={this.state.onSuccess} />
-        <Main />
+        {Main}
+        <Team />
+        <Footer />
       </div>
     )
   }
