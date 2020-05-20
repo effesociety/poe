@@ -23,6 +23,5 @@
     "ws": "^7.3.0"
   },
   "devDependencies": {
-    "axios": "^0.19.2"
   }
 }

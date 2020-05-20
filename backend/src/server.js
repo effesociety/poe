@@ -17,12 +17,28 @@ const server = app.listen(process.env.PORT, () => {
 mongo()
 
 //Setup for Janus
-janus()
-
+if(process.env.NODE_ENV === "development"){
+	janus()
+}
+else if(process.env.NODE_ENV === "production"){
+	janus(app)
+}
 
 app.use('/api', apiRouter)
 apiRouter.use('/users', userRoutes)
 apiRouter.use('/courses', coursesRoutes)
+
+
+if(process.env.NODE_ENV === "productio"){
+	const CLIENT_BUILD_PATH = path.join(__dirname, "../frontend/build");
+	// Static files
+	app.use(express.static(CLIENT_BUILD_PATH));
+
+	// Server React Client
+	app.get("/", function(req, res) {
+	  res.sendFile(path.join(CLIENT_BUILD_PATH , "index.html"));
+	});
+}
 
 
 const janusRelay = require('./janus/janus-event-handler-relay')

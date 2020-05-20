@@ -1,14 +1,18 @@
 const JanusWrapper = require('./janus-wrapper');
 const WebSocket = require('ws');
 
-const janus = async () => {
+const janus = async (app) => {
     //Create Janus Session
     var janusWrapper = new JanusWrapper();
     await janusWrapper.init();
 
-	const port = process.env.WS_SERVER_PORT || process.env.PORT
     //Create WebSocket server to communicate with users
-    const wss = new WebSocket.Server({ port: port });
+	if(process.env.NODE_ENV === "development"){
+		const wss = new WebSocket.Server({ port: process.env.WS_SERVER_PORT });
+	}
+	else if(process.env.NODE_ENV === "production" && app){
+		const wss = new WebSocket.Server({ app })
+	}
 
     wss.on('connection', ws => {
 
