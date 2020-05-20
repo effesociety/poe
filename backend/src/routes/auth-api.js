@@ -5,6 +5,7 @@ const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const usersSchema = require('../schemas/users-schema')
+const helper = require('../utils/helpers')
 const userRouter = express.Router()
 
 userRouter.use(bodyParser.json())
@@ -158,37 +159,20 @@ userRouter.get(
   "/auth",
   async (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
-
-    var token = cookies.token
-    if(token){
-      var decoded = jwt.verify(token,process.env.JWT_SECRET)
-      var email = decoded.user.email
-      try {
-        let user = await usersSchema.findOne({email})
-        if(user){
-          res.status(200).json({
-            email: user.email,
-            role: user.role,
-            courses: user.courses
-          })
-        }
-        else {
-          return res.status(400).json({
-            message: "User Not Exist"
-          })
-        }
-      } catch (err){
-        console.error(err)
-        return res.status(500).json({
-          message: "Server Error"
+    helper.checkUser(cookies,res).then(user => {
+      if(user){
+        console.log("Authentication user",user.email)
+        res.status(200).json({
+          email: user.email,
+          role: user.role,
+          courses: user.courses
         })
       }
-    }
-    else {
-      return res.status(500).json({
-        message: "Unidentified Token"
-      })
-    }
+      else
+        res.status(400).json({
+          message: "User Not Exist"
+        })
+    })
   }
 )
 
