@@ -34,8 +34,13 @@ class Courses extends React.Component{
                 document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
                 document.getElementById('remote2').srcObject = janus.streams[Object.keys(janus.streams)[1]];
             }
+            else if(Object.keys(janus.streams).length===3){
+                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
+                document.getElementById('remote2').srcObject = janus.streams[Object.keys(janus.streams)[1]];
+                document.getElementById('remote3').srcObject = janus.streams[Object.keys(janus.streams)[2]];
+            }
             else{
-                console.log("ELse!")            
+                console.log("Tutto rotto!")            
             }
         },5000)
     }
@@ -47,6 +52,7 @@ class Courses extends React.Component{
             <Button id="getFeeds" onClick={this.getFeeds}>getFeeds</Button>
             <video style={{"width":"320px", "height":"180px"}} id="remote1" autoPlay playsInline></video>
             <video style={{"width":"320px", "height":"180px"}} id="remote2" autoPlay playsInline></video>
+            <video style={{"width":"320px", "height":"180px"}} id="remote3" autoPlay playsInline></video>
             <Container>
                 <Grid container>
                     <Grid item sm={12} md={3}>

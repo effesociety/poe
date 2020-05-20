@@ -50,7 +50,7 @@ module.exports = class JanusSession{
 
     send(type, signal){
         let transaction = Math.random().toString(36).slice(2);
-        signal = Object.assign({transaction: transaction}, signal);
+        signal = Object.assign({transaction: transaction, apisecret: process.env.JANUS_API_SECRET}, signal);
         return new Promise((resolve, reject) => {
             var timeout = null;
             if (this.options.timeoutMs) {

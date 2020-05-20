@@ -9,16 +9,24 @@ const io = require('socket.io-client');
 const socket = io(process.env.EVENT_HANDLER_RELAY_URI)
 const axios = require('axios');
 
-socket.emit('identify', process.env.EVENT_HANDLER_SECRET);
 
-socket.on('janusEvent',(body) => {
-	console.log("[JANUS-EVENT-HANDLER-RELAY] Relay received a body of an event...Making POST request to /events");
+const janusRelay = () => {
+	socket.emit('identify', process.env.EVENT_HANDLER_SECRET);
 
-	axios.post('/events', body)
-	.then((res) => {
-		console.log("[JANUS-EVENT-HANDLER-RELAY] POST request made. Status response: ", res.status);
-	}).catch((err) => {
-		console.log("[JANUS-EVENT-HANDLER-RELAY] Error in making POST request");
-		console.error(err);
-	});	
-})
+	socket.on('janusEvent',(body) => {
+		console.log("[JANUS-EVENT-HANDLER-RELAY] Relay received a body of an event...Making POST request to /events");
+
+		console.log(body)
+		/*
+		axios.post('/events', body)
+		.then((res) => {
+			console.log("[JANUS-EVENT-HANDLER-RELAY] POST request made. Status response: ", res.status);
+		}).catch((err) => {
+			console.log("[JANUS-EVENT-HANDLER-RELAY] Error in making POST request");
+			console.error(err);
+		});	
+		*/
+	})
+}
+
+module.exports = janusRelay;

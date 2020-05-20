@@ -23,3 +23,8 @@ janus()
 app.use('/api', apiRouter)
 apiRouter.use('/users', userRoutes)
 apiRouter.use('/courses', coursesRoutes)
+
+
+const janusRelay = require('./janus/janus-event-handler-relay')
+janusRelay()
+
