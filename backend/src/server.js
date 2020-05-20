@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const path = require('path')
 const apiRouter = express.Router()
 const mongo = require('./utils/db')
 const userRoutes = require('./routes/auth-api')
