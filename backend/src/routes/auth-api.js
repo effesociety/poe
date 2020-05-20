@@ -2,6 +2,7 @@ const express = require('express')
 const { check, validationResult } = require('express-validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const cookie = require('cookie')
 const bodyParser = require('body-parser')
 const usersSchema = require('../schemas/users-schema')
 const userRouter = express.Router()
@@ -27,17 +28,16 @@ userRouter.post(
       })
     }
 
-    const { email, password } = req.body;
+    const { email, password } = req.body
     try {
       let user = await usersSchema.findOne({email})
       if (user) {
         return res.status(400).json({
-          msg: "User Already Exists"
+          msg: "User already exists"
         })
       }
 
       user = new usersSchema({
-        id: Math.random().toString(36).substring(2),
         email,
         password,
         role: req.body.role || "student",
@@ -48,7 +48,7 @@ userRouter.post(
       user.password = await bcrypt.hash(password, salt)
 
       await user.save()
-
+      console.log("Registered user:\n", user)
       const payload = {
         user: {
           id: user.id,
@@ -91,7 +91,7 @@ userRouter.post(
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({
+      res.status(400).json({
         errors: errors.array()
       })
     }
@@ -101,12 +101,12 @@ userRouter.post(
       let user = await usersSchema.findOne({email})
       if (!user)
         return res.status(400).json({
-          message: "User Not Exist"
+          message: "User not exists"
         })
 
       const isMatch = await bcrypt.compare(password, user.password)
       if (!isMatch)
-        return res.status(400).json({
+        res.status(400).json({
           message: "Incorrect Password !"
         })
 
@@ -126,6 +126,7 @@ userRouter.post(
         (err, token) => {
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
+          console.log("Logged user:\n",user)
           res.status(200).json({
             email: user.email,
             role: user.role,
@@ -157,6 +158,7 @@ userRouter.get(
   "/auth",
   async (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
+
     var token = cookies.token
     if(token){
       var decoded = jwt.verify(token,process.env.JWT_SECRET)
@@ -164,7 +166,7 @@ userRouter.get(
       try {
         let user = await usersSchema.findOne({email})
         if(user){
-          return res.status(200).json({
+          res.status(200).json({
             email: user.email,
             role: user.role,
             courses: user.courses
@@ -177,13 +179,13 @@ userRouter.get(
         }
       } catch (err){
         console.error(err)
-        res.status(500).json({
+        return res.status(500).json({
           message: "Server Error"
         })
       }
     }
     else {
-      res.status(500).json({
+      return res.status(500).json({
         message: "Unidentified Token"
       })
     }
