@@ -1,5 +1,5 @@
 var websocketURI;
-if(process.env.NODE_ENV === "development")
+if(process.env.NODE_ENV === "development"){
 	websocketURI = "ws://localhost:8080/";
 }
 else if(process.env.NODE_ENV === "production"){
