@@ -1,4 +1,10 @@
-const websocketURI = "ws://localhost:8080/";
+var websocketURI;
+if(process.env.NODE_ENV === "development")
+	websocketURI = "ws://localhost:8080/";
+}
+else if(process.env.NODE_ENV === "production"){
+	websocketURI = "ws://" + window.location.hostname + ":" + process.env.PORT;
+}
 
 class Janus {
   constructor() {
