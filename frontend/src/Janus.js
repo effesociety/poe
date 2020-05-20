@@ -3,7 +3,7 @@ if(process.env.NODE_ENV === "development"){
 	websocketURI = "ws://localhost:8080/";
 }
 else if(process.env.NODE_ENV === "production"){
-	websocketURI = "ws://" + window.location.hostname + ":" + process.env.PORT;
+	websocketURI = "wss://poe-dtlab.herokuapp.com";
 }
 
 class Janus {
