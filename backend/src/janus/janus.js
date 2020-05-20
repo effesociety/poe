@@ -11,6 +11,8 @@ const janus = async (app) => {
 		const wss = new WebSocket.Server({ port: process.env.WS_SERVER_PORT });
 	}
 	else if(process.env.NODE_ENV === "production" && app){
+		console.log("Production")
+		console.log(app)
 		const wss = new WebSocket.Server({ app })
 	}
 
