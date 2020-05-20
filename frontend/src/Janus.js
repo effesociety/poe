@@ -1,10 +1,14 @@
 var websocketURI;
 if(process.env.NODE_ENV === "development"){
+	console.log(process.env.NODE_ENV)
 	websocketURI = "ws://localhost:8080/";
 }
 else if(process.env.NODE_ENV === "production"){
+	console.log(process.env_NODE_ENV)
 	websocketURI = "wss://poe-dtlab.herokuapp.com";
 }
+
+console.log(websocketURI)
 
 class Janus {
   constructor() {
