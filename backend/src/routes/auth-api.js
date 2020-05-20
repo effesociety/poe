@@ -1,6 +1,7 @@
 const express = require('express')
 const { check, validationResult } = require('express-validator')
 const bcrypt = require('bcryptjs')
+const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
 const bodyParser = require('body-parser')
 const usersSchema = require('../schemas/users-schema')
@@ -153,7 +154,7 @@ userRouter.post(
   }
 )
 
-userRouter.post(
+userRouter.get(
   "/auth",
   async (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')

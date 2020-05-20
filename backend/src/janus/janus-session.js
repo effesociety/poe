@@ -107,7 +107,12 @@ module.exports = class JanusSession{
     }
 
     isError(signal){
-        return signal.janus === "error";
+        if(signal.plugindata && signal.plugindata.data){
+            return (signal.janus === "error" || signal.plugindata.data.error);
+        }
+        else{
+            return signal.janus === "error"
+        }
     }
 
     _transmit(type, signal){

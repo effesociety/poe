@@ -27,8 +27,8 @@ class Header extends React.Component {
             <Grid item sm={6} md={2}>
               <div style={styles.logo} />
             </Grid>
-            <Grid item sm={4} md={9}/>
-            <Grid item sm={2} md={1}>
+            <Grid item sm={4} md={8}/>
+            <Grid item sm={2} md={2}>
               <LoginForm isLoggedIn={this.props.isLoggedIn} onSuccess={this.props.onSuccess} email={this.props.email}/>
             </Grid>
           </Grid>

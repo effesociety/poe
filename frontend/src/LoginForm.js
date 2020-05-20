@@ -82,19 +82,18 @@ class LoginForm extends React.Component {
         },
         body: JSON.stringify({
           "email": email,
-          "passowrd": password
+          "password": password
         })
       };
       let response = await fetch("/api/users/login", requestOptions);
-      let result = await response.json();
-
-      if (result && result.success) {
+      if(response.status === 200){
+        let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(); //@TO-DO Lift up data to be set in upper state
-      } 
-      else if (result && !result.success) {
+        this.props.onSuccess(result.email); //@TO-DO Lift up data to be set in upper state
+      }
+      else{
         this.resetForm();
-        alert(result.msg);
+        alert("An error occurred");
       }
     } 
     catch (err) {
@@ -119,18 +118,18 @@ class LoginForm extends React.Component {
         },
         body: JSON.stringify({
           "email": email,
-          "passowrd": password
+          "password": password
         })
       };
-      let res = await fetch("/api/users/signup",requestOptions);
-      let result = await res.json();
-      if (result && result.success) {
+      let response = await fetch("/api/users/signup",requestOptions);
+      if(response.status === 200){
+        let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(); //@TO-DO Lift up data to be set in upper state
-      } 
-      else if (result && !result.success) {
+        this.props.onSuccess(result.email); //@TO-DO Lift up data to be set in upper state
+      }
+      else{
         this.resetForm();
-        alert(result.msg);
+        alert("An error occurred");
       }
     } 
     catch (err) {

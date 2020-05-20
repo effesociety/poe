@@ -21,7 +21,7 @@ const janus = async () => {
                 console.log("Received start message");
                 ws.videoroomHandle = janusWrapper.addHandle();
                 await ws.videoroomHandle.attach("janus.plugin.videoroom");
-                await ws.handle.join(5678, "publisher");
+                await ws.videoroomHandle.join(5678, "publisher");
             }
             //There are ICE candidates ready to be sent
             else if(object.message === "trickle"){
@@ -54,14 +54,22 @@ const janus = async () => {
                     if(ev.plugindata.plugin === "janus.plugin.videoroom" && ev.plugindata.data.videoroom === "participants"){
                         if(ev.plugindata.data.participants.length>0){
                           var participants = ev.plugindata.data.participants;
+                          ws.subscriberHandles = {}
                           participants.forEach(async (participant) => {
                             let feed = participant.id;
                             console.log("Printing participant id: ", feed);
-                            let object = await ws.videoroomHandle.join(5678, "subscriber", feed);
+                            let subscriberHandle = janusWrapper.addHandle();
+                            await subscriberHandle.attach("janus.plugin.videoroom");
+                            ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
+                            console.log("Printing ID of this subscriber handle")
+                            console.log(subscriberHandle.id)
+                            let object = await subscriberHandle.join(5678, "subscriber", feed);
                             let body = {
                               "message": "offer",
-                              "jsep": object.jsep
+                              "jsep": object.jsep,
+                              "subscriberID": subscriberHandle.id
                             };
+                            console.log("Sending offer to ",subscriberHandle.id)
                             ws.send(JSON.stringify(body));
                           });
                         }
@@ -71,7 +79,9 @@ const janus = async () => {
             //The teacher wants to subscribe to a particular feed
             else if(object.message === "subscribe"){
                 console.log("Received subscribe message");
-                ws.videoroomHandle.start(object.jsep);
+                console.log("Printing subscriber ID");
+                console.log(object.subscriberID)
+                ws.subscriberHandles[object.subscriberID].start(object.jsep);
             }
         })
 

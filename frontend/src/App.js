@@ -26,48 +26,46 @@ class App extends React.Component {
       "loading": true,
       "email": undefined,
     }
+    this.onSuccess = this.onSuccess.bind(this);
   }
   async componentDidMount() {
     window.scrollTo(0, 0)
-    
-    this.setState({
-      "loading": false
-    })
 
-    //Uncomment the following and delete previous setState once the authentication is completed
-    /*
     try {
       const requestOptions = {
         method: "GET",
         headers: {
           "Accept": "application/json",
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
+        credentials: 'include'
       };
       let response = await fetch("/api/users/auth", requestOptions);
-      let result = await response.json();
-
-      if (result && result.success) {
+      if(response.status === 200){
+        let result = await response.json();
         this.setState({
           "isLoggedIn": true,
-          "loading": false
+          "loading": false,
+          "email": result.email
         })
-      } else {
+      }
+      else{
         this.setState({
-          "isLoggedIn": false,
           "loading": false
         })
       }
-    } catch (err) {
+    } 
+    catch (err) {
       console.log("An error occurred: ");
       console.log(err);
     }
-  */
   }
 
-  onSuccess(){
+  onSuccess(email){
+    console.log("Login successfull");
     this.setState({
-      "isLoggedIn": true
+      "isLoggedIn": true,
+      "email": email
     })
   }
 
@@ -84,7 +82,7 @@ class App extends React.Component {
     return (
       <div style={styles.parallax}>
         <FullBackdrop backdrop={this.state.loading}/>
-        <Header isLoggedIn={this.state.isLoggedIn} email={this.state.email} onSuccess={this.state.onSuccess} />
+        <Header isLoggedIn={this.state.isLoggedIn} email={this.state.email} onSuccess={this.onSuccess} />
         {Main}
         <Team />
         <Footer />
