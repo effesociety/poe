@@ -31,7 +31,7 @@ apiRouter.use('/courses', coursesRoutes)
 
 
 if(process.env.NODE_ENV === "production"){
-	const CLIENT_BUILD_PATH = path.join(__dirname, "../frontend/build");
+	const CLIENT_BUILD_PATH = path.join(__dirname, "../../frontend/build");
 	// Static files
 	app.use(express.static(CLIENT_BUILD_PATH));
 
