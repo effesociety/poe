@@ -13,30 +13,29 @@ class Courses extends React.Component{
         var janus = new Janus();
         janus.init()
         .then(() => {
-            let body = {
-                message: "start"
-              };
-            janus.websocket.send(JSON.stringify(body));
-            janus.userMediaSetup();
+            janus.publish()
         })
     }
     getFeeds(){
         var janus = new Janus();
         janus.init()
         .then(() => {
-            let body = {
-                message: "getFeeds"
-            };
-            janus.websocket.send(JSON.stringify(body))
+            janus.subscribe()
         })
         
         setInterval(() => {
-            if(janus.streams.length===1){
-                document.getElementById('remote1').srcObject = janus.streams[0];
+            console.log("Ciao")
+            console.log(janus.streams)
+            console.log(Object.keys(janus.streams).length)
+            if(Object.keys(janus.streams).length===1){
+                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
             }
-            else if(janus.streams.length===2){
-                document.getElementById('remote1').srcObject = janus.streams[0];
-                document.getElementById('remote2').srcObject = janus.streams[1];
+            else if(Object.keys(janus.streams).length===2){
+                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
+                document.getElementById('remote2').srcObject = janus.streams[Object.keys(janus.streams)[1]];
+            }
+            else{
+                console.log("ELse!")            
             }
         },5000)
     }

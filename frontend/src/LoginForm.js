@@ -140,8 +140,30 @@ class LoginForm extends React.Component {
   }
 
   async doLogout(){
-
-  }
+    try {
+      const requestOptions = {
+        method: "DELETE",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        credentials: "include"
+      };
+      let response = await fetch("/api/users/logout",requestOptions);
+      if(response.status === 200){
+        console.log("You should set isLoggedIn to false")
+      }
+      else{
+        this.resetForm();
+        alert("An error occurred");
+      }
+    } 
+    catch (err) {
+      console.log("An error occurred")
+      console.log(err);
+      this.resetForm();
+    }
+  } 
 
   render() {
     var userInfo;

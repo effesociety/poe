@@ -3,15 +3,15 @@ const websocketURI = "ws://localhost:8080/";
 class Janus {
   constructor() {
     this.websocket = undefined;
-    this.connection = undefined;
-    this.streams = [];
+    this.publisherConn = undefined
+    this.subscriberConn = {};
+    this.streams = {};
   }
 
   connect() {
     return new Promise((resolve, reject) => {
       let socket = new WebSocket(websocketURI);
       socket.onopen = () => {
-        console.log("ciao");
         resolve(socket);
       };
       socket.onerror = (err) => {
@@ -21,14 +21,9 @@ class Janus {
   }
 
   async init() {
-    this.connection = new RTCPeerConnection({});
     this.websocket = await this.connect();
 
-    this.websocket.onmessage = this.onMessageHandler.bind(this);
-
-    this.connection.onicecandidate = this.onIceCandidateHandler.bind(this);
-    this.connection.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);
-    this.connection.ontrack = this.onTrackHandler.bind(this);
+    this.websocket.onmessage = this.onMessageHandler.bind(this);   
   }
 
   static async create() {
@@ -39,15 +34,22 @@ class Janus {
 
   async onMessageHandler(ev){
     let object = JSON.parse(ev.data);
-    console.log(object);
 
     if (object.message === "answer") { //The user is a student who needs to send its audio/video stream
-      this.connection.setRemoteDescription(object.jsep);
+      this.publisherConn.setRemoteDescription(object.jsep);
     }
+
     else if(object.message === "offer"){ //The user is a teacher who needs to get all audio/video streams
-      this.connection.setRemoteDescription(object.jsep);
-      let answer = await this.connection.createAnswer();
-      this.connection.setLocalDescription(answer)
+
+      this.subscriberConn[object.subscriberID] = new RTCPeerConnection({});
+      this.subscriberConn[object.subscriberID].onicecandidate = this.onIceCandidateHandler.bind(this)
+      this.subscriberConn[object.subscriberID].ontrack = (ev) => {
+        this.onTrackHandler(ev,object.subscriberID);
+      }
+
+      this.subscriberConn[object.subscriberID].setRemoteDescription(object.jsep);
+      let answer = await this.subscriberConn[object.subscriberID].createAnswer();
+      this.subscriberConn[object.subscriberID].setLocalDescription(answer)
       let body = {
           "message": "subscribe",
           "jsep": answer,
@@ -55,10 +57,29 @@ class Janus {
       }
       this.websocket.send(JSON.stringify(body)) 
     } 
+
     else {
       console.log("Received msg from server");
       console.log(object);
     }
+  }
+
+  publish(){
+    let body = {
+      message: "start"
+    };
+    this.websocket.send(JSON.stringify(body));
+    this.publisherConn = new RTCPeerConnection({});
+    this.publisherConn.onicecandidate = this.onIceCandidateHandler.bind(this);
+    this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);
+    this.userMediaSetup()
+  }
+
+  subscribe(){
+    let body = {
+      message: "getFeeds"
+    };
+    this.websocket.send(JSON.stringify(body))
   }
 
   async userMediaSetup() {
@@ -68,7 +89,7 @@ class Janus {
     });
     media
       .getTracks()
-      .forEach((track) => this.connection.addTrack(track, media));
+      .forEach((track) => this.publisherConn.addTrack(track, media));
   }
 
   async onIceCandidateHandler(ev) {
@@ -82,11 +103,9 @@ class Janus {
 
   async onNegotiationNeededHandler(ev) {
     console.log("onNegotiationNeededHandler");
-    console.log(this.connection);
 
-    let offer = await this.connection.createOffer();
-    console.log(offer);
-    this.connection.setLocalDescription(offer);
+    let offer = await this.publisherConn.createOffer();
+    this.publisherConn.setLocalDescription(offer);
 
     let body = {
       message: "publish",
@@ -97,15 +116,9 @@ class Janus {
     this.websocket.send(JSON.stringify(body));
   }
 
-  async onTrackHandler(ev){
+  onTrackHandler(ev, subscriberID){
     console.log("On Add Stream event")
-    console.log(ev)
-    this.streams.push(ev.streams[0])
-
-    console.log("Some info printing")
-      console.log(ev.srcElement.remoteDescription)
-    //let remoteVideo = document.getElementById('remote');
-    //remoteVideo.srcObject = ev.streams[0]   
+    this.streams[subscriberID]=ev.streams[0] 
   }
 }
 

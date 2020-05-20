@@ -3,7 +3,6 @@ const { check, validationResult } = require('express-validator')
 const bcrypt = require('bcryptjs')
 const cookie = require('cookie')
 const jwt = require('jsonwebtoken')
-const cookie = require('cookie')
 const bodyParser = require('body-parser')
 const usersSchema = require('../schemas/users-schema')
 const userRouter = express.Router()
@@ -148,7 +147,7 @@ userRouter.post(
 userRouter.delete(
   "/logout",
   (req, res) => {
-	  res.clearCookie()
+	  res.clearCookie('token')
     res.status(200).json({
       message: "Success"
     })

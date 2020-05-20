@@ -21,7 +21,7 @@ const janus = async () => {
                 console.log("Received start message");
                 ws.videoroomHandle = janusWrapper.addHandle();
                 await ws.videoroomHandle.attach("janus.plugin.videoroom");
-                await ws.videoroomHandle.join(5678, "publisher");
+                await ws.videoroomHandle.join(1234, "publisher");
             }
             //There are ICE candidates ready to be sent
             else if(object.message === "trickle"){
@@ -39,7 +39,8 @@ const janus = async () => {
                     let remote = await ws.videoroomHandle.publish(offer,true,true);
                     let body = {
                         "message": "answer",
-                        "jsep": remote.jsep
+                        "jsep": remote.jsep,
+                        "publisherID": ws.videoroomHandle.id
                     }
                     ws.send(JSON.stringify(body));
                 }
@@ -49,7 +50,7 @@ const janus = async () => {
                 console.log("Received getFeeds message");
                 ws.videoroomHandle = janusWrapper.addHandle();
                 await ws.videoroomHandle.attach("janus.plugin.videoroom");
-                let ev = await ws.videoroomHandle.listParticipants(5678);
+                let ev = await ws.videoroomHandle.listParticipants(1234);
                 if(ev.plugindata){
                     if(ev.plugindata.plugin === "janus.plugin.videoroom" && ev.plugindata.data.videoroom === "participants"){
                         if(ev.plugindata.data.participants.length>0){
@@ -63,7 +64,7 @@ const janus = async () => {
                             ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
                             console.log("Printing ID of this subscriber handle")
                             console.log(subscriberHandle.id)
-                            let object = await subscriberHandle.join(5678, "subscriber", feed);
+                            let object = await subscriberHandle.join(1234, "subscriber", feed);
                             let body = {
                               "message": "offer",
                               "jsep": object.jsep,
