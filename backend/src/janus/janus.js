@@ -6,8 +6,9 @@ const janus = async () => {
     var janusWrapper = new JanusWrapper();
     await janusWrapper.init();
 
+	const port = process.env.WS_SERVER_PORT || process.env.PORT
     //Create WebSocket server to communicate with users
-    const wss = new WebSocket.Server({ port: process.env.WS_SERVER_PORT});
+    const wss = new WebSocket.Server({ port: port });
 
     wss.on('connection', ws => {
 
