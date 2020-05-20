@@ -21,7 +21,7 @@ if(process.env.NODE_ENV === "development"){
 	janus()
 }
 else if(process.env.NODE_ENV === "production"){
-	janus(app)
+	janus(server)
 }
 
 app.use('/api', apiRouter)
