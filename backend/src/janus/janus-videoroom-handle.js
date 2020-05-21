@@ -77,7 +77,10 @@ module.exports = class JanusVideoroomHandle{
         let body = {
             "request": "publish",
             "audio": audio,
-            "video": video
+            "video": video,
+			"audio_codec": "opus",
+			"video_codec": "vp8",
+			"data": false
         };
         return this.sendJsep(jsep,body);
     }

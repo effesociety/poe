@@ -1,14 +1,5 @@
-var websocketURI;
-if(process.env.NODE_ENV === "development"){
-	console.log(process.env.NODE_ENV)
-	websocketURI = "ws://localhost:8080/";
-}
-else if(process.env.NODE_ENV === "production"){
-	console.log(process.env_NODE_ENV)
-	websocketURI = "wss://poe-dtlab.herokuapp.com";
-}
-
-console.log(websocketURI)
+const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:8080/" : "wss://poe-dtlab.herokuapp.com";
+const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"}]}
 
 class Janus {
   constructor() {
@@ -32,10 +23,10 @@ class Janus {
 
   async init() {
     this.websocket = await this.connect();
-
     this.websocket.onmessage = this.onMessageHandler.bind(this);   
   }
 
+  //Method for static declaration. Unused 
   static async create() {
     const o = new Janus();
     await o.init();
@@ -51,7 +42,7 @@ class Janus {
 
     else if(object.message === "offer"){ //The user is a teacher who needs to get all audio/video streams
 
-      this.subscriberConn[object.subscriberID] = new RTCPeerConnection({});
+      this.subscriberConn[object.subscriberID] = new RTCPeerConnection(config);
       this.subscriberConn[object.subscriberID].onicecandidate = this.onIceCandidateHandler.bind(this)
       this.subscriberConn[object.subscriberID].ontrack = (ev) => {
         this.onTrackHandler(ev,object.subscriberID);
@@ -79,9 +70,10 @@ class Janus {
       message: "start"
     };
     this.websocket.send(JSON.stringify(body));
-    this.publisherConn = new RTCPeerConnection({});
-    this.publisherConn.onicecandidate = this.onIceCandidateHandler.bind(this);
-    this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);
+	
+	this.publisherConn = new RTCPeerConnection(config);
+	this.publisherConn.onicecandidate = this.onIceCandidateHandler.bind(this);
+    this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);	
     this.userMediaSetup()
   }
 
@@ -100,21 +92,29 @@ class Janus {
     media
       .getTracks()
       .forEach((track) => this.publisherConn.addTrack(track, media));
+	
   }
 
   async onIceCandidateHandler(ev) {
     console.log("onIceCandidateHandler");
-    let body = {
-      message: "trickle",
-      candidate: ev.candidate,
-    };
-    this.websocket.send(JSON.stringify(body));
+	if(ev.candidate && ev.candidate.candidate){
+		console.log("Printing candidate....")
+		console.log(ev.candidate)
+		
+		let body = {
+		  message: "trickle",
+		  candidate: ev.candidate,
+		};
+		this.websocket.send(JSON.stringify(body));
+	}
   }
 
   async onNegotiationNeededHandler(ev) {
     console.log("onNegotiationNeededHandler");
 
     let offer = await this.publisherConn.createOffer();
+	console.log("Printing offer...")
+	console.log(offer)
     this.publisherConn.setLocalDescription(offer);
 
     let body = {
