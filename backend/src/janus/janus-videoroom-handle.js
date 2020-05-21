@@ -142,9 +142,9 @@ module.exports = class JanusVideoroomHandle{
         }
 
         let body = {
-            "request": "start",
-
+            "request": "start"
         }
+		console.log("SENDING START MESSAGE")
         return this.sendJsep(jsep,body);
     }
 

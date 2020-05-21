@@ -33,7 +33,10 @@ const janus = async (server) => {
             else if(object.message === "trickle"){
                 console.log("Received trickle message");
                 let candidate = object.candidate;
-                if(ws.videoroomHandle){
+				if(object.subscriberID){
+					ws.subscriberHandles[object.subscriberID].sendTrickle(candidate || null);
+				}
+                else if(ws.videoroomHandle){
                     ws.videoroomHandle.sendTrickle(candidate || null);
                 }
             }
@@ -88,7 +91,12 @@ const janus = async (server) => {
                 console.log("Received subscribe message");
                 console.log("Printing subscriber ID");
                 console.log(object.subscriberID)
-                ws.subscriberHandles[object.subscriberID].start(object.jsep);
+                
+                await ws.subscriberHandles[object.subscriberID].start(object.jsep);
+                let body = {
+                    "message": "started"
+                };
+                ws.send(JSON.stringify(body))
             }
         })
 
