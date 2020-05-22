@@ -1,5 +1,5 @@
 const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:8080/" : "wss://poe-dtlab.herokuapp.com";
-const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"}]}
+const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"},{urls: "turn:numb.viagenie.ca", username: "webrtc@live.com", credential: "muazkh"}]}
 var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 			
 class Janus {
