@@ -1,12 +1,5 @@
 import React from "react";
-import { Box } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import Typography from "@material-ui/core/Typography";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
-import Container from "@material-ui/core/Container";
+import { Box, Dialog, Typography, Avatar, Button, TextField, Grid, Container } from "@material-ui/core";
 import GroupIcon from '@material-ui/icons/Group';
 
 const styles = {

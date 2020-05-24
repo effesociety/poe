@@ -1,17 +1,10 @@
 import React from "react";
-import { Box } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import Typography from "@material-ui/core/Typography";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Grid from "@material-ui/core/Grid";
-import Container from "@material-ui/core/Container";
+import { Box, Dialog, Typography, Avatar, Button, TextField, Grid, Container} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
 
 const styles = {
   userInfo:{
-    color: "#f50057",
+    color: "#fff",
     fontSize: "1.2rem"
   },
   avatar: {
@@ -43,7 +36,7 @@ class LoginForm extends React.Component {
 
     this.doLogin = this.doLogin.bind(this);
     this.doSignUp = this.doSignUp.bind(this);
-
+    this.doLogout = this.doLogout.bind(this);
     this.openForm = this.openForm.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.resetForm = this.resetForm.bind(this);
@@ -89,7 +82,8 @@ class LoginForm extends React.Component {
       if(response.status === 200){
         let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(result.email, result.role, result.courses); //@TO-DO Lift up data to be set in upper state
+        let otherCourses = result.otherCourses ? result.otherCourses : [];
+        this.props.onSuccess(result.email, result.role, result.courses, otherCourses); 
       }
       else{
         this.resetForm();
@@ -125,7 +119,8 @@ class LoginForm extends React.Component {
       if(response.status === 200){
         let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(result.email, result.role, result.courses); //@TO-DO Lift up data to be set in upper state
+        let otherCourses = result.otherCourses ? result.otherCourses : [];
+        this.props.onSuccess(result.email, result.role, result.courses, otherCourses);
       }
       else{
         this.resetForm();
@@ -153,7 +148,7 @@ class LoginForm extends React.Component {
       if(response.status === 200){
         let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(null); //@TO-DO Lift up data to be set in upper state
+        this.props.onSuccess(null); 
       }
       else{
         this.resetForm();
@@ -172,12 +167,14 @@ class LoginForm extends React.Component {
     const email = this.props.email
     if(this.props.isLoggedIn && email !== undefined){
         userInfo = (
-          <Typography style={styles.userInfo} variant="subtitle2" align="right">
-            Hi, {email}!
+          <Box align="right">
+            <Typography style={styles.userInfo} variant="subtitle2" align="right">
+              Hi, {email}!
+            </Typography>
             <Button variant="contained" style={styles.button} onClick={this.doLogout}>
-             Logout
-           </Button>          
-          </Typography>
+              Logout
+            </Button>   
+          </Box>
         )
     }else{
       userInfo = (

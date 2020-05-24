@@ -104,7 +104,7 @@ coursesRouter.post(
       if(course){
         helper.checkUser(cookies,res).then(user => {
           if(user){
-            if (user.role === 'student') {
+            if (user.role === 'student' && !user.courses.includes(course.name)) {
               user.courses.push(course.name)
               user.save()
               course.students.push(user.email)

@@ -53,6 +53,9 @@ html,body{
 	margin-left: 15px;
 	margin-top: 40px;
 }
+.courses-title{
+	margin-left: 15px!important;
+}
 .course-avatar{
 	width: 75px;
 	height: 75px;

@@ -1,9 +1,7 @@
 import React from 'react';
-import { Box, Link } from '@material-ui/core';
-import Favorite from '@material-ui/icons/Favorite';
-import GitHub from '@material-ui/icons/GitHub';
-import Typography from '@material-ui/core/Typography';
-
+import { Box, Link, Typography } from '@material-ui/core';
+import {Favorite, GitHub} from '@material-ui/icons';
+  
 class Footer extends React.Component{
     constructor(){
         super();

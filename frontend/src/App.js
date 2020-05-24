@@ -3,6 +3,7 @@ import FullBackdrop from './FullBackdrop'
 import Header from "./Header";
 import Info from "./Info";
 import CoursesTeacher from "./CoursesTeacher";
+import CoursesStudent from "./CoursesStudent";
 import Team from "./Team";
 import Footer from "./Footer";
 import OverlayBackground from './images/overlay_bg.jpg'
@@ -26,7 +27,8 @@ class App extends React.Component {
       "loading": true,
       "email": undefined,
       "role": undefined,
-      "courses": []
+      "courses": [],
+      "otherCourses": []
     }
     this.getComponents = this.getComponents.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
@@ -56,6 +58,11 @@ class App extends React.Component {
           "role": result.role,
           "courses": result.courses
         })
+        if(result.otherCourses){
+          this.setState({
+            "otherCourses": result.otherCourses
+          })
+        }
       }
       else{
         this.setState({
@@ -69,13 +76,14 @@ class App extends React.Component {
     }
   }
 
-  onSuccess(email, role, courses){
+  onSuccess(email, role, courses,otherCourses){
     if(email){
       this.setState({
         "isLoggedIn": true,
         "email": email,
         "role": role,
-        "courses": courses
+        "courses": courses,
+        "otherCourses": otherCourses
       })
     }
     else{
@@ -91,8 +99,11 @@ class App extends React.Component {
 
   render() {
     var Main;
-    if(this.state.isLoggedIn){
-      Main = (<CoursesTeacher courses={this.state.courses} role={this.state.role} refresh={this.getComponents}/>)
+    if(this.state.isLoggedIn && this.state.role === "teacher"){
+      Main = (<CoursesTeacher courses={this.state.courses} refresh={this.getComponents}/>)
+    }
+    else if(this.state.isLoggedIn && this.state.role === "student"){
+      Main = (<CoursesStudent courses={this.state.courses} otherCourses={this.state.otherCourses} refresh={this.getComponents} />)
     }
     else{
       Main = (<Info />)

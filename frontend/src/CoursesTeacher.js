@@ -1,16 +1,8 @@
 import React from 'react'
 import CourseForm from './CourseForm'
 import Janus from './Janus'
-import Grid from "@material-ui/core/Grid";
-import Container from "@material-ui/core/Container";
-import Box from "@material-ui/core/Box";
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import Fab from '@material-ui/core/Fab';
+import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
-import { Typography } from '@material-ui/core';
 
 class CoursesTeacher extends React.Component{
     constructor(){
@@ -39,9 +31,6 @@ class CoursesTeacher extends React.Component{
     }
 
     async destroyCourse(course){
-        this.setState({
-            buttonDisabled: true,
-          });
           try {
             const requestOptions = {
               method: "DELETE",
