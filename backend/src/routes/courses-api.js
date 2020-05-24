@@ -59,24 +59,25 @@ coursesRouter.delete(
   "/destroy",
   (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
-    var name = req.body.name
-    helper.checkCourse(name).then(course => {
+    var courseName = req.body.name
+    helper.checkCourse(courseName).then(course => {
       if(course){
         helper.checkUser(cookies).then(user => {
           if(user){
             if (helper.isTeacher(user)) {
-              user.courses.splice(user.courses.indexOf(name),1)
+              user.courses.splice(user.courses.indexOf(courseName),1)
+              helper.removeDeletedCourse(courseName)
               user.save()
               course.remove()
 
-              console.log("Course [",name,"] has been deleted")
+              console.log("Course [",courseName,"] has been deleted")
               res.status(200).json({
                 message: "Success"
               })
             }
             else
               res.status(400).json({
-                message: "This user cannot create a course"
+                message: "This user cannot destroy a course"
               })
           }
           else
@@ -98,6 +99,7 @@ coursesRouter.post(
   (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
     var name = req.body.name
+    console.log(name)
     helper.checkCourse(name).then(course => {
       if(course){
         helper.checkUser(cookies,res).then(user => {

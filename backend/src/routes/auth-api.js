@@ -63,14 +63,26 @@ userRouter.post(
         {
           expiresIn: '24h'
         },
-        (err, token) => {
+        async (err, token) => {
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
-          res.status(200).json({
-            email: user.email,
-            role: user.role,
-            courses: user.courses
-          })
+          if(helper.isTeacher(user)){
+            res.status(200).json({
+              email: user.email,
+              role: user.role,
+              courses: user.courses
+            })
+          }
+          else {
+            let otherCourses = await helper.getAllCourses()
+            console.log(otherCourses)
+            res.status(200).json({
+              email: user.email,
+              role: user.role,
+              courses: user.courses,
+              otherCourses: otherCourses
+            })
+          }
         }
       )
     } catch (err) {
@@ -124,15 +136,27 @@ userRouter.post(
         {
           expiresIn: '24h'
         },
-        (err, token) => {
+        async (err, token) => {
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
           console.log("Logged user:\n",user)
-          res.status(200).json({
-            email: user.email,
-            role: user.role,
-            courses: user.courses
-          })
+          if(helper.isTeacher(user)){
+            res.status(200).json({
+              email: user.email,
+              role: user.role,
+              courses: user.courses
+            })
+          }
+          else {
+            let otherCourses = await helper.getOtherCourses(user)
+            console.log(otherCourses)
+            res.status(200).json({
+              email: user.email,
+              role: user.role,
+              courses: user.courses,
+              otherCourses: otherCourses
+            })
+          }
         }
       )
 
@@ -159,14 +183,26 @@ userRouter.get(
   "/auth",
     (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
-    helper.checkUser(cookies).then(user => {
+    helper.checkUser(cookies).then(async user => {
       if(user){
         console.log("Authentication user",user.email)
-        res.status(200).json({
-          email: user.email,
-          role: user.role,
-          courses: user.courses
-        })
+        if(helper.isTeacher(user)){
+          res.status(200).json({
+            email: user.email,
+            role: user.role,
+            courses: user.courses
+          })
+        }
+        else {
+          let otherCourses = await helper.getOtherCourses(user)
+          console.log(otherCourses)
+          res.status(200).json({
+            email: user.email,
+            role: user.role,
+            courses: user.courses,
+            otherCourses: otherCourses
+          })
+        }
       }
       else
         res.status(400).json({
