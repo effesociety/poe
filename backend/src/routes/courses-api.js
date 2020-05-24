@@ -13,10 +13,10 @@ coursesRouter.use(bodyParser.urlencoded({extended:false}))
 
 coursesRouter.post(
   "/create",
-  async (req,res) => {
+  (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
     var name = req.body.name
-    helper.checkCourse(name,res).then(course => {
+    helper.checkCourse(name).then(course => {
       if(!course){
         helper.checkUser(cookies,res).then(user => {
           if(user){
@@ -57,12 +57,12 @@ coursesRouter.post(
 
 coursesRouter.delete(
   "/destroy",
-  async (req,res) => {
+  (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
     var name = req.body.name
-    helper.checkCourse(name,res).then(course => {
+    helper.checkCourse(name).then(course => {
       if(course){
-        helper.checkUser(cookies,res).then(user => {
+        helper.checkUser(cookies).then(user => {
           if(user){
             if (helper.isTeacher(user)) {
               user.courses.splice(user.courses.indexOf(name),1)
@@ -95,10 +95,10 @@ coursesRouter.delete(
 
 coursesRouter.post(
   "/enroll",
-  async (req,res) => {
+  (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
     var name = req.body.name
-    helper.checkCourse(name,res).then(course => {
+    helper.checkCourse(name).then(course => {
       if(course){
         helper.checkUser(cookies,res).then(user => {
           if(user){

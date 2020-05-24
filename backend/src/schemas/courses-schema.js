@@ -15,4 +15,4 @@ const coursesSchema = mongoose.Schema({
   }
 })
 
-module.exports = mongoose.model('coursesSchema', coursesSchema)
+module.exports = mongoose.model('courses', coursesSchema)

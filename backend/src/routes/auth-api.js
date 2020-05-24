@@ -157,9 +157,9 @@ userRouter.delete(
 
 userRouter.get(
   "/auth",
-  async (req,res) => {
+    (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
-    helper.checkUser(cookies,res).then(user => {
+    helper.checkUser(cookies).then(user => {
       if(user){
         console.log("Authentication user",user.email)
         res.status(200).json({
@@ -170,7 +170,7 @@ userRouter.get(
       }
       else
         res.status(400).json({
-          message: "User Not Exist"
+          message: "No valid token provided in the request"
         })
     })
   }

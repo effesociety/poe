@@ -2,39 +2,35 @@ const jwt = require('jsonwebtoken')
 const usersSchema = require('../schemas/users-schema')
 const coursesSchema = require('../schemas/courses-schema')
 
-async function checkUser(cookies,res){
+async function checkUser(cookies){
   var token = cookies.token
   if(token){
     var decoded = jwt.verify(token,process.env.JWT_SECRET)
     var email = decoded.user.email
 
     try{
-      let user = usersSchema.findOne({email})
+      let user = await usersSchema.findOne({email})
       return user
     }
     catch (e){
       console.log(e)
-      res.status(500).json({
-        message: "Server Error"
-      })
+      return null;
     }
   }
-  else
-    res.status(400).json({
-      message: "Invalid Token"
-    })
+  else{
+    return null;
+  }
+    
 }
 
-async function checkCourse(name,res){
+async function checkCourse(name){
   try{
-    let course = coursesSchema.findOne({name})
-    return course
+    let course = await coursesSchema.findOne({name});
+    return course;
   }
   catch (e){
-    console.log(e)
-    res.status(500).json({
-      message: "Server Error"
-    })
+    console.log(e);
+    return null;
   }
 }
 
@@ -45,6 +41,25 @@ function isTeacher(user){
     return false
 }
 
+function isEnrolled(student,course){
+  if(student.courses.includes(course)){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+function removeDeletedCourse(course){
+
+}
+
+const EventEmitter = require('events');
+const commonEmitter = new EventEmitter();
+
 exports.checkUser = checkUser
 exports.checkCourse = checkCourse
 exports.isTeacher = isTeacher
+exports.isEnrolled = isEnrolled
+exports.removeDeletedCourse = removeDeletedCourse
+exports.commonEmitter = commonEmitter

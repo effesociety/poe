@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+const eventEmitter = require('events')
 const apiRouter = express.Router()
 const mongo = require('./utils/db')
 const userRoutes = require('./routes/auth-api')
@@ -41,7 +42,20 @@ if(process.env.NODE_ENV === "production"){
 	});
 }
 
+//Move this in another file if it becames too big
+const Helpers = require('./utils/helpers')
+const janusEventHandler =  Helpers.commonEmitter;
+/*
+janusEventHandler.on('joined', () => {
+	console.log("ciao")
+})
+*/
 
-const janusRelay = require('./janus/janus-event-handler-relay')
-janusRelay()
-
+if(process.env.JANUS_RELAY){
+	const janusRelay = require('./janus/janus-event-handler-relay')
+	janusRelay()
+}
+else{
+	const eventsRoutes = require('./routes/events-api')
+	app.use('/janus', eventsRoutes)
+}

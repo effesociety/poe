@@ -7,25 +7,19 @@ Then, in localhost, a POST request has to be made to simulate the event coming d
 */
 const io = require('socket.io-client');
 const socket = io(process.env.EVENT_HANDLER_RELAY_URI)
-const axios = require('axios');
-
+const Helpers = require('../utils/helpers')
+const commonEmitter = Helpers.commonEmitter
 
 const janusRelay = () => {
-	socket.emit('identify', process.env.EVENT_HANDLER_SECRET);
+	socket.emit('identify', process.env.EVENT_HANDLER_SECRET, process.env.JANUS_SERVER_NAME);
 
 	socket.on('janusEvent',(body) => {
-		console.log("[JANUS-EVENT-HANDLER-RELAY] Relay received a body of an event...Making POST request to /events");
+		console.log("[JANUS-EVENT-HANDLER-RELAY] Relay received a body of an event...Emitting event");
 
-		console.log(body)
-		/*
-		axios.post('/events', body)
-		.then((res) => {
-			console.log("[JANUS-EVENT-HANDLER-RELAY] POST request made. Status response: ", res.status);
-		}).catch((err) => {
-			console.log("[JANUS-EVENT-HANDLER-RELAY] Error in making POST request");
-			console.error(err);
-		});	
-		*/
+		if(body.event && body.event.data){
+		  let data = body.event.data; //We suppose the plugin is 'janus.plugin.videoroom' because it's the only one we use (for now)
+		  commonEmitter.emit(data.event,data);
+		}	
 	})
 }
 
