@@ -69,6 +69,27 @@ html,body{
 	text-align: center;
 	margin-top: 20px;
 	font-size: 1.2rem;
+	margin-bottom: 10px;
+}
+.course-btn{
+	margin: 5px 0!important;
+	width: 100%;
+	color: #fff!important;
+}
+.course-btn-cancel{
+	background-color:#f44336!important;
+}
+.course-btn-start{
+	background-color:#009688!important;
+}
+.course-btn-create{
+	background-color:#009688!important;
+	margin:20px auto!important;
+	display: block!important;
+	width: auto!important;
+}
+.plus-fab{
+	margin-top:calc(50% - 28px)!important;
 }
 .team{
 	text-align: center;

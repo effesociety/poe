@@ -2,7 +2,7 @@ import React from "react";
 import FullBackdrop from './FullBackdrop'
 import Header from "./Header";
 import Info from "./Info";
-import Courses from "./Courses";
+import CoursesTeacher from "./CoursesTeacher";
 import Team from "./Team";
 import Footer from "./Footer";
 import OverlayBackground from './images/overlay_bg.jpg'
@@ -25,12 +25,18 @@ class App extends React.Component {
       "isLoggedIn": false,
       "loading": true,
       "email": undefined,
+      "role": undefined,
+      "courses": []
     }
+    this.getComponents = this.getComponents.bind(this);
     this.onSuccess = this.onSuccess.bind(this);
   }
-  async componentDidMount() {
+  componentDidMount() {
     window.scrollTo(0, 0)
+    this.getComponents();
+  }
 
+  async getComponents(){
     try {
       const requestOptions = {
         method: "GET",
@@ -46,7 +52,9 @@ class App extends React.Component {
         this.setState({
           "isLoggedIn": true,
           "loading": false,
-          "email": result.email
+          "email": result.email,
+          "role": result.role,
+          "courses": result.courses
         })
       }
       else{
@@ -61,19 +69,30 @@ class App extends React.Component {
     }
   }
 
-  onSuccess(email){
-    console.log("Login successfull");
-    this.setState({
-      "isLoggedIn": true,
-      "email": email
-    })
+  onSuccess(email, role, courses){
+    if(email){
+      this.setState({
+        "isLoggedIn": true,
+        "email": email,
+        "role": role,
+        "courses": courses
+      })
+    }
+    else{
+      this.setState({
+        "isLoggedIn": false,
+        "email": undefined,
+        "role": undefined,
+        "courses": []
+      })
+    }
   }
 
 
   render() {
     var Main;
     if(this.state.isLoggedIn){
-      Main = (<Courses courses={this.state.courses} role={this.state.role}/>)
+      Main = (<CoursesTeacher courses={this.state.courses} role={this.state.role} refresh={this.getComponents}/>)
     }
     else{
       Main = (<Info />)

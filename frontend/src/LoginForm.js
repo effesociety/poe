@@ -89,7 +89,7 @@ class LoginForm extends React.Component {
       if(response.status === 200){
         let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(result.email); //@TO-DO Lift up data to be set in upper state
+        this.props.onSuccess(result.email, result.role, result.courses); //@TO-DO Lift up data to be set in upper state
       }
       else{
         this.resetForm();
@@ -125,7 +125,7 @@ class LoginForm extends React.Component {
       if(response.status === 200){
         let result = await response.json();
         this.closeForm();
-        this.props.onSuccess(result.email); //@TO-DO Lift up data to be set in upper state
+        this.props.onSuccess(result.email, result.role, result.courses); //@TO-DO Lift up data to be set in upper state
       }
       else{
         this.resetForm();
@@ -151,7 +151,9 @@ class LoginForm extends React.Component {
       };
       let response = await fetch("/api/users/logout",requestOptions);
       if(response.status === 200){
-        console.log("You should set isLoggedIn to false")
+        let result = await response.json();
+        this.closeForm();
+        this.props.onSuccess(null); //@TO-DO Lift up data to be set in upper state
       }
       else{
         this.resetForm();
