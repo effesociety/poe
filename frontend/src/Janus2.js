@@ -163,8 +163,8 @@ class Janus {
     };
     this.websocket.send(JSON.stringify(body))
 
-    this.on('offer',this.onOfferHandler.bind(this))
     this.on('started', this.onStartedHandler.bind(this))
+    this.on('offer',this.onOfferHandler.bind(this))
   }
 
   async userMediaSetup() {

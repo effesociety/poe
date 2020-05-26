@@ -9,7 +9,8 @@ class CoursesTeacher extends React.Component{
     constructor(){
         super()
         this.state = {
-            openForm : false
+            openForm : false,
+            mystream : null
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -67,8 +68,6 @@ class CoursesTeacher extends React.Component{
                 "mystream": janus.mystream
             })
         }
-
-
     }
 
     //Test functions

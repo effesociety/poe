@@ -1,11 +1,16 @@
 import React from 'react'
-import Janus from './Janus'
+import janus from './Janus'
+import Stream from './Stream'
 import {Grid, Container, Box, Card, CardContent, Button, Typography} from '@material-ui/core';
 
 class CoursesStudent extends React.Component{
     constructor(props){
         super(props);
-        this.enroll = this.enroll.bind(this)
+        this.state = {
+            mystream: null
+        }
+        this.enroll = this.enroll.bind(this);
+        this.startExam = this.startExam.bind(this);
     }
 
     async enroll(course){
@@ -38,15 +43,15 @@ class CoursesStudent extends React.Component{
           }        
     }
 
-    //Test functions
-    start(){
-        var janus = new Janus();
-        janus.init()
-        .then(() => {
-            janus.publish()
-        })
+    async startExam(course){
+        await janus.init(course)
+        await janus.publish()
+        if(janus.mystream && !this.state.mystream){
+            this.setState({
+                "mystream": janus.mystream
+            })
+        }
     }
-    //End test functions
 
     render(){
         var courses = (<div></div>);
@@ -58,7 +63,7 @@ class CoursesStudent extends React.Component{
                 let startExam;
                 if(course.examActive){
                     startExam = (
-                        <Button className="course-btn course-btn-start">
+                        <Button className="course-btn course-btn-start" onClick={() => this.startExam(course.name)}>
                             Start exam
                         </Button>
                     )
@@ -134,6 +139,10 @@ class CoursesStudent extends React.Component{
             )           
         }
 
+        var prova;
+        if(this.state.mystream){
+            prova = (<Stream stream={this.state.mystream} />)
+        }
                
         return (
         <Box className="course-box">
@@ -142,6 +151,9 @@ class CoursesStudent extends React.Component{
             <video style={{"width":"320px", "height":"180px"}} id="remote1" autoPlay playsInline></video>
             <video style={{"width":"320px", "height":"180px"}} id="remote2" autoPlay playsInline></video>
             <video style={{"width":"320px", "height":"180px"}} id="remote3" autoPlay playsInline></video>
+
+            {prova}
+
             <Container>
                 {courses}
                 {otherCourses}

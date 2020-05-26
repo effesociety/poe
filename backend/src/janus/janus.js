@@ -160,6 +160,12 @@ const janus = async (server) => {
                 };
                 ws.send(JSON.stringify(body))
             }
+            //The teacher stops exams 
+            else if(object.message === 'destroy' && ws.role === 'teacher'){
+                console.log("Received destroy message")
+                var room = currentExams.getExam(ws.course).room
+                ws.videoroomHandle.destroyRoom(room)
+            }
         })
 
         ws.on('close', () => {
@@ -177,6 +183,7 @@ const janus = async (server) => {
     janusEventHandler.on('leaving', (data) => {
         console.log("Leaving event")
         console.log(data)
+        videoroomHandle.destroyRoom(data.room)
     })
 }
 
