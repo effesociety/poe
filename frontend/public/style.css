@@ -93,6 +93,7 @@ html,body{
 }
 .plus-fab{
 	margin-top:calc(50% - 28px)!important;
+	background-color: #009688!important;
 }
 .team{
 	text-align: center;

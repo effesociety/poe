@@ -19,12 +19,7 @@ const server = app.listen(process.env.PORT, () => {
 mongo()
 
 //Setup for Janus
-if(process.env.NODE_ENV === "development"){
-	janus()
-}
-else if(process.env.NODE_ENV === "production"){
-	janus(server)
-}
+janus(app,server)
 
 app.use('/api', apiRouter)
 apiRouter.use('/users', userRoutes)

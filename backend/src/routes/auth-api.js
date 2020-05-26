@@ -8,6 +8,8 @@ const usersSchema = require('../schemas/users-schema')
 const helper = require('../utils/helpers')
 const userRouter = express.Router()
 
+var currentExams = require('../utils/current-exams')
+
 userRouter.use(bodyParser.json())
 userRouter.use(bodyParser.urlencoded({extended:false}))
 
@@ -140,11 +142,27 @@ userRouter.post(
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
           console.log("Logged user:\n",user)
+
+          courses = user.courses.map(course => {
+            if(currentExams.getExam(course) !== null){
+              return {
+                "name": course,
+                "examActive": true
+              }
+            }
+            else{
+              return {
+                "name": course,
+                "examActive": false
+              }             
+            }
+          })
+
           if(helper.isTeacher(user)){
             res.status(200).json({
               email: user.email,
               role: user.role,
-              courses: user.courses
+              courses: courses
             })
           }
           else {
@@ -153,7 +171,7 @@ userRouter.post(
             res.status(200).json({
               email: user.email,
               role: user.role,
-              courses: user.courses,
+              courses: courses,
               otherCourses: otherCourses
             })
           }
@@ -186,11 +204,27 @@ userRouter.get(
     helper.checkUser(cookies).then(async user => {
       if(user){
         console.log("Authentication user",user.email)
+        
+        courses = user.courses.map(course => {
+          if(currentExams.getExam(course) !== null){
+            return {
+              "name": course,
+              "examActive": true
+            }
+          }
+          else{
+            return {
+              "name": course,
+              "examActive": false
+            }             
+          }
+        })
+
         if(helper.isTeacher(user)){
           res.status(200).json({
             email: user.email,
             role: user.role,
-            courses: user.courses
+            courses: courses
           })
         }
         else {
@@ -199,7 +233,7 @@ userRouter.get(
           res.status(200).json({
             email: user.email,
             role: user.role,
-            courses: user.courses,
+            courses: courses,
             otherCourses: otherCourses
           })
         }

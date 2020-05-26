@@ -52,7 +52,7 @@ class CoursesStudent extends React.Component{
         var courses = (<div></div>);
         if(this.props.courses.length>0){
             courses = this.props.courses.map((course) => {
-                let matches = course.match(/\b(\w)/g)
+                let matches = course.name.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
                 return (
                     <Grid item sm={12} md={3}>
@@ -62,7 +62,7 @@ class CoursesStudent extends React.Component{
                                     {acronym}
                                 </Box>
                                 <Box className="course-name">
-                                    {course}
+                                    {course.name}
                                 </Box>
                                 <Button className="course-btn course-btn-start">
                                     Start exam
@@ -78,7 +78,6 @@ class CoursesStudent extends React.Component{
                     Your courses
                 </Typography>
                 <Grid container>
-
                     {courses}
                 </Grid>
             </Box>

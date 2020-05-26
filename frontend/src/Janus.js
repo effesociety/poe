@@ -1,13 +1,14 @@
-const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:8080/" : "wss://poe-dtlab.herokuapp.com";
+const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:5000/" : "wss://poe-dtlab.herokuapp.com";
 const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"},{urls: "turn:numb.viagenie.ca", username: "webrtc@live.com", credential: "muazkh"}]}
 var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 			
 class Janus {
   constructor() {
     this.websocket = undefined;
-    this.publisherConn = undefined
+    this.publisherConn = undefined;
     this.subscriberConn = {};
     this.streams = {};
+    this.mystream = undefined;
 	
 	this.candidates = [];
 	this.SDP = false;
@@ -26,8 +27,10 @@ class Janus {
   }
 
   async init() {
-    this.websocket = await this.connect();
-    this.websocket.onmessage = this.onMessageHandler.bind(this);   
+    if(!this.websocket){
+      this.websocket = await this.connect();
+      this.websocket.onmessage = this.onMessageHandler.bind(this);   
+    }
   }
 
   //Method for static declaration. Unused 
@@ -102,6 +105,7 @@ class Janus {
     this.publisherConn.onicecandidate = this.onIceCandidateHandler.bind(this);
     this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);	
     this.userMediaSetup()
+  
   }
 
   subscribe(){
@@ -116,9 +120,10 @@ class Janus {
       audio: true,
       video: true,
     });
-    media
-      .getTracks()
-      .forEach((track) => this.publisherConn.addTrack(track, media));
+    this.mystream = media;
+    media.getTracks().forEach((track) => {
+      this.publisherConn.addTrack(track, media)
+    });
   }
 
   async onIceCandidateHandler(ev) {
@@ -143,6 +148,7 @@ class Janus {
         message: "trickle",
         completed: true
       }
+      this.websocket.send(JSON.stringify(body));
     }
   }
   
@@ -224,4 +230,6 @@ class Janus {
   }
 }
 
-export default Janus;
+var JanusInstance = new Janus();
+
+export default JanusInstance;

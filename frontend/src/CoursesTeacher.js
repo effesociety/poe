@@ -1,6 +1,7 @@
 import React from 'react'
 import CourseForm from './CourseForm'
-import Janus from './Janus'
+import janus from './Janus'
+import Stream from './Stream'
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -8,11 +9,12 @@ class CoursesTeacher extends React.Component{
     constructor(){
         super()
         this.state = {
-            openForm : false,
+            openForm : false
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
         this.destroyCourse = this.destroyCourse.bind(this);
+        this.startExam = this.startExam.bind(this);
     }
 
     closeForm(refresh){
@@ -57,16 +59,37 @@ class CoursesTeacher extends React.Component{
           }
     }
 
+    startExam(){
+        janus.init()
+        .then(() => {
+            janus.publish()
+
+        })
+
+
+
+        setInterval(() => {
+            console.log("printing my stream")
+            console.log(janus.mystream)
+            if(janus.mystream){
+                if(!this.state.mystream){
+                    this.setState({
+                        "mystream": janus.mystream
+                    })
+                }
+
+            }
+        },1000)
+    }
+
     //Test functions
     start(){
-        var janus = new Janus();
         janus.init()
         .then(() => {
             janus.publish()
         })
     }
     getFeeds(){
-        var janus = new Janus();
         janus.init()
         .then(() => {
             janus.subscribe()
@@ -99,7 +122,7 @@ class CoursesTeacher extends React.Component{
         var courses;
         if(this.props.courses.length>0){
             courses = this.props.courses.map((course) => {
-                let matches = course.match(/\b(\w)/g)
+                let matches = course.name.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
                 return (
                     <Grid item sm={12} md={3}>
@@ -109,12 +132,12 @@ class CoursesTeacher extends React.Component{
                                     {acronym}
                                 </Box>
                                 <Box className="course-name">
-                                    {course}
+                                    {course.name}
                                 </Box>
                                 <Button className="course-btn course-btn-cancel" onClick={() => this.destroyCourse(course)}>
                                     Delete course
                                 </Button>
-                                <Button className="course-btn course-btn-start">
+                                <Button className="course-btn course-btn-start" onClick={() => this.startExam(course)}>
                                     Start exam
                                 </Button>
                             </CardContent>
@@ -152,6 +175,12 @@ class CoursesTeacher extends React.Component{
                 </Grid>
             )
         }
+
+        var prova;
+        if(this.state.mystream){
+            prova = (<Stream stream={this.state.mystream} />)
+        }
+
         
         return (
         <Box className="course-box">
@@ -160,6 +189,8 @@ class CoursesTeacher extends React.Component{
             <video style={{"width":"320px", "height":"180px"}} id="remote1" autoPlay playsInline></video>
             <video style={{"width":"320px", "height":"180px"}} id="remote2" autoPlay playsInline></video>
             <video style={{"width":"320px", "height":"180px"}} id="remote3" autoPlay playsInline></video>
+
+            {prova}
 
             <CourseForm open={this.state.openForm} closeForm={this.closeForm} />
 

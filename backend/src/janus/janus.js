@@ -1,33 +1,82 @@
-const JanusWrapper = require('./janus-wrapper');
-const WebSocket = require('ws');
+const JanusWrapper = require('./janus-wrapper')
+const WebSocket = require('ws')
+const helper = require('../utils/helpers')
+const cookie = require('cookie')
+const http = require('http')
+var currentExams = require('../utils/current-exams')
 
-const janus = async (server) => {
+const janus = async (app,server) => {
+
+    //Authentication and Authorization  
+    server.on('upgrade', async (req, ws, head) => {
+        const cookies = cookie.parse(req.headers.cookie || '')
+        user = await helper.checkUser(cookies)
+        if(user){
+            console.log("Set WebSocket role",user.email, "[",user.role,"]")
+            ws.role = user.role
+        }
+        else {
+            console.log("No valid token")
+            ws.destroy();
+            return;        
+        }
+
+        wss.handleUpgrade(req, ws, head, function(ws) {
+            ws.role = ws._socket.role
+            wss.emit('connection', ws, req);
+          });
+    })
+
     //Create Janus Session
     var janusWrapper = new JanusWrapper();
     await janusWrapper.init();
 
-	var wss = undefined
-    //Create WebSocket server to communicate with users
-	if(process.env.NODE_ENV === "development"){
-		wss = new WebSocket.Server({ port: process.env.WS_SERVER_PORT });
-	}
-	else if(process.env.NODE_ENV === "production" && server){
-		wss = new WebSocket.Server({ server })
-	}
+	const wss = new WebSocket.Server({ noServer: true })
 
-    wss.on('connection', ws => {
-
+    wss.on('connection', async (ws) => {
         ws.on('message', async e => {
             var object = JSON.parse(e);
             console.log("Received message on WebSocket:");
             console.log(object);
+            if(ws.course && ws.course !== object.course){
+                //@TO-DO: What happened?
+                console.log("What happened?")
+            }
+            ws.course = object.course
 
-            //A student wants to start its media stream
             if(object.message === "start"){
-                console.log("Received start message");
-                ws.videoroomHandle = janusWrapper.addHandle();
-                await ws.videoroomHandle.attach("janus.plugin.videoroom");
-                await ws.videoroomHandle.join(1234, "publisher");
+            /*
+                The first thing to do is check if the websocket has a role attached. Then if it is a teacher and the exam does not exist yet it has to be created (hence create a room). If there is already a room associated with the exam then the teacher/user needs just to join it.
+            */
+                console.log("Received start message");   
+                console.log(ws.role)             
+                if(ws.role){
+                    ws.videoroomHandle = janusWrapper.addHandle();
+                    await ws.videoroomHandle.attach("janus.plugin.videoroom");
+                    
+                    if(ws.role === 'teacher'){
+                        console.log("Role teacher")
+                        let exam = currentExams.getExam(ws.course);
+                        if(exam){
+                            await ws.videoroomHandle.join(exam.room, "publisher");
+                        }
+                        else{
+                            let room = Math.floor(Math.random()*10000)
+                            await ws.videoroomHandle.createRoom(room)
+                            currentExams[ws.course] = {
+                                "room": room
+                            }
+                            await ws.videoroomHandle.join(currentExams[ws.course].room, "publisher");                        
+                        }
+                    }
+                    else if(ws.role === 'student'){
+                        console.log("Role student")
+                        if(currentExams[ws.course].room){
+                            await ws.videoroomHandle.join(currentExams[ws.course].room, "publisher"); 
+                        }       
+                        //@TO-DO: Send some info msg to the client                     
+                    } 
+                }    
             }
             //There are ICE candidates ready to be sent
             else if(object.message === "trickle"){
@@ -55,7 +104,7 @@ const janus = async (server) => {
                 }
             }
             //The teacher wants to get all feeds
-            else if(object.message === "getFeeds"){
+            else if(object.message === "getFeeds" && ws.role === 'teacher'){
                 console.log("Received getFeeds message");
                 ws.videoroomHandle = janusWrapper.addHandle();
                 await ws.videoroomHandle.attach("janus.plugin.videoroom");
@@ -87,7 +136,7 @@ const janus = async (server) => {
                 }
             }
             //The teacher wants to subscribe to a particular feed
-            else if(object.message === "subscribe"){
+            else if(object.message === "subscribe" && ws.role === 'teacher'){
                 console.log("Received subscribe message");
                 console.log("Printing subscriber ID");
                 console.log(object.subscriberID)
@@ -99,8 +148,8 @@ const janus = async (server) => {
                 ws.send(JSON.stringify(body))
             }
         })
-
     })
+
 }
 
 module.exports = janus
