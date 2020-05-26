@@ -23,25 +23,25 @@ class Team extends React.Component{
                 <Container>
                     <Grid container>
                         <Grid item sm={12} md={3}>
-                            <img src={PropicDaniele} className="team-avatar"/>
+                            <img alt="Capone Daniele" src={PropicDaniele} className="team-avatar"/>
                             <span className="team-member">
                                 Daniele
                             </span>
                         </Grid>
                         <Grid item sm={12} md={3}>
-                            <img src={PropicAlessandro} className="team-avatar"/>
+                            <img alt="De Crecchio Alessandro" src={PropicAlessandro} className="team-avatar"/>
                             <span className="team-member">
                                 Alessandro
                             </span>
                         </Grid>
                         <Grid item sm={12} md={3}>
-                            <img src={PropicAngelo} className="team-avatar"/>
+                            <img alt="Delicato Angelo" src={PropicAngelo} className="team-avatar"/>
                             <span className="team-member">
                                 Angelo
                             </span>
                         </Grid>
                         <Grid item sm={12} md={3}>
-                            <img src={PropicGaetano} className="team-avatar"/>
+                            <img alt="Sansiviero Gaetano" src={PropicGaetano} className="team-avatar"/>
                             <span className="team-member">
                                 Gaetano
                             </span>

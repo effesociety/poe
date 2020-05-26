@@ -4,15 +4,16 @@ var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 			
 class Janus {
   constructor() {
-    this.websocket = undefined;
-    this.publisherConn = undefined;
-    this.subscriberConn = {};
-    this.streams = {};
-    this.mystream = undefined;
-    this.course = undefined;
-	
-    this.candidates = [];
-    this.SDP = false;
+    this.websocket = undefined; //the WebSocket connection with the backend
+    this.publisherConn = undefined; //the peerConnection as publisher
+    this.subscriberConn = {}; //the peerConnections as subscriber (only available for teachers, students are refused by backend)
+    this.streams = {}; //all the remote streams to be displayed (just the teacher feed for the students)
+    this.mystream = undefined; //the local stream
+    this.course = undefined; //the course to be added to every message sent to the backend
+    this.messageHandlers = {}; //handlers for responses received from the backend
+
+    this.candidates = []; //list of candidates not sent yet
+    this.SDP = false; //boolean var to keep track if the SDP is already been sent
   }
 
   connect() {
@@ -31,7 +32,7 @@ class Janus {
     this.course = course
     if(!this.websocket){
       this.websocket = await this.connect();
-      this.websocket.onmessage = this.onMessageHandler.bind(this);   
+      this.websocket.onmessage = this.receive.bind(this);   
       this.websocket.onclose = this.onCloseHandler.bind(this);
     }
   }
@@ -43,6 +44,7 @@ class Janus {
     return o;
   }
 
+  //Close all RTCPeerConnections
   onCloseHandler(){
     console.log("WebSocket closed")
     this.publisherConn.close();
@@ -51,61 +53,87 @@ class Janus {
     })
   }
 
-  async onMessageHandler(ev){
+  //Define callback for each event
+  on(ev,callback){
+    let handlers = this.messageHandlers[ev];
+    if(handlers == null){
+      handlers = this.messageHandlers[ev] = [];
+    }
+    handlers.push(callback);
+  }
+
+  receive(ev){
     let object = JSON.parse(ev.data);
-
-    if (object.message === "answer") { //The user is a student or a teacher who needs to send its audio/video stream
-      console.log("Got an answer")
-      console.log(object.jsep)
-      console.log(this.publisherConn)
-      this.publisherConn.setRemoteDescription(object.jsep);
-      console.log(this.publisherConn)
-    }
-    else if(object.message === "offer"){ //The user is a teacher who needs to get all audio/video streams
-
-      this.subscriberConn[object.subscriberID] = new RTCPeerConnection(config,pc_constraints);      
-
-      this.subscriberConn[object.subscriberID].ontrack = (ev) => {
-        this.onTrackHandler(ev,object.subscriberID);
+    let responseType = object.message;
+    let handlers = this.messageHandlers[responseType];
+    if (handlers != null) {
+      for (let i = 0; i < handlers.length; i++) {
+        handlers[i](object);
       }
-      
-      this.subscriberConn[object.subscriberID].onicecandidate = (ev) => {
-	      this.onIceCandidateHandler2(ev,object.subscriberID)
-      }
-
-      this.subscriberConn[object.subscriberID].setRemoteDescription(object.jsep);
-	    var mediaConstraints = {
-	    	offerToReceiveAudio: true,
-		    offerToReceiveVideo: true
-      }
-
-	  
-      let answer = await this.subscriberConn[object.subscriberID].createAnswer(mediaConstraints);
-      this.subscriberConn[object.subscriberID].setLocalDescription(answer)
-      
-      var jsep = {
-		    "type": answer.type,
-	    	"sdp": answer.sdp
-	     };
-      let body = {
-        "message": "subscribe",
-        "jsep": jsep,
-        "subscriberID": object.subscriberID,
-        "course": this.course
-      }
-      this.websocket.send(JSON.stringify(body)) 
-	  
-
-    } 
-    else if(object.message === "started"){
-      console.log("Received started message")
-      this.SDP = true
-    }
-    else {
-      console.log("Received msg from server");
-      console.log(object);
     }
   }
+
+  onAnswerHandler(object){
+    //object.message is equal to "answer"
+    //This means that the user wants to send its audio/video stream
+    console.log("Got message type ANSWER. Setting Remote Description...")
+    this.publisherConn.setRemoteDescription(object.jsep);
+  }
+
+  async onOfferHandler(object){
+    //object.message is equal to "offer"
+    //This means that the user is a teacher who needs to get all audio/video streams
+    console.log("Got message type OFFER. Creating new RTCPeerConnection")
+
+    this.subscriberConn[object.subscriberID] = new RTCPeerConnection(config, pc_constraints)
+
+    //Define what happens onTrack
+    this.subscriberConn[object.subscriberID].ontrack = (ev) => {
+      this.onTrackHandler(ev,object.subscriberID);
+    }
+    
+    //Define what happens every time there is a ICE candidate
+    this.subscriberConn[object.subscriberID].onicecandidate = (ev) => {
+      this.onIceCandidateHandler2(ev,object.subscriberID)
+    }
+
+    console.log("Setting Remote Description for Remote Feed")
+    //Setup remote description with the JSEP received
+    this.subscriberConn[object.subscriberID].setRemoteDescription(object.jsep);
+    var mediaConstraints = {
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true
+    }
+
+    console.log("Creating answer to send back to the server")
+    //Create an answer to send
+    let answer = await this.subscriberConn[object.subscriberID].createAnswer(mediaConstraints);
+    this.subscriberConn[object.subscriberID].setLocalDescription(answer)
+    
+    //Encapsulate the message
+    var jsep = {
+      "type": answer.type,
+      "sdp": answer.sdp
+     };
+    let body = {
+      "message": "subscribe",
+      "jsep": jsep,
+      "subscriberID": object.subscriberID,
+      "course": this.course
+    }
+
+    console.log("Sending msg to the server")
+    //Send it through the websocket
+    this.websocket.send(JSON.stringify(body)) 
+  }
+
+  onStartedHandler(){
+    //object.message is equal to "started"
+    //This means that Janus successfully received our SDP
+    console.log("Server correctly received the SDP")
+    this.SDP = true;
+  }
+
 
   publish(){
     let body = {
@@ -113,11 +141,19 @@ class Janus {
       "course": this.course
     };
     this.websocket.send(JSON.stringify(body));
-	
+  
     this.publisherConn = new RTCPeerConnection(config,pc_constraints);
     this.publisherConn.onicecandidate = this.onIceCandidateHandler.bind(this);
     this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);	
     this.userMediaSetup()
+    //this.on('answer', this.onAnswerHandler.bind(this))
+
+    return new Promise((resolve) => {
+      this.on('answer',(object) => {
+        this.onAnswerHandler(object);
+        resolve()
+      })
+    })
   }
 
   subscribe(){
@@ -126,6 +162,9 @@ class Janus {
       "course": this.course
     };
     this.websocket.send(JSON.stringify(body))
+
+    this.on('offer',this.onOfferHandler.bind(this))
+    this.on('started', this.onStartedHandler.bind(this))
   }
 
   async userMediaSetup() {

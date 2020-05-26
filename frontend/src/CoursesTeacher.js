@@ -1,6 +1,6 @@
 import React from 'react'
 import CourseForm from './CourseForm'
-import janus from './Janus'
+import janus from './Janus2'
 import Stream from './Stream'
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -59,41 +59,21 @@ class CoursesTeacher extends React.Component{
           }
     }
 
-    startExam(){
-        janus.init()
-        .then(() => {
-            janus.publish()
+    async startExam(course){
+        await janus.init(course)
+        await janus.publish()
+        if(janus.mystream && !this.state.mystream){
+            this.setState({
+                "mystream": janus.mystream
+            })
+        }
 
-        })
 
-
-
-        setInterval(() => {
-            console.log("printing my stream")
-            console.log(janus.mystream)
-            if(janus.mystream){
-                if(!this.state.mystream){
-                    this.setState({
-                        "mystream": janus.mystream
-                    })
-                }
-
-            }
-        },1000)
     }
 
     //Test functions
-    start(){
-        janus.init()
-        .then(() => {
-            janus.publish()
-        })
-    }
     getFeeds(){
-        janus.init()
-        .then(() => {
-            janus.subscribe()
-        })
+        janus.subscribe()
         
         setInterval(() => {
             console.log("Ciao")
@@ -121,11 +101,11 @@ class CoursesTeacher extends React.Component{
     render(){
         var courses;
         if(this.props.courses.length>0){
-            courses = this.props.courses.map((course) => {
+            courses = this.props.courses.map((course,i) => {
                 let matches = course.name.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
                 return (
-                    <Grid item sm={12} md={3}>
+                    <Grid item sm={12} md={3} key={i}>
                         <Card className="course-card">
                             <CardContent>
                                 <Box className="course-avatar">
@@ -134,10 +114,10 @@ class CoursesTeacher extends React.Component{
                                 <Box className="course-name">
                                     {course.name}
                                 </Box>
-                                <Button className="course-btn course-btn-cancel" onClick={() => this.destroyCourse(course)}>
+                                <Button className="course-btn course-btn-cancel" onClick={() => this.destroyCourse(course.name)}>
                                     Delete course
                                 </Button>
-                                <Button className="course-btn course-btn-start" onClick={() => this.startExam(course)}>
+                                <Button className="course-btn course-btn-start" onClick={() => this.startExam(course.name)}>
                                     Start exam
                                 </Button>
                             </CardContent>

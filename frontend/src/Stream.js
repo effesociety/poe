@@ -1,10 +1,6 @@
 import React from 'react';
 
 class Stream extends React.Component{
-    constructor(props){
-        super(props);
-    }
-
     render(){
         var stream;
         if(this.props.stream){

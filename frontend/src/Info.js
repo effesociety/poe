@@ -6,7 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from "@material-ui/core/Typography";
 import 'animate.css/animate.css'
 
-import Sample1 from './images/sample1.jpg';
+//import Sample1 from './images/sample1.jpg';
 import Sample2 from './images/sample2.jpg';
 import Sample3 from './images/sample3.jpg';
 
@@ -27,7 +27,7 @@ class Info extends React.Component{
                                 </Typography>
                             </Grid>
                             <Grid item sm={12} md={6}>
-                                <img src={Sample2} className="info-img-right"/>  
+                                <img alt="Sample 2" src={Sample2} className="info-img-right"/>  
                             </Grid>
                         </Grid>
 
@@ -36,7 +36,7 @@ class Info extends React.Component{
                         </Typography>                        
                         <Grid container>
                            <Grid item sm={12} md={6}>
-                                <img src={Sample3} className="info-img-left"/>  
+                                <img alt="Sample 3" src={Sample3} className="info-img-left"/>  
                             </Grid>
                             <Grid item sm={12} md={6}>
                                 <Typography variant="subtitle1" align="justify">

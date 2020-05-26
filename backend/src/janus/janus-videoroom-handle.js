@@ -2,6 +2,7 @@ module.exports = class JanusVideoroomHandle{
     constructor(session){
         this.session = session;
         this.id = undefined;
+        this.feedID = undefined;
     }
 
     attach(plugin){            
@@ -66,7 +67,10 @@ module.exports = class JanusVideoroomHandle{
             body = Object.assign({"feed": feed}, body);
         }
 
-        return this.sendMessage(body);
+        return this.sendMessage(body).then(res => {
+            this.feedID = res.plugindata.data.id;
+            return res;
+        });
     }
 
     publish(jsep,audio,video){
@@ -144,8 +148,18 @@ module.exports = class JanusVideoroomHandle{
         let body = {
             "request": "start"
         }
-		console.log("SENDING START MESSAGE")
         return this.sendJsep(jsep,body);
+    }
+
+    leave(){
+        if(this.session.options.verbose === true){
+            console.log("[" + this.id + "] Leaving...")
+        }
+
+        let body = {
+            "request": "leave"
+        }
+        return this.sendMessage(body);
     }
 
 

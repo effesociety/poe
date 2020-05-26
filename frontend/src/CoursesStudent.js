@@ -51,22 +51,37 @@ class CoursesStudent extends React.Component{
     render(){
         var courses = (<div></div>);
         if(this.props.courses.length>0){
-            courses = this.props.courses.map((course) => {
+            courses = this.props.courses.map((course,i) => {
                 let matches = course.name.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
+                
+                let startExam;
+                if(course.examActive){
+                    startExam = (
+                        <Button className="course-btn course-btn-start">
+                            Start exam
+                        </Button>
+                    )
+                }
+                else{
+                    startExam = (
+                        <Typography variant="paragraph">
+                            There are no active exams for this course at this time
+                        </Typography>
+                    )
+                }
+
                 return (
-                    <Grid item sm={12} md={3}>
+                    <Grid item sm={12} md={3} key={i}>
                         <Card className="course-card">
-                            <CardContent>
+                            <CardContent align="center">
                                 <Box className="course-avatar">
                                     {acronym}
                                 </Box>
                                 <Box className="course-name">
                                     {course.name}
                                 </Box>
-                                <Button className="course-btn course-btn-start">
-                                    Start exam
-                                </Button>
+                                {startExam}
                             </CardContent>
                         </Card>
                     </Grid>

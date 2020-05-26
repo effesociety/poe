@@ -2,10 +2,10 @@ const JanusWrapper = require('./janus-wrapper')
 const WebSocket = require('ws')
 const helper = require('../utils/helpers')
 const cookie = require('cookie')
-const http = require('http')
-var currentExams = require('../utils/current-exams')
+const Helpers = require('../utils/helpers')
+const currentExams = require('../utils/current-exams')
 
-const janus = async (app,server) => {
+const janus = async (server) => {
 
     //Authentication and Authorization  
     server.on('upgrade', async (req, ws, head) => {
@@ -27,22 +27,35 @@ const janus = async (app,server) => {
           });
     })
 
-    //Create Janus Session
+    //SETUP @TO-DO: Move in separate files all the following
     var janusWrapper = new JanusWrapper();
     await janusWrapper.init();
-
 	const wss = new WebSocket.Server({ noServer: true })
+    const janusEventHandler =  Helpers.commonEmitter;
 
     wss.on('connection', async (ws) => {
         ws.on('message', async e => {
             var object = JSON.parse(e);
-            console.log("Received message on WebSocket:");
-            console.log(object);
+            
+            
+            if(object.message!=="trickle" && object.message !=="publish"){
+                console.log("Received message on WebSocket:");
+                console.log(object);
+            }
+
             if(ws.course && ws.course !== object.course){
                 //@TO-DO: What happened?
                 console.log("What happened?")
             }
-            ws.course = object.course
+
+            if(object.course){
+                ws.course = object.course
+            }
+            else{
+                console.log("Missing mandatory element: course")
+                ws.close()
+                return
+            }
 
             if(object.message === "start"){
             /*
@@ -63,10 +76,8 @@ const janus = async (app,server) => {
                         else{
                             let room = Math.floor(Math.random()*10000)
                             await ws.videoroomHandle.createRoom(room)
-                            currentExams[ws.course] = {
-                                "room": room
-                            }
-                            await ws.videoroomHandle.join(currentExams[ws.course].room, "publisher");                        
+                            currentExams.setExam(ws.course,room)
+                            await ws.videoroomHandle.join(room, "publisher");                       
                         }
                     }
                     else if(ws.role === 'student'){
@@ -92,9 +103,8 @@ const janus = async (app,server) => {
             //The media stream is ready to be published
             else if(object.message === "publish"){
                 console.log("Received publish message");
-                let offer = object.offer;
                 if(ws.videoroomHandle){
-                    let remote = await ws.videoroomHandle.publish(offer,true,true);
+                    let remote = await ws.videoroomHandle.publish(object.offer,object.audio,object.video);
                     let body = {
                         "message": "answer",
                         "jsep": remote.jsep,
@@ -106,34 +116,37 @@ const janus = async (app,server) => {
             //The teacher wants to get all feeds
             else if(object.message === "getFeeds" && ws.role === 'teacher'){
                 console.log("Received getFeeds message");
-                ws.videoroomHandle = janusWrapper.addHandle();
-                await ws.videoroomHandle.attach("janus.plugin.videoroom");
-                let ev = await ws.videoroomHandle.listParticipants(1234);
-                if(ev.plugindata){
-                    if(ev.plugindata.plugin === "janus.plugin.videoroom" && ev.plugindata.data.videoroom === "participants"){
-                        if(ev.plugindata.data.participants.length>0){
-                          var participants = ev.plugindata.data.participants;
-                          ws.subscriberHandles = {}
-                          participants.forEach(async (participant) => {
-                            let feed = participant.id;
-                            console.log("Printing participant id: ", feed);
-                            let subscriberHandle = janusWrapper.addHandle();
-                            await subscriberHandle.attach("janus.plugin.videoroom");
-                            ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
-                            console.log("Printing ID of this subscriber handle")
-                            console.log(subscriberHandle.id)
-                            let object = await subscriberHandle.join(1234, "subscriber", feed);
-                            let body = {
-                              "message": "offer",
-                              "jsep": object.jsep,
-                              "subscriberID": subscriberHandle.id
-                            };
-                            console.log("Sending offer to ",subscriberHandle.id)
-                            ws.send(JSON.stringify(body));
-                          });
+                var room = currentExams.getExam(ws.course).room
+                if(ws.videoroomHandle.id && room){
+                    let ev = await ws.videoroomHandle.listParticipants(room);
+                    if(ev.plugindata){
+                        if(ev.plugindata.plugin === "janus.plugin.videoroom" && ev.plugindata.data.videoroom === "participants"){
+                            if(ev.plugindata.data.participants.length>0){
+                                var participants = ev.plugindata.data.participants;
+                                ws.subscriberHandles = {}
+                                participants.forEach(async (participant) => {
+                                    let feed = participant.id;
+                                    if(feed !== ws.videoroomHandle.feedID){
+                                        console.log("Printing participant id: ", feed);
+                                        let subscriberHandle = janusWrapper.addHandle();
+                                        await subscriberHandle.attach("janus.plugin.videoroom");
+                                        ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
+                                        console.log("Printing ID of this subscriber handle")
+                                        console.log(subscriberHandle.id)
+                                        let object = await subscriberHandle.join(room, "subscriber", feed);
+                                        let body = {
+                                            "message": "offer",
+                                            "jsep": object.jsep,
+                                            "subscriberID": subscriberHandle.id
+                                        };
+                                        console.log("Sending offer to ",subscriberHandle.id)
+                                        ws.send(JSON.stringify(body));
+                                    }
+                                });
+                            }
                         }
                     }
-                }
+                }   
             }
             //The teacher wants to subscribe to a particular feed
             else if(object.message === "subscribe" && ws.role === 'teacher'){
@@ -148,8 +161,23 @@ const janus = async (app,server) => {
                 ws.send(JSON.stringify(body))
             }
         })
+
+        ws.on('close', () => {
+            if(ws.videoroomHandle){
+                ws.videoroomHandle.detach()
+            }
+            if(ws.subscriberHandle){
+                Object.keys(ws.subscriberHandles).forEach(handle => {
+                    ws.subscriberHandles[handle.id].detach()
+                })
+            }
+        })
     })
 
+    janusEventHandler.on('leaving', (data) => {
+        console.log("Leaving event")
+        console.log(data)
+    })
 }
 
 module.exports = janus

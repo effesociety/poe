@@ -146,7 +146,6 @@ class LoginForm extends React.Component {
       };
       let response = await fetch("/api/users/logout",requestOptions);
       if(response.status === 200){
-        let result = await response.json();
         this.closeForm();
         this.props.onSuccess(null); 
       }
