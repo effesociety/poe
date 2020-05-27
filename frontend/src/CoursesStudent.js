@@ -51,6 +51,8 @@ class CoursesStudent extends React.Component{
 
         await janus.init(course)
         await janus.publish()
+
+        janus.subscriberSetup();
        
         janus.on('subscribed', (object) => {
             console.log("Subscribed event")
