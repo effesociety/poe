@@ -188,6 +188,7 @@ class Janus {
   }
 
   subscriberSetup(){
+    console.log("SUBSCRIBER SETUP")
     this.on('started',this.onStartedHandler.bind(this));
     this.on('offer', this.onOfferHandler.bind(this));
   }

@@ -183,6 +183,9 @@ const janus = async (server) => {
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "teacher" && websocket.course === ws.course){
                             console.log("ATTACHING TO TEACHER FEED")
+                            console.log(ws.role)
+                            console.log(websocket.role)
+                            console.log(websocket.videoroomHandle.feedID)
                             manageSubscribeHandle(ws, exam.room, websocket.videoroomHandle.feedID)
                         }
                     })
@@ -239,18 +242,16 @@ const janus = async (server) => {
     }
     
     async function manageSubscribeMessage(ws,object){
-        if(ws.role === 'teacher'){
-            console.log("Received subscribe message")
-            console.log("Printing subscriber ID")
-            console.log(object.subscriberID)
-            
-            await ws.subscriberHandles[object.subscriberID].start(object.jsep);
-            let body = {
-                "message": "started",
-                "subscriberID": object.subscriberID
-            }
-            ws.send(JSON.stringify(body))
+        console.log("Received subscribe message")
+        console.log("Printing subscriber ID")
+        console.log(object.subscriberID)
+        
+        await ws.subscriberHandles[object.subscriberID].start(object.jsep);
+        let body = {
+            "message": "started",
+            "subscriberID": object.subscriberID
         }
+        ws.send(JSON.stringify(body))
     }
     
     function manageDestroyMessage(ws){

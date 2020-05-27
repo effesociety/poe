@@ -77,6 +77,8 @@ class CoursesTeacher extends React.Component{
         }
 
         janus.subscriberSetup();
+    
+        console.log(janus)
 
         janus.on('subscribed', (object) => {
             janus.onRemoteFeed2(object)
