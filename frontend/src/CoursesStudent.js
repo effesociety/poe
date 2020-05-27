@@ -53,8 +53,10 @@ class CoursesStudent extends React.Component{
         await janus.publish()
        
         janus.on('subscribed', (object) => {
+            console.log("Subscribed event")
             janus.onRemoteFeed2(object)
             .then((id)=> {
+                console.log("ATTACHED TO TEACHER STREAM")
                 this.setState({
                     teacherStream: janus.streams[id]
                 })
@@ -149,7 +151,7 @@ class CoursesStudent extends React.Component{
         }
 
         var teacherStream;
-        if(this.state.mystream){
+        if(this.state.teacherStream){
             teacherStream = (
                 <Grid item>
                     <Stream stream={this.state.teacherStream} />

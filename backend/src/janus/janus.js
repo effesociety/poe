@@ -122,6 +122,7 @@ const janus = async (server) => {
         
         janusAdminAPI.listParticipants(data.room)
         .then(participants => {
+            console.log(participants)
             if(participants.length === 0){
                 janusAdminAPI.destroyRoom(data.room)
                 var course = currentExams.getCourse(data.room)
@@ -181,6 +182,7 @@ const janus = async (server) => {
                     await ws.videoroomHandle.join(exam.room, "publisher"); 
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "teacher" && websocket.course === ws.course){
+                            console.log("ATTACHING TO TEACHER FEED")
                             manageSubscribeHandle(ws, exam.room, websocket.videoroomHandle.feedID)
                         }
                     })
@@ -274,16 +276,14 @@ const janus = async (server) => {
             console.log(feed)
             console.log("Printing room")
             console.log(room)
-            //setTimeout(async () => {
-                let object = await subscriberHandle.join(room, "subscriber", feed);
-                let body = {
-                    "message": "offer",
-                    "jsep": object.jsep,
-                    "subscriberID": subscriberHandle.id
-                };
-                console.log("Sending offer to ",subscriberHandle.id)
-                ws.send(JSON.stringify(body));
-            //},2000)
+            let object = await subscriberHandle.join(room, "subscriber", feed);
+            let body = {
+                "message": "offer",
+                "jsep": object.jsep,
+                "subscriberID": subscriberHandle.id
+            };
+            console.log("Sending offer to ",subscriberHandle.id)
+            ws.send(JSON.stringify(body));
 
         }
     }
