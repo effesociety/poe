@@ -20,7 +20,6 @@ async function checkUser(cookies){
   else{
     return null
   }
-
 }
 
 async function checkCourse(name){
@@ -91,7 +90,6 @@ async function removeDeletedCourse(courseName){
   catch(e){
     console.log(e)
   }
-
 }
 
 const EventEmitter = require('events')

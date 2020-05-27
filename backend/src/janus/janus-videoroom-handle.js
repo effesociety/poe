@@ -140,6 +140,19 @@ module.exports = class JanusVideoroomHandle{
         return this.sendMessage(body);
     }
 
+    kickParticipants(room,id){
+        if(this.session.options.verbose === true){
+            console.log("[" + this.id  + "] Kick participant [",id,"] in room " + room);
+        }
+        
+        let body = {
+            "request": "kick",
+            "room": room,
+            "id": id 
+        }
+        return this.sendMessage(body);        
+    }
+
     start(jsep){
         if(this.session.options.verbose === true){
             console.log("[" + this.id  + "] Starting...")
