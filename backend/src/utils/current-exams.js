@@ -16,12 +16,25 @@ class CurrentExams{
         }
     }
 
+    getCourse(room){
+        const c = Object.keys(this.exams).map(course => {
+            if(this.exams[course].room === room){
+                return course
+            }
+        })
+        return c;
+    }
+
     setExam(course,room){
         if(!this.exams[course]){
             this.exams[course] = {
                 "room": room
             } 
         }
+    }
+
+    removeExam(course){
+        delete this.exams[course];
     }
 }
 

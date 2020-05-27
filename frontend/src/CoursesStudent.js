@@ -1,5 +1,5 @@
 import React from 'react'
-import janus from './Janus'
+import janus from './Janus2'
 import Stream from './Stream'
 import {Grid, Container, Box, Card, CardContent, Button, Typography} from '@material-ui/core';
 
@@ -7,7 +7,8 @@ class CoursesStudent extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            mystream: null
+            displayRoom: false,
+            teacherStream: null
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
@@ -44,13 +45,21 @@ class CoursesStudent extends React.Component{
     }
 
     async startExam(course){
+        this.setState({
+            displayRoom: true
+        })
+
         await janus.init(course)
         await janus.publish()
-        if(janus.mystream && !this.state.mystream){
-            this.setState({
-                "mystream": janus.mystream
-            })
-        }
+       
+        janus.on('subscribed', (object) => {
+            janus.onRemoteFeed2(object)
+            .then((id)=> {
+                this.setState({
+                    teacherStream: janus.streams[id]
+                })
+            }) 
+        })
     }
 
     render(){
@@ -139,20 +148,29 @@ class CoursesStudent extends React.Component{
             )           
         }
 
-        var prova;
+        var teacherStream;
         if(this.state.mystream){
-            prova = (<Stream stream={this.state.mystream} />)
+            teacherStream = (
+                <Grid item>
+                    <Stream stream={this.state.teacherStream} />
+                </Grid>
+            )
+        }
+
+        var streams;
+        if(this.state.displayRoom){
+            streams = (
+                <Box className="streams-box">
+                    <Grid container className="streams-container">
+                        {teacherStream}
+                    </Grid>
+                </Box>
+            )
         }
                
         return (
         <Box className="course-box">
-            <Button id="start" onClick={this.start}>Start</Button>
-            <Button id="getFeeds" onClick={this.getFeeds}>getFeeds</Button>
-            <video style={{"width":"320px", "height":"180px"}} id="remote1" autoPlay playsInline></video>
-            <video style={{"width":"320px", "height":"180px"}} id="remote2" autoPlay playsInline></video>
-            <video style={{"width":"320px", "height":"180px"}} id="remote3" autoPlay playsInline></video>
-
-            {prova}
+            {streams}
 
             <Container>
                 {courses}

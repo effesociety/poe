@@ -1,5 +1,5 @@
 const JanusWrapper = require('./janus-wrapper')
-const JanusAdminAPI = require('./janus-admin-session')
+const janusAdminAPI = require('./janus-admin-session')
 const WebSocket = require('ws')
 const helper = require('../utils/helpers')
 const cookie = require('cookie')
@@ -101,12 +101,52 @@ const janus = async (server) => {
         })
     })
 
+    janusEventHandler.on('published', (data) => {
+        console.log("published event")
+        console.log(data)
+
+        wss.clients.forEach(ws => {
+            console.log(ws.role)
+            if(ws.role === 'teacher'){
+                let exam = currentExams.getExam(ws.course)
+                if(exam.room === data.room){
+                    manageSubscribeHandle(ws,data.room,data.id)
+                }
+            }
+        })
+    })
+
     janusEventHandler.on('leaving', (data) => {
         console.log("Leaving event")
         console.log(data)
-        var janusAdmin = new JanusAdminAPI();
-        janusAdmin.destroyRoom(data.room)
+        
+        janusAdminAPI.listParticipants(data.room)
+        .then(participants => {
+            if(participants.length === 0){
+                janusAdminAPI.destroyRoom(data.room)
+                var course = currentExams.getCourse(data.room)
+                currentExams.removeExam(course)
+            }
+        })       
     })
+
+    janusEventHandler.on('subscribed', (data) => {
+        wss.clients.forEach(ws => {
+            if(ws.subscriberHandles){
+                Object.keys(ws.subscriberHandles).forEach(subscriberHandle => {
+                    if(subscriberHandle.feed_id === data.id){
+                        let body = {
+                            message : "subscribed",
+                            subscriberID : subscriberHandle
+                        }
+                        ws.send(JSON.stringify(body))
+                    }
+                })
+            }        
+        })
+    })
+
+
 
     async function manageStartMessage(ws){
         console.log("Received start message");   
@@ -118,6 +158,12 @@ const janus = async (server) => {
             if(ws.role === 'teacher'){
                 console.log("Role teacher")
                 let exam = currentExams.getExam(ws.course);
+
+                console.log("printing exam")
+                console.log(exam)
+                console.log("printing currentExams")
+                console.log(currentExams)
+
                 if(exam){
                     await ws.videoroomHandle.join(exam.room, "publisher");
                 }
@@ -130,9 +176,15 @@ const janus = async (server) => {
             }
             else if(ws.role === 'student'){
                 console.log("Role student")
-                if(currentExams[ws.course].room){
-                    await ws.videoroomHandle.join(currentExams[ws.course].room, "publisher"); 
-                }       
+                let exam = currentExams.getExam(ws.course);
+                if(exam){
+                    await ws.videoroomHandle.join(exam.room, "publisher"); 
+                    wss.clients.forEach(websocket => {
+                        if(websocket.role === "teacher" && websocket.course === ws.course){
+                            manageSubscribeHandle(ws, exam.room, websocket.videoroomHandle.feedID)
+                        }
+                    })
+                }
                 //@TO-DO: Send some info msg to the client                     
             } 
         }  
@@ -175,22 +227,7 @@ const janus = async (server) => {
                             ws.subscriberHandles = {}
                             participants.forEach(async (participant) => {
                                 let feed = participant.id;
-                                if(feed !== ws.videoroomHandle.feedID){
-                                    console.log("Printing participant id: ", feed);
-                                    let subscriberHandle = janusWrapper.addHandle();
-                                    await subscriberHandle.attach("janus.plugin.videoroom");
-                                    ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
-                                    console.log("Printing ID of this subscriber handle")
-                                    console.log(subscriberHandle.id)
-                                    let object = await subscriberHandle.join(room, "subscriber", feed);
-                                    let body = {
-                                        "message": "offer",
-                                        "jsep": object.jsep,
-                                        "subscriberID": subscriberHandle.id
-                                    };
-                                    console.log("Sending offer to ",subscriberHandle.id)
-                                    ws.send(JSON.stringify(body));
-                                }
+                                manageSubscribeHandle(ws, room, feed)
                             })
                         }
                     }
@@ -207,7 +244,8 @@ const janus = async (server) => {
             
             await ws.subscriberHandles[object.subscriberID].start(object.jsep);
             let body = {
-                "message": "started"
+                "message": "started",
+                "subscriberID": object.subscriberID
             }
             ws.send(JSON.stringify(body))
         }
@@ -218,6 +256,35 @@ const janus = async (server) => {
             console.log("Received destroy message")
             var room = currentExams.getExam(ws.course).room
             ws.videoroomHandle.destroyRoom(room)
+        }
+    }
+
+    async function manageSubscribeHandle(ws, room, feed){
+        if(feed !== ws.videoroomHandle.feedID){
+            console.log("Printing participant id: ", feed);
+            let subscriberHandle = janusWrapper.addHandle();
+            await subscriberHandle.attach("janus.plugin.videoroom");
+            if(!ws.subscriberHandles){
+                ws.subscriberHandles = {}
+            }
+            ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
+            console.log("Printing ID of this subscriber handle")
+            console.log(subscriberHandle.id)
+            console.log("Priting feed we're trying to attach")
+            console.log(feed)
+            console.log("Printing room")
+            console.log(room)
+            //setTimeout(async () => {
+                let object = await subscriberHandle.join(room, "subscriber", feed);
+                let body = {
+                    "message": "offer",
+                    "jsep": object.jsep,
+                    "subscriberID": subscriberHandle.id
+                };
+                console.log("Sending offer to ",subscriberHandle.id)
+                ws.send(JSON.stringify(body));
+            //},2000)
+
         }
     }
 }

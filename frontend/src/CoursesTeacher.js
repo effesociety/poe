@@ -2,6 +2,7 @@ import React from 'react'
 import CourseForm from './CourseForm'
 import janus from './Janus2'
 import Stream from './Stream'
+import update from 'react-addons-update';
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -9,8 +10,10 @@ class CoursesTeacher extends React.Component{
     constructor(){
         super()
         this.state = {
+            displayRoom: false,
             openForm : false,
-            mystream : null
+            mystream : null,
+            streams: {}
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -61,6 +64,10 @@ class CoursesTeacher extends React.Component{
     }
 
     async startExam(course){
+        this.setState({
+            displayRoom: true
+        })
+
         await janus.init(course)
         await janus.publish()
         if(janus.mystream && !this.state.mystream){
@@ -68,34 +75,22 @@ class CoursesTeacher extends React.Component{
                 "mystream": janus.mystream
             })
         }
-    }
 
-    //Test functions
-    getFeeds(){
-        janus.subscribe()
-        
-        setInterval(() => {
-            console.log("Ciao")
-            console.log(janus.streams)
-            console.log(Object.keys(janus.streams).length)
-            if(Object.keys(janus.streams).length===1){
-                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
-            }
-            else if(Object.keys(janus.streams).length===2){
-                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
-                document.getElementById('remote2').srcObject = janus.streams[Object.keys(janus.streams)[1]];
-            }
-            else if(Object.keys(janus.streams).length===3){
-                document.getElementById('remote1').srcObject = janus.streams[Object.keys(janus.streams)[0]];
-                document.getElementById('remote2').srcObject = janus.streams[Object.keys(janus.streams)[1]];
-                document.getElementById('remote3').srcObject = janus.streams[Object.keys(janus.streams)[2]];
-            }
-            else{
-                console.log("Tutto rotto!")            
-            }
-        },5000)
+        janus.subscriberSetup();
+
+        janus.on('subscribed', (object) => {
+            janus.onRemoteFeed2(object)
+            .then((id)=> {
+                this.setState(update(this.state,{
+                    streams: {
+                        [id]: {
+                            $set: janus.streams[id]
+                        }
+                    }
+                }))
+            })
+        })    
     }
-    //End test functions
 
     render(){
         var courses;
@@ -155,21 +150,46 @@ class CoursesTeacher extends React.Component{
             )
         }
 
-        var prova;
+
+        var localStream;
         if(this.state.mystream){
-            prova = (<Stream stream={this.state.mystream} />)
+            localStream = (
+                <Grid item>
+                    <Stream stream={this.state.mystream} />
+                </Grid>
+            )
         }
+
+        var remoteStreams;
+        if(Object.keys(this.state.streams) !== 0){
+            remoteStreams = Object.values(this.state.streams).map((stream,i) => {
+                    return (
+                        <Grid item>
+                            <Stream stream={stream} key={i} />
+                        </Grid>
+                    )
+            })
+        }
+        var streams;
+        if(this.state.displayRoom){
+            streams = (
+                <Box className="streams-box">
+                    <Grid container className="streams-container">
+                        {localStream}
+                        {remoteStreams}
+                    </Grid>
+                </Box>
+            )
+        }
+
+
+
 
         
         return (
         <Box className="course-box">
-            <Button id="start" onClick={this.start}>Start</Button>
-            <Button id="getFeeds" onClick={this.getFeeds}>getFeeds</Button>
-            <video style={{"width":"320px", "height":"180px"}} id="remote1" autoPlay playsInline></video>
-            <video style={{"width":"320px", "height":"180px"}} id="remote2" autoPlay playsInline></video>
-            <video style={{"width":"320px", "height":"180px"}} id="remote3" autoPlay playsInline></video>
 
-            {prova}
+            {streams}
 
             <CourseForm open={this.state.openForm} closeForm={this.closeForm} />
 

@@ -1,5 +1,6 @@
 const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:5000/" : "wss://poe-dtlab.herokuapp.com";
 const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"},{urls: "turn:numb.viagenie.ca", username: "webrtc@live.com", credential: "muazkh"}]}
+//const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"}]}
 var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 			
 class Janus {
@@ -13,7 +14,7 @@ class Janus {
     this.messageHandlers = {}; //handlers for responses received from the backend
 
     this.candidates = []; //list of candidates not sent yet
-    this.SDP = false; //boolean var to keep track if the SDP is already been sent
+    this.SDP = {}; //boolean var to keep track if the SDP is already been sent
   }
 
   connect() {
@@ -85,6 +86,12 @@ class Janus {
     //This means that the user is a teacher who needs to get all audio/video streams
     console.log("Got message type OFFER. Creating new RTCPeerConnection")
 
+
+    console.log("Printing this")
+    console.log(this)
+    console.log("Printing object")
+    console.log(object)
+
     this.subscriberConn[object.subscriberID] = new RTCPeerConnection(config, pc_constraints)
 
     //Define what happens onTrack
@@ -127,11 +134,11 @@ class Janus {
     this.websocket.send(JSON.stringify(body)) 
   }
 
-  onStartedHandler(){
+  onStartedHandler(object){
     //object.message is equal to "started"
     //This means that Janus successfully received our SDP
     console.log("Server correctly received the SDP")
-    this.SDP = true;
+    this.SDP[object.subscriberID] = true;
   }
 
 
@@ -180,6 +187,35 @@ class Janus {
     }
   }
 
+  subscriberSetup(){
+    this.on('started',this.onStartedHandler.bind(this));
+    this.on('offer', this.onOfferHandler.bind(this));
+  }
+
+  onRemoteFeed(object){    
+    return new Promise((resolve) => {
+        const subscriberID = object.subscriberID;
+        console.log("Printing the subscriber ID")       
+        this.on("subscribed", (object) => {
+          console.log("Received subscribed msg")
+          if(object.subscriberID == subscriberID){
+            console.log("And it was the right one!")
+            resolve()
+          }
+        })
+    })
+  }
+
+  onRemoteFeed2(object){
+    return new Promise((resolve) => {
+      const subscriberID = object.subscriberID;
+      if(object.subscriberID == subscriberID){
+        console.log("And it was the right one!")
+        resolve(subscriberID)
+      }
+    })
+  }
+
   async onIceCandidateHandler(ev) {
     console.log("onIceCandidateHandler");
   	console.log("Printing candidate....")
@@ -213,7 +249,7 @@ class Janus {
     console.log("onIceCandidateHandler");
     console.log("Printing candidate....")
     console.log(ev.candidate)
-    if(this.SDP){
+    if(this.SDP[subscriberID]){
       if(ev.candidate && ev.candidate.candidate.length > 0){
 
         let candidate = {
@@ -267,7 +303,7 @@ class Janus {
     }
   }  
 
-  async onNegotiationNeededHandler(ev) {
+  async onNegotiationNeededHandler() {
     console.log("onNegotiationNeededHandler");
 
     let offer = await this.publisherConn.createOffer();
