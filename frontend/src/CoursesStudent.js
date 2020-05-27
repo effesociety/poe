@@ -57,6 +57,8 @@ class CoursesStudent extends React.Component{
             janus.onRemoteFeed2(object)
             .then((id)=> {
                 console.log("ATTACHED TO TEACHER STREAM")
+                console.log(id)
+                console.log(janus.streams)
                 this.setState({
                     teacherStream: janus.streams[id]
                 })
@@ -91,7 +93,7 @@ class CoursesStudent extends React.Component{
                     <Grid item sm={12} md={3} key={i}>
                         <Card className="course-card">
                             <CardContent align="center">
-                                <Box className="course-avatar">
+                               <Box className="course-avatar">
                                     {acronym}
                                 </Box>
                                 <Box className="course-name">
