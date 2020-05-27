@@ -52,6 +52,10 @@ class CoursesStudent extends React.Component{
         await janus.init(course)
         await janus.publish()
 
+        janus.on('offer', () =>{
+            console.log("We deserve to suffer")
+        })
+        
         janus.subscriberSetup();
        
         janus.on('subscribed', (object) => {
