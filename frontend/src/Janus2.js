@@ -65,6 +65,10 @@ class Janus {
 
   receive(ev){
     let object = JSON.parse(ev.data);
+    
+    console.log("Printing the impossible")
+    console.log(object)
+
     let responseType = object.message;
     let handlers = this.messageHandlers[responseType];
     if (handlers != null) {
