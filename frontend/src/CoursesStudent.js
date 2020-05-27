@@ -60,6 +60,7 @@ class CoursesStudent extends React.Component{
             .then((id)=> {
                 console.log("ATTACHED TO TEACHER STREAM")
                 console.log(id)
+                console.log(janus)
                 console.log(janus.streams)
                 this.setState({
                     teacherStream: janus.streams[id]
