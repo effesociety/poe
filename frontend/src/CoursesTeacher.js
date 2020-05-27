@@ -75,8 +75,6 @@ class CoursesTeacher extends React.Component{
                 "mystream": janus.mystream
             })
         }
-
-        janus.subscriberSetup();
     
         console.log(janus)
 

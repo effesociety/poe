@@ -147,6 +147,8 @@ class Janus {
 
 
   publish(){
+    this.subscriberSetup();
+
     let body = {
       "message": "start",
       "course": this.course
