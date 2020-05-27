@@ -128,7 +128,10 @@ const janus = async (server) => {
                 var course = currentExams.getCourse(data.room)
                 currentExams.removeExam(course)
             }
-        })       
+        })  
+        .catch(err => {
+            console.log(err)
+        })     
     })
 
     janusEventHandler.on('subscribed', (data) => {
@@ -286,6 +289,13 @@ const janus = async (server) => {
             console.log("Sending offer to ",subscriberHandle.id)
             ws.send(JSON.stringify(body));
 
+            console.log("WS ROLE")
+            console.log(ws.role)
+            console.log("ROOM")
+            console.log(room)
+            console.log("FEED")
+            console.log(feed)
+            console.log("*********")
         }
     }
 }
