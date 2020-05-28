@@ -264,6 +264,7 @@ const janus = async (server) => {
         if(ws.role === 'teacher'){
             console.log("Received destroy message")
             var room = currentExams.getExam(object.course).room
+            currentExams.removeExam(course)
             janusAdminAPI.destroyRoom(room)
         }
     }
