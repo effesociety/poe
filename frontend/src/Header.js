@@ -38,10 +38,11 @@ class Header extends React.Component {
           <Grid container>
             <Grid item sm={12}>
               <Typography  variant="h1" align="center" className="header-text-title">
-                Lorem ipsum
+                Pretty Open Education
               </Typography>
               <Typography  variant="h4" align="center" className="header-text-title">
-                dolor sit amet, consectetur adipiscing elit. Aenean consequat convallis sem vitae rutrum. Morbi auctor condimentum nisl, non interdum eros viverra ac. In eu risus efficitur, egestas purus id, finibus neque. 
+              The Coronavirus outbreak is making a breakthrough in distance learning, but the assessment of the skills acquired by  students, through formal examinations, leads to significant problems.
+              We are here to solve them.
               </Typography>             
             </Grid>
           </Grid>
