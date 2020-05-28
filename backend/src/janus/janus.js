@@ -109,7 +109,7 @@ const janus = async (server) => {
             console.log(ws.role)
             if(ws.role === 'teacher'){
                 let exam = currentExams.getExam(ws.course)
-                if(exam.room === data.room){
+                if(exam && exam.room === data.room){
                     manageSubscribeHandle(ws,data.room,data.id)
                 }
             }
@@ -124,12 +124,12 @@ const janus = async (server) => {
         .then(participants => {
             console.log("Printing participants")
             console.log(participants)
-            if(participants.length === 0){/*
+            if(participants.length === 0){
                 janusAdminAPI.destroyRoom(data.room)
-                var course = currentExams.getCourse(data.room)
-                currentExams.removeExam(course)
-                */
-               console.log("@TO-DO: FIX REMOVE EXAM FUNCTION")
+                .then(() => {
+                    var course = currentExams.getCourse(data.room)
+                    currentExams.removeExam(course)
+                })
             }
         })  
         .catch(err => {
@@ -260,12 +260,20 @@ const janus = async (server) => {
         ws.send(JSON.stringify(body))
     }
     
-    function manageDestroyMessage(ws,object){
+    async function manageDestroyMessage(ws,object){
         if(ws.role === 'teacher'){
             console.log("Received destroy message")
-            var room = currentExams.getExam(object.course).room
-            currentExams.removeExam(object.course)
-            janusAdminAPI.destroyRoom(room)
+            let exam = currentExams.getExam(object.course)
+            if(exam){
+                let room = exam.room
+                currentExams.removeExam(object.course)
+                await janusAdminAPI.destroyRoom(room)
+            }
+            let body = {
+                "message": "destroyed",
+                "course": object.course
+            }
+            ws.send(JSON.stringify(body))
         }
     }
 
@@ -278,12 +286,6 @@ const janus = async (server) => {
                 ws.subscriberHandles = {}
             }
             ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
-            console.log("Printing ID of this subscriber handle")
-            console.log(subscriberHandle.id)
-            console.log("Priting feed we're trying to attach")
-            console.log(feed)
-            console.log("Printing room")
-            console.log(room)
             let object = await subscriberHandle.join(room, "subscriber", feed);
             let body = {
                 "message": "offer",
@@ -292,14 +294,6 @@ const janus = async (server) => {
             };
             console.log("Sending offer to ",subscriberHandle.id)
             ws.send(JSON.stringify(body));
-
-            console.log("WS ROLE")
-            console.log(ws.role)
-            console.log("ROOM")
-            console.log(room)
-            console.log("FEED")
-            console.log(feed)
-            console.log("*********")
         }
     }
 }

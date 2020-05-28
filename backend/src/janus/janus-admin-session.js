@@ -6,7 +6,7 @@ const destroyRoom = (room) => {
         request: "destroy",
         room: room
     }
-    axios.post(process.env.JANUS_ADMIN_URI,{
+    return axios.post(process.env.JANUS_ADMIN_URI,{
         janus: "message_plugin",
         admin_secret: process.env.JANUS_ADMIN_SECRET,
         plugin: "janus.plugin.videoroom",
@@ -16,6 +16,7 @@ const destroyRoom = (room) => {
     .then(res => {
         console.log("Result from Janus destroy room admin request")
         console.log(res.data)
+        return
     })
     .catch(err => {
         console.log(err)

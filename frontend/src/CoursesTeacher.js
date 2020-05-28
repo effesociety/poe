@@ -3,7 +3,8 @@ import CourseForm from './CourseForm'
 import janus from './Janus'
 import Stream from './Stream'
 import update from 'react-addons-update';
-import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
+import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 
 class CoursesTeacher extends React.Component{
@@ -20,6 +21,8 @@ class CoursesTeacher extends React.Component{
         this.destroyCourse = this.destroyCourse.bind(this);
         this.startExam = this.startExam.bind(this);
         this.destroyExam = this.destroyExam.bind(this);
+        this.closeExam = this.closeExam.bind(this);
+        this.fixOverflow = this.fixOverflow.bind(this);
         this.changeSize = this.changeSize.bind(this);
     }
 
@@ -73,7 +76,6 @@ class CoursesTeacher extends React.Component{
         await janus.init(course)
         await janus.publish()
         if(janus.mystream && !this.state.mystream){
-            console.log("YO")
             let mystream = {
                 "media": janus.mystream,
                 "bigscreen": true
@@ -103,20 +105,27 @@ class CoursesTeacher extends React.Component{
         })    
     }
 
-    async destroyExam(course){
-        await janus.init(course)
-        janus.destroyExam(course);
-        setTimeout(() => {
-            this.props.refresh()
-        }, 2000)
+    closeExam(){
+        this.setState({
+            displayRoom: false,
+            mystream : null,
+            streams: {}
+        })
+        janus.destroy();
     }
 
-    changeSize(streamID){    
-        console.log(this.state.mystream)
-        console.log(this.state.streams)
-        console.log("Got ID:", streamID)
+    async destroyExam(course){
+        await janus.init(course)
+        await janus.destroyExam(course);
+        this.props.refresh()
+    }
 
-        
+    fixOverflow(hidden){
+        let overflow = hidden ? "hidden" : "inherit";
+        document.body.style.overflow = overflow
+    }
+
+    changeSize(streamID){        
         if(streamID === null){
             Object.keys(this.state.streams).forEach((id) => {
                 if(this.state.streams[id].bigscreen){
@@ -248,17 +257,20 @@ class CoursesTeacher extends React.Component{
 
         var streams;
         if(this.state.displayRoom){
+            this.fixOverflow(true);
             streams = (
                 <Box className="streams-box">
+                    <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
+                        <CloseIcon />
+                    </IconButton>
                     {localStream}
                     {remoteStreams}
                 </Box>
             )
         }
-
-
-
-
+        else{
+            this.fixOverflow(false)
+        }
         
         return (
         <Box className="course-box">

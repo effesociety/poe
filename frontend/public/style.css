@@ -94,6 +94,19 @@ html,body{
 	display: block!important;
 	width: auto!important;
 }
+.exam-btn-stop{
+	z-index: 10000;
+	color: #fff!important;
+	position: absolute!important;
+	right: 20px;
+	top: 20px;
+}
+.exam-btn-stop:hover{
+	background: rgba(0,0,0,0.4)!important;
+}
+.exam-btn-stop span svg{
+	font-size: 3rem;
+}
 .plus-fab{
 	margin-top:calc(50% - 28px)!important;
 	background-color: #009688!important;

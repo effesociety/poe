@@ -15,6 +15,8 @@ class Janus {
 
     this.candidates = []; //list of candidates not sent yet
     this.SDP = {}; //boolean var to keep track if the SDP is already been sent
+     //Just to cleanup the setInterval on Heroku
+     this.keepAliveID = undefined;
   }
 
   connect() {
@@ -35,6 +37,10 @@ class Janus {
       this.websocket = await this.connect();
       this.websocket.onmessage = this.receive.bind(this);   
       this.websocket.onclose = this.onCloseHandler.bind(this);
+
+      //Just for Heroku because it closes the websocket after 60 seconds of inactivity
+      const keepaliveMs = 30000;
+      this.sendKeepalive(keepaliveMs);
     }
   }
 
@@ -45,15 +51,60 @@ class Janus {
     return o;
   }
 
+  destroy(){
+    //Closing everything
+    if(this.websocket){
+      this.websocket.close();
+    }
+    if(this.publisherConn){
+      this.mystream.getTracks()[0].stop();
+      this.mystream.getTracks()[1].stop();      
+      this.publisherConn.close();
+    }
+    Object.keys(this.subscriberConn).forEach((subscriberID) => {
+      this.streams[subscriberID].getTracks()[0].stop();
+      this.streams[subscriberID].getTracks()[1].stop();      
+      this.subscriberConn[subscriberID].close();
+    })
+    clearTimeout(this.keepAliveID);
+
+    //Resetting everything to default values without destroying the object itself
+    //This way we can keep using .init() before every action
+    this.websocket = undefined; 
+    this.publisherConn = undefined; 
+    this.subscriberConn = {}; 
+    this.streams = {}; 
+    this.mystream = undefined; 
+    this.course = undefined; 
+    this.messageHandlers = {}; 
+
+    this.candidates = []; 
+    this.SDP = {};
+
+    this.keepAliveID = undefined;
+  }
+
+  //Just for Heroku to send keepalive messages every 30 seconds
+  sendKeepalive(keepaliveMs){
+    let body = {
+      "message": "keepalive"
+    }
+    this.keepAliveID = setInterval(() => {
+      if(this.websocket){
+        this.websocket.send(JSON.stringify(body))
+      }
+    }, keepaliveMs)
+  }
+
   //Close all RTCPeerConnections
   onCloseHandler(){
     console.log("WebSocket closed")
-    /*
-    this.publisherConn.close();
+    if(this.publisherConn){
+      this.publisherConn.close();
+    }
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       this.subscriberConn[subscriberID].close();
     })
-    */
   }
 
   //Define callback for each event
@@ -147,6 +198,23 @@ class Janus {
     this.SDP[object.subscriberID] = true;
   }
 
+  
+  destroyExam(course){
+    console.log("DESTROYING COURSE");
+    let body = {
+      "message": "destroy",
+      "course": course
+    }
+    this.websocket.send(JSON.stringify(body))
+    
+    return new Promise((resolve) => {
+      this.on('destroyed',(object) => {
+        if(object.course === course){
+          resolve()
+        }
+      })
+    })
+  }
 
   publish(){
     this.subscriberSetup();
@@ -193,15 +261,6 @@ class Janus {
           this.publisherConn.addTrack(track, media)
       });
     }
-  }
-
-  destroyExam(course){
-    console.log("DESTROYING COURSE");
-    let body = {
-      "message": "destroy",
-      "course": course
-    }
-    this.websocket.send(JSON.stringify(body))
   }
 
   subscriberSetup(){
