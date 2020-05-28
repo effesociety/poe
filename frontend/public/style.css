@@ -85,6 +85,9 @@ html,body{
 .course-btn-start{
 	background-color:#009688!important;
 }
+.course-btn-stop{
+	background-color: #ed9321 !important;
+}
 .course-btn-create{
 	background-color:#009688!important;
 	margin:20px auto!important;
