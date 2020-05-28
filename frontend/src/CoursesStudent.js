@@ -1,5 +1,5 @@
 import React from 'react'
-import janus from './Janus2'
+import janus from './Janus'
 import Stream from './Stream'
 import {Grid, Container, Box, Card, CardContent, Button, Typography} from '@material-ui/core';
 
@@ -54,12 +54,8 @@ class CoursesStudent extends React.Component{
        
         janus.on('subscribed', (object) => {
             console.log("Subscribed event")
-            janus.onRemoteFeed2(object)
+            janus.onRemoteFeed(object)
             .then((id)=> {
-                console.log("ATTACHED TO TEACHER STREAM")
-                console.log(id)
-                console.log(janus)
-                console.log(janus.streams)
                 this.setState({
                     teacherStream: janus.streams[id]
                 })
@@ -156,9 +152,7 @@ class CoursesStudent extends React.Component{
         var teacherStream;
         if(this.state.teacherStream){
             teacherStream = (
-                <Grid item>
-                    <Stream stream={this.state.teacherStream} />
-                </Grid>
+                <Stream stream={this.state.teacherStream} bigscreen={true} />
             )
         }
 
@@ -166,9 +160,7 @@ class CoursesStudent extends React.Component{
         if(this.state.displayRoom){
             streams = (
                 <Box className="streams-box">
-                    <Grid container className="streams-container">
-                        {teacherStream}
-                    </Grid>
+                    {teacherStream}
                 </Box>
             )
         }

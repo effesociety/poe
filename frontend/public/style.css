@@ -128,5 +128,32 @@ html,body{
 	flex-wrap: wrap;
 }
 .streams-item{
-	
+}
+
+.bigscreen{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+.smallscreen{
+	width: 250px;
+	height: 140px;
+	z-index: 999;
+	overflow: hidden;
+	position: relative;
+	float: left;
+	top: calc(100% - 140px);
+}
+
+.bigscreen video{
+	position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    min-width: 100%
+} 
+.smallscreen video{
+	width: 100%;
 }

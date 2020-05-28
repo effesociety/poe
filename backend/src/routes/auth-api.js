@@ -68,15 +68,31 @@ userRouter.post(
         async (err, token) => {
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
+
+          courses = user.courses.map(course => {
+            if(currentExams.getExam(course) !== null){
+              return {
+                "name": course,
+                "examActive": true
+              }
+            }
+            else{
+              return {
+                "name": course,
+                "examActive": false
+              }             
+            }
+          })
+
           if(helper.isTeacher(user)){
             res.status(200).json({
               email: user.email,
               role: user.role,
-              courses: user.courses
+              courses: courses
             })
           }
           else {
-            let otherCourses = await helper.getAllCourses()
+            let otherCourses = await helper.getOtherCourses(user)
             console.log(otherCourses)
             res.status(200).json({
               email: user.email,

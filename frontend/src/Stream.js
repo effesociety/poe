@@ -1,23 +1,7 @@
 import React from 'react';
+import Box from '@material-ui/core/Grid'
 
 class Stream extends React.Component{
-    /*
-    render(){
-        var stream;
-        console.log("Printing in STREAM 1")
-        console.log(this.props.stream)
-        if(this.props.stream){
-            let srcObject = this.props.stream || null
-            stream = (
-                <video ref={video => { video.srcObject = srcObject }} autoPlay playsInline/>
-            )
-        }
-        return (
-            <div>{stream}</div>
-        )
-    }
-    */
-
     constructor(props) {
         super(props)
         this.videoRef = React.createRef()
@@ -35,8 +19,17 @@ class Stream extends React.Component{
     }
 
     render(){
+        let screenSize = this.props.bigscreen ? "bigscreen" : "smallscreen";
+
         return (
+            <Box className={screenSize} onClick={() => {
+                if(this.props.changeSize) {
+                    this.props.changeSize(this.props.id || null)
+                }
+            }}>
                 <video ref={this.videoRef} autoPlay />
+            </Box>
+                
         )
     }
 }

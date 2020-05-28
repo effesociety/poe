@@ -1,6 +1,6 @@
 import React from 'react'
 import CourseForm from './CourseForm'
-import janus from './Janus2'
+import janus from './Janus'
 import Stream from './Stream'
 import update from 'react-addons-update';
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab} from '@material-ui/core';
@@ -19,6 +19,7 @@ class CoursesTeacher extends React.Component{
         this.openForm = this.openForm.bind(this);
         this.destroyCourse = this.destroyCourse.bind(this);
         this.startExam = this.startExam.bind(this);
+        this.changeSize = this.changeSize.bind(this);
     }
 
     closeForm(refresh){
@@ -71,25 +72,82 @@ class CoursesTeacher extends React.Component{
         await janus.init(course)
         await janus.publish()
         if(janus.mystream && !this.state.mystream){
+            console.log("YO")
+            let mystream = {
+                "media": janus.mystream,
+                "bigscreen": true
+            }
+
             this.setState({
-                "mystream": janus.mystream
+                "mystream": mystream
             })
         }
-    
-        console.log(janus)
 
         janus.on('subscribed', (object) => {
-            janus.onRemoteFeed2(object)
+            janus.onRemoteFeed(object)
             .then((id)=> {
+                let stream = {
+                    "media" : janus.streams[id],
+                    "bigscreen": false
+                }
+
                 this.setState(update(this.state,{
                     streams: {
                         [id]: {
-                            $set: janus.streams[id]
+                            $set: stream
                         }
                     }
                 }))
             })
         })    
+    }
+
+    changeSize(streamID){    
+        console.log(this.state.mystream)
+        console.log(this.state.streams)
+        console.log("Got ID:", streamID)
+
+        
+        if(streamID === null){
+            Object.keys(this.state.streams).forEach((id) => {
+                if(this.state.streams[id].bigscreen){
+                    let stream = {
+                        "media": this.state.streams[id].media,
+                        "bigscreen": false
+                    }
+                    this.setState(update(this.state,{
+                        mystream: {
+                            ["bigscreen"]: {
+                                $set: true
+                            }
+                        },
+                        streams: {
+                            [id]: {
+                                $set: stream
+                            }
+                        }
+                    }))
+                }
+            })
+        }
+        else{
+            let stream = {
+                "media": this.state.streams[streamID].media,
+                "bigscreen": true
+            }
+            this.setState(update(this.state,{
+                mystream: {
+                    ["bigscreen"]: {
+                        $set: false
+                    }
+                },
+                streams: {
+                    [streamID]: {
+                        $set: stream
+                    }
+                }
+            }))
+        }
     }
 
     render(){
@@ -151,33 +209,29 @@ class CoursesTeacher extends React.Component{
         }
 
 
+        
         var localStream;
         if(this.state.mystream){
             localStream = (
-                <Grid item>
-                    <Stream stream={this.state.mystream} />
-                </Grid>
+                <Stream stream={this.state.mystream.media} bigscreen={this.state.mystream.bigscreen} changeSize={this.changeSize}/>
             )
         }
 
         var remoteStreams;
         if(Object.keys(this.state.streams) !== 0){
-            remoteStreams = Object.values(this.state.streams).map((stream,i) => {
+            remoteStreams = Object.keys(this.state.streams).map((stream,i) => {
                     return (
-                        <Grid item>
-                            <Stream stream={stream} key={i} />
-                        </Grid>
+                        <Stream id={stream} stream={this.state.streams[stream].media} bigscreen={this.state.streams[stream].bigscreen} key={i} changeSize={this.changeSize}/>
                     )
             })
-        }
+        }      
+
         var streams;
         if(this.state.displayRoom){
             streams = (
                 <Box className="streams-box">
-                    <Grid container className="streams-container">
-                        {localStream}
-                        {remoteStreams}
-                    </Grid>
+                    {localStream}
+                    {remoteStreams}
                 </Box>
             )
         }
