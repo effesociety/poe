@@ -48,10 +48,12 @@ class Janus {
   //Close all RTCPeerConnections
   onCloseHandler(){
     console.log("WebSocket closed")
+    /*
     this.publisherConn.close();
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       this.subscriberConn[subscriberID].close();
     })
+    */
   }
 
   //Define callback for each event
