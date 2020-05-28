@@ -103,7 +103,7 @@ class CoursesTeacher extends React.Component{
         })    
     }
 
-    destroyExam(course){
+    async destroyExam(course){
         await janus.init(course)
         janus.destroyExam(course);
         setTimeout(() => {
