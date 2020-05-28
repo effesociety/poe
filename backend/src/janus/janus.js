@@ -52,7 +52,7 @@ const janus = async (server) => {
             if(object.course && !ws.course){
                 ws.course = object.course
             }
-            else{
+            else if(!object.course || (object.course && ws.course && ws.course !== object.course)){
                 console.log("Missing mandatory element: course")
                 ws.close()
                 return
