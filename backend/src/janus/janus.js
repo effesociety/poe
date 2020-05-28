@@ -80,7 +80,7 @@ const janus = async (server) => {
                     break
 
                 case 'destroy':
-                    manageDestroyMessage(ws)
+                    manageDestroyMessage(ws, object)
                     break   
                     
                 default:
@@ -124,10 +124,12 @@ const janus = async (server) => {
         .then(participants => {
             console.log("Printing participants")
             console.log(participants)
-            if(participants.length === 0){
+            if(participants.length === 0){/*
                 janusAdminAPI.destroyRoom(data.room)
                 var course = currentExams.getCourse(data.room)
                 currentExams.removeExam(course)
+                */
+               console.log("@TO-DO: FIX REMOVE EXAM FUNCTION")
             }
         })  
         .catch(err => {
@@ -258,10 +260,10 @@ const janus = async (server) => {
         ws.send(JSON.stringify(body))
     }
     
-    function manageDestroyMessage(ws){
+    function manageDestroyMessage(ws,object){
         if(ws.role === 'teacher'){
             console.log("Received destroy message")
-            var room = currentExams.getExam(ws.course).room
+            var room = currentExams.getExam(object.course).room
             ws.videoroomHandle.destroyRoom(room)
         }
     }
