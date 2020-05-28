@@ -49,7 +49,7 @@ const janus = async (server) => {
                 console.log("What happened?")
             }
 
-            if(object.course){
+            if(object.course && !ws.course){
                 ws.course = object.course
             }
             else{

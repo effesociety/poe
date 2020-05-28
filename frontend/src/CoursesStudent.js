@@ -1,7 +1,8 @@
 import React from 'react'
 import janus from './Janus'
 import Stream from './Stream'
-import {Grid, Container, Box, Card, CardContent, Button, Typography} from '@material-ui/core';
+import {Grid, Container, Box, Card, CardContent, Button, Typography, IconButton} from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 
 class CoursesStudent extends React.Component{
     constructor(props){

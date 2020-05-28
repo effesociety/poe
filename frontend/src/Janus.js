@@ -39,7 +39,7 @@ class Janus {
       this.websocket.onclose = this.onCloseHandler.bind(this);
 
       //Just for Heroku because it closes the websocket for inactivity
-      const keepaliveMs = 15000;
+      const keepaliveMs = 30000;
       this.sendKeepalive(keepaliveMs);
     }
   }
@@ -87,7 +87,8 @@ class Janus {
   //Just for Heroku to send keepalive messages every 30 seconds
   sendKeepalive(keepaliveMs){
     let body = {
-      "message": "keepalive"
+      "message": "keepalive",
+      "course": this.course
     }
     this.keepAliveID = setInterval(() => {
       if(this.websocket){
