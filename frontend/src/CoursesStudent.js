@@ -12,6 +12,8 @@ class CoursesStudent extends React.Component{
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
+        this.closeExam = this.closeExam.bind(this);
+        this.fixOverflow = this.fixOverflow.bind(this);
     }
 
     async enroll(course){
@@ -61,6 +63,20 @@ class CoursesStudent extends React.Component{
                 })
             }) 
         })
+    }
+
+    closeExam(){
+        this.setState({
+            displayRoom: false,
+            mystream : null,
+            streams: {}
+        })
+        janus.destroy();
+    }
+
+    fixOverflow(hidden){
+        let overflow = hidden ? "hidden" : "inherit";
+        document.body.style.overflow = overflow
     }
 
     render(){
@@ -158,11 +174,18 @@ class CoursesStudent extends React.Component{
 
         var streams;
         if(this.state.displayRoom){
+            this.fixOverflow(true)
             streams = (
                 <Box className="streams-box">
+                    <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
+                        <CloseIcon />
+                    </IconButton>
                     {teacherStream}
                 </Box>
             )
+        }
+        else{
+            this.fixOverflow(false)
         }
                
         return (

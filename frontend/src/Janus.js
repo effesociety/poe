@@ -38,8 +38,8 @@ class Janus {
       this.websocket.onmessage = this.receive.bind(this);   
       this.websocket.onclose = this.onCloseHandler.bind(this);
 
-      //Just for Heroku because it closes the websocket after 60 seconds of inactivity
-      const keepaliveMs = 30000;
+      //Just for Heroku because it closes the websocket for inactivity
+      const keepaliveMs = 15000;
       this.sendKeepalive(keepaliveMs);
     }
   }
