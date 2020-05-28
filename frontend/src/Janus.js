@@ -119,9 +119,6 @@ class Janus {
 
   receive(ev){
     let object = JSON.parse(ev.data);
-    
-    console.log("Printing the impossible")
-    console.log(object)
 
     let responseType = object.message;
     let handlers = this.messageHandlers[responseType];
@@ -143,12 +140,6 @@ class Janus {
     //object.message is equal to "offer"
     //This means that the user is a teacher who needs to get all audio/video streams
     console.log("Got message type OFFER. Creating new RTCPeerConnection")
-
-
-    console.log("Printing this")
-    console.log(this)
-    console.log("Printing object")
-    console.log(object)
 
     this.subscriberConn[object.subscriberID] = new RTCPeerConnection(config, pc_constraints)
 
@@ -199,9 +190,21 @@ class Janus {
     this.SDP[object.subscriberID] = true;
   }
 
+  onLeavingHandler(object){
+    console.log("Leaving msg received");
+    if(this.subscriberConn[object.subscriberID]){
+      this.subscriberConn[object.subscriberID].close();
+      delete this.subscriberConn[object.subscriberID];
+    }
+    if(this.streams[object.subscriberID]){
+      this.streams[object.subscriberID].getTracks()[0].stop();
+      this.streams[object.subscriberID].getTracks()[1].stop();      
+      delete this.streams[object.subscriberID]
+    }
+  }
+
   
   destroyExam(course){
-    console.log("DESTROYING COURSE");
     let body = {
       "message": "destroy",
       "course": course
@@ -240,6 +243,7 @@ class Janus {
     })
   }
 
+  //NOT USED FOR NOW
   subscribe(){
     let body = {
       "message": "getFeeds",
@@ -249,6 +253,7 @@ class Janus {
 
     this.on('started', this.onStartedHandler.bind(this))
     this.on('offer',this.onOfferHandler.bind(this))
+    this.on('leaving', this.onLeavingHandler.bind(this))
   }
 
   async userMediaSetup() {
@@ -265,7 +270,6 @@ class Janus {
   }
 
   subscriberSetup(){
-    console.log("SUBSCRIBER SETUP")
     this.on('started',this.onStartedHandler.bind(this));
     this.on('offer', this.onOfferHandler.bind(this));
   }
@@ -274,7 +278,16 @@ class Janus {
     return new Promise((resolve) => {
       const subscriberID = object.subscriberID;
       if(object.subscriberID == subscriberID){
-        console.log("And it was the right one!")
+        resolve(subscriberID)
+      }
+    })
+  }
+
+  onLeavingFeed(object){
+    return new Promise((resolve) => {
+      const subscriberID = object.subscriberID;
+      if(object.subscriberID == subscriberID){
+        this.onLeavingHandler(object)
         resolve(subscriberID)
       }
     })
@@ -312,7 +325,7 @@ class Janus {
 	  
     console.log("onIceCandidateHandler");
     console.log("Printing candidate....")
-    console.log(ev.candidate)
+    console.log(ev.candidate) 
     if(this.SDP[subscriberID]){
       if(ev.candidate && ev.candidate.candidate.length > 0){
 

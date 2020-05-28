@@ -117,8 +117,19 @@ const janus = async (server) => {
     })
 
     janusEventHandler.on('leaving', (data) => {
-        console.log("Leaving event")
-        console.log(data)
+        wss.clients.forEach(ws => {
+            if(ws.subscriberHandles){
+                Object.keys(ws.subscriberHandles).forEach(subscriberHandle => {
+                    if(ws.subscriberHandles[subscriberHandle].feedID === data.id){
+                        let body = {
+                            message : "leaving",
+                            subscriberID : subscriberHandle
+                        }
+                        ws.send(JSON.stringify(body))
+                    }
+                })
+            }        
+        })
         
         janusAdminAPI.listParticipants(data.room)
         .then(participants => {
@@ -141,7 +152,7 @@ const janus = async (server) => {
         wss.clients.forEach(ws => {
             if(ws.subscriberHandles){
                 Object.keys(ws.subscriberHandles).forEach(subscriberHandle => {
-                    if(subscriberHandle.feed_id === data.id){
+                    if(ws.subscriberHandles[subscriberHandle].feedID === data.feed){
                         let body = {
                             message : "subscribed",
                             subscriberID : subscriberHandle

@@ -1,6 +1,7 @@
 import React from 'react'
 import janus from './Janus'
 import Stream from './Stream'
+import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -15,6 +16,7 @@ class CoursesStudent extends React.Component{
         this.startExam = this.startExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
+        this.goFull = this.goFull.bind(this);
     }
 
     async enroll(course){
@@ -55,15 +57,26 @@ class CoursesStudent extends React.Component{
         await janus.init(course)
         await janus.publish()
        
-        janus.on('subscribed', (object) => {
+        janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
-            janus.onRemoteFeed(object)
-            .then((id)=> {
-                this.setState({
-                    teacherStream: janus.streams[id]
-                })
-            }) 
+            var id = await janus.onRemoteFeed(object)
+            this.setState({
+                teacherStream: janus.streams[id]
+            })
         })
+
+        janus.on('leaving', async (object) => {
+            await janus.onLeavingFeed(object)
+            this.setState({
+                teacherStream: null
+            })
+        })
+    }
+
+    goFull() {
+        this.setState({ 
+            isFull: true 
+        });
     }
 
     closeExam(){
@@ -177,12 +190,14 @@ class CoursesStudent extends React.Component{
         if(this.state.displayRoom){
             this.fixOverflow(true)
             streams = (
-                <Box className="streams-box">
-                    <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
-                        <CloseIcon />
-                    </IconButton>
-                    {teacherStream}
-                </Box>
+                <Fullscreen enabled={this.state.isFull} onChange={isFull => this.setState({isFull})}>
+                    <Box className="streams-box">
+                        <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
+                            <CloseIcon />
+                        </IconButton>
+                        {teacherStream}
+                    </Box>
+                </Fullscreen>
             )
         }
         else{

@@ -99,7 +99,7 @@ module.exports = class JanusVideoroomHandle{
             "room": room,
             "max_publishers": 150,
             "permanent": false,
-            "bitrate": 128000,
+            "bitrate": 64000,
             "fir_freq": 10
         };
         return this.sendMessage(body);

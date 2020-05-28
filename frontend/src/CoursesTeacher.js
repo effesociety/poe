@@ -3,9 +3,11 @@ import CourseForm from './CourseForm'
 import janus from './Janus'
 import Stream from './Stream'
 import update from 'react-addons-update';
+import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
+
 
 class CoursesTeacher extends React.Component{
     constructor(){
@@ -14,7 +16,8 @@ class CoursesTeacher extends React.Component{
             displayRoom: false,
             openForm : false,
             mystream : null,
-            streams: {}
+            streams: {},
+            isFull: false
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -24,6 +27,7 @@ class CoursesTeacher extends React.Component{
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
         this.changeSize = this.changeSize.bind(this);
+        this.goFull = this.goFull.bind(this);
     }
 
     closeForm(refresh){
@@ -39,6 +43,12 @@ class CoursesTeacher extends React.Component{
         this.setState({
             openForm: true
         })
+    }
+
+    goFull() {
+        this.setState({ 
+            isFull: true 
+        });
     }
 
     async destroyCourse(course){
@@ -75,6 +85,8 @@ class CoursesTeacher extends React.Component{
 
         await janus.init(course)
         await janus.publish()
+        this.props.refresh(); //To make appear the "Stop exam" btn
+        this.goFull();
         if(janus.mystream && !this.state.mystream){
             let mystream = {
                 "media": janus.mystream,
@@ -86,23 +98,31 @@ class CoursesTeacher extends React.Component{
             })
         }
 
-        janus.on('subscribed', (object) => {
-            janus.onRemoteFeed(object)
-            .then((id)=> {
-                let stream = {
-                    "media" : janus.streams[id],
-                    "bigscreen": false
-                }
+        janus.on('subscribed', async (object) => {
+            var id = await janus.onRemoteFeed(object)
+            let stream = {
+                "media" : janus.streams[id],
+                "bigscreen": false
+            }
 
-                this.setState(update(this.state,{
-                    streams: {
-                        [id]: {
-                            $set: stream
-                        }
+            this.setState(update(this.state,{
+                streams: {
+                    [id]: {
+                        $set: stream
                     }
-                }))
+                }
+            }))
+        })
+        
+        janus.on('leaving', async (object) => {
+            var id = await janus.onLeavingFeed(object)
+            let streams = this.state.streams;
+            delete streams[id];
+            this.setState({
+                streams: streams
             })
-        })    
+        
+        })
     }
 
     closeExam(){
@@ -259,13 +279,15 @@ class CoursesTeacher extends React.Component{
         if(this.state.displayRoom){
             this.fixOverflow(true);
             streams = (
-                <Box className="streams-box">
-                    <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
-                        <CloseIcon />
-                    </IconButton>
-                    {localStream}
-                    {remoteStreams}
-                </Box>
+                <Fullscreen enabled={this.state.isFull} onChange={isFull => this.setState({isFull})}>
+                    <Box className="streams-box">
+                        <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
+                            <CloseIcon />
+                        </IconButton>
+                        {localStream}
+                        {remoteStreams}
+                    </Box>
+                </Fullscreen>
             )
         }
         else{
