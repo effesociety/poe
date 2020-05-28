@@ -122,6 +122,7 @@ const janus = async (server) => {
         
         janusAdminAPI.listParticipants(data.room)
         .then(participants => {
+            console.log("Printing participants")
             console.log(participants)
             if(participants.length === 0){
                 janusAdminAPI.destroyRoom(data.room)

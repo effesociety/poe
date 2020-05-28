@@ -36,6 +36,12 @@ const listParticipants = (room) => {
     })
     .then(res => {
         console.log("Result from Janus list participants on room", room)
+        console.log("TESTTESTTEST")
+        console.log(res)
+        console.log(res.data)
+        console.log(res.data.response)
+        console.log(res.data.response.participants)
+        console.log("TESTTESTTEST")
         return res.data.response.participants
     })
     .catch(err => {
