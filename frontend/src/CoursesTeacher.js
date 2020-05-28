@@ -19,6 +19,7 @@ class CoursesTeacher extends React.Component{
         this.openForm = this.openForm.bind(this);
         this.destroyCourse = this.destroyCourse.bind(this);
         this.startExam = this.startExam.bind(this);
+        this.destroyExam = this.destroyExam.bind(this);
         this.changeSize = this.changeSize.bind(this);
     }
 
@@ -102,6 +103,13 @@ class CoursesTeacher extends React.Component{
         })    
     }
 
+    destroyExam(course){
+        janus.destroyExam(course);
+        setTimeout(() => {
+            this.props.refresh()
+        }, 2000)
+    }
+
     changeSize(streamID){    
         console.log(this.state.mystream)
         console.log(this.state.streams)
@@ -156,6 +164,16 @@ class CoursesTeacher extends React.Component{
             courses = this.props.courses.map((course,i) => {
                 let matches = course.name.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
+
+                let stopExam;
+                if(course.examActive){
+                    stopExam = (
+                        <Button className="course-btn course-btn-stop" onClick={() => this.destroyExam(course.name)}>
+                            Stop exam
+                        </Button>
+                    )
+                }
+
                 return (
                     <Grid item sm={12} md={3} key={i}>
                         <Card className="course-card">
@@ -172,6 +190,7 @@ class CoursesTeacher extends React.Component{
                                 <Button className="course-btn course-btn-start" onClick={() => this.startExam(course.name)}>
                                     Start exam
                                 </Button>
+                                {stopExam}
                             </CardContent>
                         </Card>
                     </Grid>

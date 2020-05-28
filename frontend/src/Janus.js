@@ -195,7 +195,14 @@ class Janus {
     }
   }
 
-
+  destroyExam(course){
+    console.log("DESTROYING COURSE");
+    let body = {
+      "message": "destroy",
+      "course": course
+    }
+    this.websocket.send(JSON.stringify(body))
+  }
 
   subscriberSetup(){
     console.log("SUBSCRIBER SETUP")
