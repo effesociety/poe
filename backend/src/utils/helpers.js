@@ -33,17 +33,32 @@ async function checkCourse(name){
   }
 }
 
-async function checkTest(name){
+async function checkTests(courses){
   try{
-    let course = await coursesSchema.findOne({name})
-    if(course.test){
-      return true
+    var teacherCourses = []
+    for await(course of courses){
+      let name = course.name
+      let c = await coursesSchema.findOne({name})
+      if(c.test){
+        teacherCourses.push(Object.assign({"test": c.test}, course))
+      }
+      else{
+        teacherCourses.push(course)
+      }
     }
-    else{
-      return false
-    }
+    return teacherCourses
   }
   catch (e){
+    console.log(e)
+    return null
+  }
+}
+
+async function getTest(name){
+  try{
+    return await coursesSchema.findOne({name}).questions
+  }
+  catch(e){
     console.log(e)
     return null
   }
@@ -115,7 +130,7 @@ const commonEmitter = new EventEmitter()
 
 exports.checkUser = checkUser
 exports.checkCourse = checkCourse
-exports.checkTest = checkTest
+exports.checkTests = checkTests
 exports.isTeacher = isTeacher
 exports.isEnrolled = isEnrolled
 exports.removeDeletedCourse = removeDeletedCourse

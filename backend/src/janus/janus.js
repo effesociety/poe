@@ -206,11 +206,6 @@ const janus = async (server) => {
                             sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
                         }
                     })
-                    let body = {
-                        "message": "startExam",
-                        "test": ws.course.test.questions
-                    }
-                    ws.send(JSON.stringify(body))
                 }
                 //@TO-DO: Send some info msg to the client                     
             } 
@@ -237,7 +232,19 @@ const janus = async (server) => {
                 "jsep": remote.jsep,
                 "publisherID": ws.videoroomHandle.id
             }
-            ws.send(JSON.stringify(body));
+            if(ws.role === 'teacher'){
+                ws.send(JSON.stringify(body))
+            }
+            else if(ws.role === 'student'){
+                let test = await getTest(ws.course)
+                if(test){
+                    body["test"] = test
+                    ws.send(JSON.stringify(body))
+                }
+                else{
+                    console.log("Test not found")
+                }                
+            }
         }  
     }
     

@@ -175,10 +175,11 @@ userRouter.post(
           })
 
           if(helper.isTeacher(user)){
+            const teacherCourses = await helper.checkTests(courses)
             res.status(200).json({
               email: user.email,
               role: user.role,
-              courses: courses
+              courses: teacherCourses
             })
           }
           else {
@@ -215,7 +216,7 @@ userRouter.delete(
 
 userRouter.get(
   "/auth",
-    (req,res) => {
+    async (req,res) => {
     var cookies = cookie.parse(req.headers.cookie || '')
     helper.checkUser(cookies).then(async user => {
       if(user){
@@ -237,23 +238,13 @@ userRouter.get(
         })
 
         if(helper.isTeacher(user)){
-          courses.forEach(course =>{
-            helper.checkTest(course.name).then(test => {
-              if(test){
-                course["testCreated"] = true
-              }
-              else{
-                course["testCreated"] = false
-              }
-            })
-          })
-          console.log("sonoqui",courses)
+          const teacherCourses = await helper.checkTests(courses)
           res.status(200).json({
             email: user.email,
             role: user.role,
-            courses: courses
+            courses: teacherCourses
           })        
-        }
+        }        
         else {
           let otherCourses = await helper.getOtherCourses(user)
           console.log(otherCourses)
