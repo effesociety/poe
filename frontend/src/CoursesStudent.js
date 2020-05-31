@@ -2,7 +2,7 @@ import React from 'react'
 import janus from './Janus'
 import Stream from './Stream'
 import Fullscreen from "react-full-screen";
-import {Grid, Container, Box, Card, CardContent, Button, Typography, IconButton} from '@material-ui/core';
+import {Grid, Container, Box, Card, CardContent, Button, Typography, Dialog, IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
 class CoursesStudent extends React.Component{
@@ -11,13 +11,16 @@ class CoursesStudent extends React.Component{
         this.state = {
             displayRoom: false,
             teacherStream: null,
-            isFull: false
+            isFull: false,
+            openExamDialog: false,
+            overflow: "inherit"
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
         this.goFull = this.goFull.bind(this);
+        this.changeFullScreen = this.changeFullScreen.bind(this);
     }
 
     async enroll(course){
@@ -57,7 +60,7 @@ class CoursesStudent extends React.Component{
 
         await janus.init(course)
         await janus.publish()
-       
+        this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
             var id = await janus.onRemoteFeed(object)
@@ -76,22 +79,59 @@ class CoursesStudent extends React.Component{
 
     goFull() {
         this.setState({ 
-            isFull: true 
+            isFull: true,
+            openExamDialog: false 
         });
+    }
+
+    changeFullScreen(isFull){
+        this.setState({
+            isFull: isFull
+        })
+        if(!isFull){
+            this.setState({
+                openExamDialog: true
+            })
+            this.startCountdown();
+        }
+    }
+
+    startCountdown(){
+        this.setState({
+            timeLeft: 10
+        })
+        const countdownID = setInterval(() => {
+            if(this.state.timeLeft <= 0){
+                this.closeExam();
+                clearInterval(countdownID)
+            }
+            this.setState({
+                timeLeft: this.state.timeLeft-1
+            })
+        },1000)
+        this.setState({
+            countdownID: countdownID
+        })
     }
 
     closeExam(){
         this.setState({
             displayRoom: false,
             mystream : null,
-            streams: {}
+            streams: {},
+            openExamDialog: false
         })
         janus.destroy();
     }
 
     fixOverflow(hidden){
         let overflow = hidden ? "hidden" : "inherit";
-        document.body.style.overflow = overflow
+        if(overflow !== this.state.overflow){
+            this.setState({
+                overflow: overflow
+            })
+            document.body.style.overflow = this.state.overflow
+        }
     }
 
     render(){
@@ -111,7 +151,7 @@ class CoursesStudent extends React.Component{
                 }
                 else{
                     startExam = (
-                        <Typography variant="paragraph">
+                        <Typography variant="subtitle1">
                             There are no active exams for this course at this time
                         </Typography>
                     )
@@ -191,7 +231,7 @@ class CoursesStudent extends React.Component{
         if(this.state.displayRoom){
             this.fixOverflow(true)
             streams = (
-                <Fullscreen enabled={this.state.isFull} onChange={isFull => this.setState({isFull})}>
+                <Fullscreen enabled={this.state.isFull} onChange={this.changeFullScreen}>
                     <Box className="streams-box">
                         <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
                             <CloseIcon />
@@ -207,6 +247,26 @@ class CoursesStudent extends React.Component{
                
         return (
         <Box className="course-box">
+            <Dialog open={this.state.openExamDialog} fullWidth={true} maxWidth="sm">
+                <Container>
+                    <Typography variant="h4" align="center" className="fullscreen-dialog-h4">
+                        You cannot disable fullscreen mode!
+                    </Typography>
+                    <Typography variant="h5" align="center">
+                        If you decide to disable it the exam will be canceled, you have {this.state.timeLeft} seconds left.
+                    </Typography>
+                    <Button onClick={() => {
+                        clearInterval(this.state.countdownID); 
+                        this.goFull()
+                    }} className="fullscreen-dialog-btn fullscreen-dialog-btn-left">
+                        Go back to fullScreen
+                    </Button>
+                    <Button onClick={this.closeExam} className="fullscreen-dialog-btn fullscreen-dialog-btn-right">
+                        I know what I'm doing
+                    </Button>
+                </Container>
+            </Dialog>
+            
             {streams}
 
             <Container>

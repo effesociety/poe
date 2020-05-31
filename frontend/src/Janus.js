@@ -57,13 +57,17 @@ class Janus {
       this.websocket.close();
     }
     if(this.publisherConn){
-      this.mystream.getTracks()[0].stop();
-      this.mystream.getTracks()[1].stop();      
+      if(this.mystream){
+        this.mystream.getTracks()[0].stop();
+        this.mystream.getTracks()[1].stop(); 
+      }     
       this.publisherConn.close();
     }
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
-      this.streams[subscriberID].getTracks()[0].stop();
-      this.streams[subscriberID].getTracks()[1].stop();      
+      if(this.streams[subscriberID]){
+        this.streams[subscriberID].getTracks()[0].stop();
+        this.streams[subscriberID].getTracks()[1].stop();      
+      }
       this.subscriberConn[subscriberID].close();
     })
     clearTimeout(this.keepAliveID);
