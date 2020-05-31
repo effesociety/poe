@@ -237,11 +237,22 @@ userRouter.get(
         })
 
         if(helper.isTeacher(user)){
+          courses.forEach(course =>{
+            helper.checkTest(course.name).then(test => {
+              if(test){
+                course["testCreated"] = true
+              }
+              else{
+                course["testCreated"] = false
+              }
+            })
+          })
+          console.log("sonoqui",courses)
           res.status(200).json({
             email: user.email,
             role: user.role,
             courses: courses
-          })
+          })        
         }
         else {
           let otherCourses = await helper.getOtherCourses(user)

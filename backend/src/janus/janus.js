@@ -1,7 +1,6 @@
 const JanusWrapper = require('./janus-wrapper')
 const janusAdminAPI = require('./janus-admin-session')
 const WebSocket = require('ws')
-const helper = require('../utils/helpers')
 const cookie = require('cookie')
 const Helpers = require('../utils/helpers')
 const currentExams = require('../utils/current-exams')
@@ -12,7 +11,7 @@ const janus = async (server) => {
     //Authentication and Authorization  
     server.on('upgrade', async (req, ws, head) => {
         const cookies = cookie.parse(req.headers.cookie || '')
-        user = await helper.checkUser(cookies)
+        user = await Helpers.checkUser(cookies)
         if(user){
             console.log("Set WebSocket",user.email, "role [",user.role,"]")
             ws.role = user.role
@@ -82,6 +81,10 @@ const janus = async (server) => {
                 case 'destroy':
                     manageDestroyMessage(ws, object)
                     break   
+                
+                case 'complete':
+                    manageCompleteMessage(ws,object)
+                    break
                     
                 default:
                     console.log("[",object.message,"] not handled...")
@@ -110,7 +113,7 @@ const janus = async (server) => {
             if(ws.role === 'teacher'){
                 let exam = currentExams.getExam(ws.course)
                 if(exam && exam.room === data.room){
-                    manageSubscribeHandle(ws,data.room,data.id)
+                    sendOffer(ws,data.room,data.id)
                 }
             }
         })
@@ -199,13 +202,15 @@ const janus = async (server) => {
                     await ws.videoroomHandle.join(exam.room, "publisher"); 
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "teacher" && websocket.course === ws.course){
-                            console.log("ATTACHING TO TEACHER FEED")
-                            console.log(ws.role)
-                            console.log(websocket.role)
-                            console.log(websocket.videoroomHandle.feedID)
-                            manageSubscribeHandle(ws, exam.room, websocket.videoroomHandle.feedID)
+                            console.log("Attacching to teacher feed")
+                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
                         }
                     })
+                    let body = {
+                        "message": "startExam",
+                        "test": ws.course.test.questions
+                    }
+                    ws.send(JSON.stringify(body))
                 }
                 //@TO-DO: Send some info msg to the client                     
             } 
@@ -249,7 +254,7 @@ const janus = async (server) => {
                             ws.subscriberHandles = {}
                             participants.forEach(async (participant) => {
                                 let feed = participant.id;
-                                manageSubscribeHandle(ws, room, feed)
+                                sendOffer(ws, room, feed)
                             })
                         }
                     }
@@ -272,8 +277,8 @@ const janus = async (server) => {
     }
     
     async function manageDestroyMessage(ws,object){
+        console.log("Received destroy message")
         if(ws.role === 'teacher'){
-            console.log("Received destroy message")
             let exam = currentExams.getExam(object.course)
             if(exam){
                 let room = exam.room
@@ -288,7 +293,14 @@ const janus = async (server) => {
         }
     }
 
-    async function manageSubscribeHandle(ws, room, feed){
+    function manageCompleteMessage(ws,object){
+        console.log("Received complete message")
+        if(ws.role === 'student'){
+            // @TO-DO: implementation
+        }
+    }
+
+    async function sendOffer(ws, room, feed){
         if(feed !== ws.videoroomHandle.feedID){
             console.log("Printing participant id: ", feed);
             let subscriberHandle = janusWrapper.addHandle();

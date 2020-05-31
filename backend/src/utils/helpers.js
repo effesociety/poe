@@ -33,11 +33,29 @@ async function checkCourse(name){
   }
 }
 
+async function checkTest(name){
+  try{
+    let course = await coursesSchema.findOne({name})
+    if(course.test){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+  catch (e){
+    console.log(e)
+    return null
+  }
+}
+
 function isTeacher(user){
-  if(user.role === 'teacher')
+  if(user.role === 'teacher'){
     return true
-  else
+  }
+  else{
     return false
+  }
 }
 
 function isEnrolled(student,course){
@@ -97,6 +115,7 @@ const commonEmitter = new EventEmitter()
 
 exports.checkUser = checkUser
 exports.checkCourse = checkCourse
+exports.checkTest = checkTest
 exports.isTeacher = isTeacher
 exports.isEnrolled = isEnrolled
 exports.removeDeletedCourse = removeDeletedCourse

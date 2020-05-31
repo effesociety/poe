@@ -1,10 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cookie = require('cookie')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 const coursesSchema = require('../schemas/courses-schema')
-const usersSchema = require('../schemas/users-schema')
 const helper = require('../utils/helpers')
 const coursesRouter = express.Router()
 
@@ -129,6 +126,45 @@ coursesRouter.post(
         res.status(400).json({
           message: "This course not exists"
         })
+    })
+  }
+)
+
+coursesRouter.post(
+  "/upload",
+  (req,res) => {
+    var cookies = cookie.parse(req.headers.cookie || '')
+    var { questions,answers,name } = req.body
+    helper.checkCourse(name).then(course => {
+      if(course){
+        helper.checkUser(cookies,res).then(async (user) => {
+          if(user){
+            if (helper.isTeacher(user)) {
+              course.test = {questions,answers}
+              await course.save()      
+              console.log("[",course.name,"] Test correctly loaded")
+              res.status(200).json({
+                message: "Success"
+              })
+            }
+            else{
+              res.status(400).json({
+                message: "This user cannot upload an exam"
+              })
+            }
+          }
+          else{
+            res.status(400).json({
+              message: "User not exists"
+            })
+          }
+        })
+      }
+      else{
+        res.status(400).json({
+          message: "This course not exists"
+        })
+      }
     })
   }
 )

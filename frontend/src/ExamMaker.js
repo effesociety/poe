@@ -104,7 +104,7 @@ class ExamMaker extends React.Component {
     let body = {
       questions: this.state.questions, //The questions with ALL the answers
       answers: this.state.answers, //The correct answers
-      course: this.props.course //This is the course
+      name: this.props.course //This is the course
     }
     const requestOptions = {
       method: "POST",
