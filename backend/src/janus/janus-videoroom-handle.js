@@ -6,7 +6,6 @@ module.exports = class JanusVideoroomHandle{
     }
 
     attach(plugin){            
-        let transaction = Math.random().toString(36).slice(2);
         let payload = {plugin: plugin};
         return this.session.send("attach",payload).then(res =>{
             this.id = res.data.id;

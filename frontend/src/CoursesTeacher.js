@@ -1,5 +1,6 @@
 import React from 'react'
 import CourseForm from './CourseForm'
+import ExamMaker from './ExamMaker'
 import janus from './Janus'
 import Stream from './Stream'
 import update from 'react-addons-update';
@@ -7,7 +8,6 @@ import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
-
 
 class CoursesTeacher extends React.Component{
     constructor(){
@@ -17,12 +17,16 @@ class CoursesTeacher extends React.Component{
             openForm : false,
             mystream : null,
             streams: {},
-            isFull: false
+            isFull: false,
+            isCreating: false,
+            examCreation: null
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
         this.destroyCourse = this.destroyCourse.bind(this);
         this.startExam = this.startExam.bind(this);
+        this.createExam = this.createExam.bind(this);
+        this.closeCreateExam = this.closeCreateExam.bind(this);
         this.destroyExam = this.destroyExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
@@ -140,6 +144,20 @@ class CoursesTeacher extends React.Component{
         this.props.refresh()
     }
 
+    createExam(course){
+        this.setState({
+            isCreating: true,
+            examCreation: course
+        })
+    }
+
+    closeCreateExam(){
+        this.setState({
+            isCreating: false,
+            examCreation: null
+        })
+    }
+
     fixOverflow(hidden){
         let overflow = hidden ? "hidden" : "inherit";
         document.body.style.overflow = overflow
@@ -216,6 +234,9 @@ class CoursesTeacher extends React.Component{
                                 </Box>
                                 <Button className="course-btn course-btn-cancel" onClick={() => this.destroyCourse(course.name)}>
                                     Delete course
+                                </Button>
+                                <Button className="course-btn course-btn-make" onClick={() => this.createExam(course.name)}>
+                                    Create exam
                                 </Button>
                                 <Button className="course-btn course-btn-start" onClick={() => this.startExam(course.name)}>
                                     Start exam
@@ -300,6 +321,8 @@ class CoursesTeacher extends React.Component{
             {streams}
 
             <CourseForm open={this.state.openForm} closeForm={this.closeForm} />
+
+            <ExamMaker open={this.state.isCreating} close={this.closeCreateExam} course={this.state.examCreation} />
 
             <Container>
                 {courses}

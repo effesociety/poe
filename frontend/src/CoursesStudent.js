@@ -10,7 +10,8 @@ class CoursesStudent extends React.Component{
         super(props);
         this.state = {
             displayRoom: false,
-            teacherStream: null
+            teacherStream: null,
+            isFull: false
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
