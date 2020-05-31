@@ -25,12 +25,12 @@ class ExamQuestion extends React.Component{
           <Fab size="small" color="primary" aria-label="add" className="make-exam-remove-question" onClick={() => this.props.removeQuestion(this.props.id)}>
                 <RemoveIcon />
             </Fab>
-          <TextField className="make-exam-textfield" id="outlined-basic" label="Question" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,"question")}/>
+          <TextField value={this.props.question || ""} className="make-exam-textfield" id="outlined-basic" label="Question" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,"question")}/>
           <Typography variant="h6">Answers</Typography>
-          <TextField className="make-exam-textfield make-exam-correct-answer" id="outlined-basic" label="Correct answer" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,0)} color="secondary"/>
-          <TextField className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #1" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,1)}/>
-          <TextField className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #2" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,2)}/>
-          <TextField className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #3" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,3)}/>
+          <TextField value={this.props.options[0] || ""} className="make-exam-textfield make-exam-correct-answer" id="outlined-basic" label="Correct answer" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,0)} color="secondary"/>
+          <TextField value={this.props.options[1] || ""} className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #1" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,1)}/>
+          <TextField value={this.props.options[2] || ""} className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #2" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,2)}/>
+          <TextField value={this.props.options[3] || ""} className="make-exam-textfield make-exam-wrong-answer" id="outlined-basic" label="Wrong answer #3" variant="outlined" fullWidth onChange={(ev) => this.updateAnswer(ev,3)}/>
 
       </Box>
     )
@@ -50,10 +50,30 @@ class ExamMaker extends React.Component {
     this.setQuestion = this.setQuestion.bind(this);
     this.removeQuestion = this.removeQuestion.bind(this);
     this.uploadExam = this.uploadExam.bind(this);
+    this.onEnter = this.onEnter.bind(this)
+    this.onClose = this.onClose.bind(this)
   }
 
-  componentDidMount(){
-    this.addQuestion()
+  onEnter(){
+    if(this.props.test){
+      let questions = this.props.test.questions;
+      let answers = this.props.test.answers;
+      this.setState({
+        "questions": questions,
+        "answers": answers
+      })
+    }
+    else{
+      this.addQuestion()
+    }
+  }
+
+  onClose(){
+    this.props.close()
+    this.setState({
+      "questions": {},
+      "answers": {}
+    })
   }
 
   addQuestion(){
@@ -138,7 +158,7 @@ class ExamMaker extends React.Component {
 
     return (
       <div>
-        <Dialog open={this.props.open} onClose={this.props.close} fullWidth={true}
+        <Dialog open={this.props.open} onEnter={this.onEnter} onClose={this.onClose} fullWidth={true}
         maxWidth="md" aria-labelledby="form-dialog-title">
           <Container>
 

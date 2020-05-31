@@ -19,14 +19,15 @@ class CoursesTeacher extends React.Component{
             streams: {},
             isFull: false,
             isCreating: false,
-            examCreation: null
+            examCreation: null,
+            currentTest: null
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
         this.destroyCourse = this.destroyCourse.bind(this);
         this.startExam = this.startExam.bind(this);
-        this.createExam = this.createExam.bind(this);
-        this.closeCreateExam = this.closeCreateExam.bind(this);
+        this.manageTest = this.manageTest.bind(this);
+        this.closeManageTest = this.closeManageTest.bind(this);
         this.destroyExam = this.destroyExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
@@ -144,17 +145,19 @@ class CoursesTeacher extends React.Component{
         this.props.refresh()
     }
 
-    createExam(course){
+    manageTest(course){
         this.setState({
             isCreating: true,
-            examCreation: course
+            examCreation: course.name,
+            currentTest: course.test || null
         })
     }
 
-    closeCreateExam(){
+    closeManageTest(){
         this.setState({
             isCreating: false,
-            examCreation: null
+            examCreation: null,
+            currentTest: null
         })
     }
 
@@ -222,6 +225,8 @@ class CoursesTeacher extends React.Component{
                     )
                 }
 
+                let testTxt = course.test ? "Edit" : "Create";
+
                 return (
                     <Grid item sm={12} md={3} key={i}>
                         <Card className="course-card">
@@ -235,8 +240,8 @@ class CoursesTeacher extends React.Component{
                                 <Button className="course-btn course-btn-cancel" onClick={() => this.destroyCourse(course.name)}>
                                     Delete course
                                 </Button>
-                                <Button className="course-btn course-btn-make" onClick={() => this.createExam(course.name)}>
-                                    Create exam
+                                <Button className="course-btn course-btn-make" onClick={() => this.manageTest(course)}>
+                                    {testTxt} test
                                 </Button>
                                 <Button className="course-btn course-btn-start" onClick={() => this.startExam(course.name)}>
                                     Start exam
@@ -322,7 +327,8 @@ class CoursesTeacher extends React.Component{
 
             <CourseForm open={this.state.openForm} closeForm={this.closeForm} />
 
-            <ExamMaker open={this.state.isCreating} close={this.closeCreateExam} course={this.state.examCreation} />
+
+            <ExamMaker open={this.state.isCreating} close={this.closeManageTest} course={this.state.examCreation} test={this.state.currentTest}/>
 
             <Container>
                 {courses}

@@ -1,6 +1,7 @@
 import React from 'react'
 import janus from './Janus'
 import Stream from './Stream'
+import Exam from './Exam'
 import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Dialog, IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
@@ -13,7 +14,8 @@ class CoursesStudent extends React.Component{
             teacherStream: null,
             isFull: false,
             openExamDialog: false,
-            overflow: "inherit"
+            overflow: "inherit",
+            test: null,
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
@@ -59,7 +61,10 @@ class CoursesStudent extends React.Component{
         })
 
         await janus.init(course)
-        await janus.publish()
+        let test = await janus.publish()
+        this.setState({
+            test: test
+        })
         this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
@@ -78,9 +83,10 @@ class CoursesStudent extends React.Component{
     }
 
     goFull() {
-        this.setState({ 
+        this.setState({
+            displayRoom: true, 
             isFull: true,
-            openExamDialog: false 
+            openExamDialog: false
         });
     }
 
@@ -105,9 +111,11 @@ class CoursesStudent extends React.Component{
                 this.closeExam();
                 clearInterval(countdownID)
             }
-            this.setState({
-                timeLeft: this.state.timeLeft-1
-            })
+            else{
+                this.setState({
+                    timeLeft: this.state.timeLeft-1
+                })
+            }
         },1000)
         this.setState({
             countdownID: countdownID
@@ -119,7 +127,8 @@ class CoursesStudent extends React.Component{
             displayRoom: false,
             mystream : null,
             streams: {},
-            openExamDialog: false
+            openExamDialog: false,
+            test: null,
         })
         janus.destroy();
     }
@@ -187,11 +196,11 @@ class CoursesStudent extends React.Component{
 
         var otherCourses= (<div></div>);
         if(this.props.otherCourses.length>0){
-            otherCourses = this.props.otherCourses.map((course) => {
+            otherCourses = this.props.otherCourses.map((course,i) => {
                 let matches = course.match(/\b(\w)/g)
                 let acronym = matches.join('').toUpperCase()
                 return (
-                    <Grid item sm={12} md={3}>
+                    <Grid key={i} item sm={12} md={3}>
                         <Card className="course-card">
                             <CardContent>
                                 <Box className="course-avatar">
@@ -223,8 +232,13 @@ class CoursesStudent extends React.Component{
         var teacherStream;
         if(this.state.teacherStream){
             teacherStream = (
-                <Stream stream={this.state.teacherStream} bigscreen={true} />
+                <Stream stream={this.state.teacherStream} bigscreen={false} />
             )
+        }
+
+        var exam;
+        if(this.state.test){
+            exam = (<Exam test={this.state.test} />)
         }
 
         var streams;
@@ -236,6 +250,7 @@ class CoursesStudent extends React.Component{
                         <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
                             <CloseIcon />
                         </IconButton>
+                        {exam}
                         {teacherStream}
                     </Box>
                 </Fullscreen>

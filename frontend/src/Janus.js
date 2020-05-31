@@ -242,7 +242,12 @@ class Janus {
     return new Promise((resolve) => {
       this.on('answer',(object) => {
         this.onAnswerHandler(object);
-        resolve()
+        if(object.test){
+          resolve(object.test) //the questions for the student
+        }
+        else{
+          resolve()
+        }        
       })
     })
   }

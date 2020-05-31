@@ -108,6 +108,7 @@ const janus = async (server) => {
         console.log("published event")
         console.log(data)
 
+        
         wss.clients.forEach(ws => {
             console.log(ws.role)
             if(ws.role === 'teacher'){
@@ -232,19 +233,24 @@ const janus = async (server) => {
                 "jsep": remote.jsep,
                 "publisherID": ws.videoroomHandle.id
             }
+            /*
+            ws.send(JSON.stringify(body))
+            */            
+            
             if(ws.role === 'teacher'){
                 ws.send(JSON.stringify(body))
             }
             else if(ws.role === 'student'){
-                let test = await getTest(ws.course)
+                let test = await Helpers.getTest(ws.course)
                 if(test){
                     body["test"] = test
                     ws.send(JSON.stringify(body))
                 }
                 else{
                     console.log("Test not found")
-                }                
+                }           
             }
+            
         }  
     }
     

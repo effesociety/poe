@@ -56,7 +56,10 @@ async function checkTests(courses){
 
 async function getTest(name){
   try{
-    return await coursesSchema.findOne({name}).questions
+    let course = await coursesSchema.findOne({name})
+    if(course.test){
+      return course.test.questions
+    }
   }
   catch(e){
     console.log(e)
@@ -131,6 +134,7 @@ const commonEmitter = new EventEmitter()
 exports.checkUser = checkUser
 exports.checkCourse = checkCourse
 exports.checkTests = checkTests
+exports.getTest = getTest
 exports.isTeacher = isTeacher
 exports.isEnrolled = isEnrolled
 exports.removeDeletedCourse = removeDeletedCourse
