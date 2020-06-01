@@ -110,6 +110,19 @@ html,body{
 .exam-btn-stop span svg{
 	font-size: 3rem;
 }
+.exam-btn-stop-student{
+	z-index: 10000;
+	position: absolute!important;
+	right: 20px;
+	top: 20px;
+}
+.exam-btn-stop-student:hover{
+	background: rgba(0,0,0,0.4)!important;
+	color: #fff!important
+}
+.exam-btn-stop-student span svg{
+	font-size: 3rem;
+}
 .fullscreen-dialog-h4{
 	margin-top:20px!important;
 }
@@ -162,7 +175,7 @@ html,body{
 }
 .make-exam-plus-question{
 	background-color: #009688!important;
-	margin: 20px auto!important;
+	margin: 40px auto!important;
 	display: block!important;
 }
 .make-exam-btn{
@@ -180,6 +193,39 @@ html,body{
 .student-exam-card{
 	width: calc(100% - 100px);
 	margin: 20px auto!important;
+}
+.student-exam-index-box{
+	display: block;
+	white-space: nowrap;
+}
+.student-exam-index{
+	display: inline-block;
+	position: relative;
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
+	font-size: 1rem;
+	border: 2px solid black;
+	border-radius: 100%;
+	background-color: #fff;
+	margin-left: 20px;
+	cursor: pointer;
+}
+.student-exam-active-index{
+	color: #2196f3;
+	border: 2px solid #2196f3;
+}
+.student-exam-complete-index{
+	vertical-align: middle;
+	margin-bottom: 5px!important;
+}
+.student-exam-complete-btn{
+	margin:auto!important;
+	display: block!important;
+	margin-top:20px!important;
+	background-color: #009688!important;
+	color: #fff!important;
 }
 .team{
 	text-align: center;

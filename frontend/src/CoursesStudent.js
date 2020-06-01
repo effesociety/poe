@@ -247,7 +247,7 @@ class CoursesStudent extends React.Component{
             streams = (
                 <Fullscreen enabled={this.state.isFull} onChange={this.changeFullScreen}>
                     <Box className="streams-box">
-                        <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
+                        <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop-student">
                             <CloseIcon />
                         </IconButton>
                         {exam}

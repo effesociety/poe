@@ -21,7 +21,7 @@ class ExamQuestion extends React.Component{
   render(){
     return (
       <Box className="make-exam-question">
-          <Typography className="make-exam-h5" variant="h5">Question #{this.props.id+1}</Typography>
+          <Typography className="make-exam-h5" variant="h5">Question #{this.props.num+1}</Typography>
           <Fab size="small" color="primary" aria-label="add" className="make-exam-remove-question" onClick={() => this.props.removeQuestion(this.props.id)}>
                 <RemoveIcon />
             </Fab>
@@ -56,8 +56,8 @@ class ExamMaker extends React.Component {
 
   onEnter(){
     if(this.props.test){
-      let questions = this.props.test.questions;
-      let answers = this.props.test.answers;
+      let questions = Object.assign({}, this.props.test.questions);
+      let answers = Object.assign({}, this.props.test.answers);
       this.setState({
         "questions": questions,
         "answers": answers
@@ -69,11 +69,11 @@ class ExamMaker extends React.Component {
   }
 
   onClose(){
-    this.props.close()
     this.setState({
       "questions": {},
       "answers": {}
     })
+    this.props.close()
   }
 
   addQuestion(){
@@ -153,7 +153,7 @@ class ExamMaker extends React.Component {
 
   render() {
     const questions = Object.keys(this.state.questions).map((key,id) => {
-      return (<ExamQuestion key={key} id={id} question={this.state.questions[key].question} options={this.state.questions[key].options} setQuestion={this.setQuestion} removeQuestion={this.removeQuestion} />)
+      return (<ExamQuestion key={key} id={key} num={id} question={this.state.questions[key].question} options={this.state.questions[key].options} setQuestion={this.setQuestion} removeQuestion={this.removeQuestion} />)
     })
 
     return (
