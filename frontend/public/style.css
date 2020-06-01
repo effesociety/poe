@@ -197,6 +197,7 @@ html,body{
 .student-exam-index-box{
 	display: block;
 	white-space: nowrap;
+	position: absolute;
 }
 .student-exam-index{
 	display: inline-block;
