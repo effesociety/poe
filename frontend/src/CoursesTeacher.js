@@ -104,6 +104,7 @@ class CoursesTeacher extends React.Component{
         }
 
         janus.on('subscribed', async (object) => {
+            console.log("Subscribed")
             var id = await janus.onRemoteFeed(object)
             let stream = {
                 "media" : janus.streams[id],

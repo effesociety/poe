@@ -264,7 +264,7 @@ html,body{
 .smallscreen{
 	width: 250px;
 	height: 140px;
-	z-index: 999;
+	z-index: 9999;
 	overflow: hidden;
 	position: relative;
 	float: left;

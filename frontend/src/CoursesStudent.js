@@ -246,12 +246,12 @@ class CoursesStudent extends React.Component{
             this.fixOverflow(true)
             streams = (
                 <Fullscreen enabled={this.state.isFull} onChange={this.changeFullScreen}>
+                    {teacherStream}
                     <Box className="streams-box">
                         <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop-student">
                             <CloseIcon />
                         </IconButton>
                         {exam}
-                        {teacherStream}
                     </Box>
                 </Fullscreen>
             )
