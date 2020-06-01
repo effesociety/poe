@@ -69,8 +69,8 @@ userRouter.post(
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
 
-          courses = user.courses.map(course => {
-            if(currentExams.getExam(course) !== null){
+          courses = user.courses.map(async course => {
+            if(await currentExams.getExam(course) !== null){
               return {
                 "name": course,
                 "examActive": true
@@ -159,8 +159,8 @@ userRouter.post(
           res.cookie('token', token, { httpOnly: true })
           console.log("Logged user:\n",user)
 
-          courses = user.courses.map(course => {
-            if(currentExams.getExam(course) !== null){
+          courses = user.courses.map(async course => {
+            if(await currentExams.getExam(course) !== null){
               return {
                 "name": course,
                 "examActive": true
@@ -222,8 +222,8 @@ userRouter.get(
       if(user){
         console.log("Authentication user",user.email)
         
-        courses = user.courses.map(course => {
-          if(currentExams.getExam(course) !== null){
+        courses = user.courses.map(async course => {
+          if(await currentExams.getExam(course) !== null){
             return {
               "name": course,
               "examActive": true
@@ -236,7 +236,7 @@ userRouter.get(
             }             
           }
         })
-
+        console.log(courses)
         if(helper.isTeacher(user)){
           const teacherCourses = await helper.checkTests(courses)
           res.status(200).json({

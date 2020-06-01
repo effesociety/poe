@@ -1,40 +1,69 @@
+const examsSchema = require('../schemas/exams-schema')
+
 class CurrentExams{
-    constructor(){
-        this.exams = {}
-    }
 
-    getExam(course){
+    async getExam(course){
         console.log("Getting exam for course:", course)
-
-        if(this.exams[course]){
-            console.log("Exam found for course:", course)
-            return this.exams[course];
-        }
-        else{
-            console.log("Exam NOT found for course:", course)
-            return null;
-        }
-    }
-
-    getCourse(room){
-        const c = Object.keys(this.exams).map(course => {
-            if(this.exams[course].room === room){
-                return course
+        try{
+            let exam = await examsSchema.findOne({course})
+            if(exam){
+                console.log("Exam found for course:", course)
+                return exam;
             }
-        })
-        return c;
-    }
-
-    setExam(course,room){
-        if(!this.exams[course]){
-            this.exams[course] = {
-                "room": room
-            } 
+            else{
+                console.log("Exam not found for course:", course)
+                return null;
+            }
+        }
+        catch(e){
+            console.log(e)
+            return null
         }
     }
 
-    removeExam(course){
-        delete this.exams[course];
+    async getCourse(room){
+        try{            
+            let exam = await examsSchema.findOne({room})
+            if(exam){
+                return exam.course
+            }
+            else{
+                return null
+            }
+        }
+        catch(e){
+            console.log(e)
+            return null
+        }
+    }
+
+    async setExam(course,room){
+        try{
+            let exam = await examsSchema.findOne({course})
+            if(!exam){
+                let e = {
+                    course,
+                    room
+                }
+                await e.save()
+            }
+        }
+        catch(e){
+            console.log(e)
+        }
+
+    }
+
+    async removeExam(course){
+        try{
+            let exam = await examsSchema.findOne({course})
+            if(exam){
+                exam.remove()
+            }            
+        }
+        catch(e){
+            console.log(e)
+        }
     }
 }
 

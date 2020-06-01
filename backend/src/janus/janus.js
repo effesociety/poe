@@ -109,10 +109,10 @@ const janus = async (server) => {
         console.log(data)
 
         
-        wss.clients.forEach(ws => {
+        wss.clients.forEach(async ws => {
             console.log(ws.role)
             if(ws.role === 'teacher'){
-                let exam = currentExams.getExam(ws.course)
+                let exam = await currentExams.getExam(ws.course)
                 if(exam && exam.room === data.room){
                     sendOffer(ws,data.room,data.id)
                 }
@@ -141,9 +141,9 @@ const janus = async (server) => {
             console.log(participants)
             if(participants.length === 0){
                 janusAdminAPI.destroyRoom(data.room)
-                .then(() => {
-                    var course = currentExams.getCourse(data.room)
-                    currentExams.removeExam(course)
+                .then(async () => {
+                    var course = await currentExams.getCourse(data.room)
+                    await currentExams.removeExam(course)
                 })
             }
         })  
@@ -179,7 +179,7 @@ const janus = async (server) => {
             
             if(ws.role === 'teacher'){
                 console.log("Role teacher")
-                let exam = currentExams.getExam(ws.course);
+                let exam = await currentExams.getExam(ws.course);
 
                 console.log("printing exam")
                 console.log(exam)
@@ -192,13 +192,13 @@ const janus = async (server) => {
                 else{
                     let room = Math.floor(Math.random()*10000)
                     await ws.videoroomHandle.createRoom(room)
-                    currentExams.setExam(ws.course,room)
+                    await currentExams.setExam(ws.course,room)
                     await ws.videoroomHandle.join(room, "publisher");                       
                 }
             }
             else if(ws.role === 'student'){
                 console.log("Role student")
-                let exam = currentExams.getExam(ws.course);
+                let exam = await currentExams.getExam(ws.course);
                 if(exam){
                     await ws.videoroomHandle.join(exam.room, "publisher"); 
                     wss.clients.forEach(websocket => {
@@ -257,7 +257,7 @@ const janus = async (server) => {
     async function manageGetFeedsMessage(ws){
         console.log("Received getFeeds message")
         if(ws.role === 'teacher'){
-            var room = currentExams.getExam(ws.course).room
+            var room = await currentExams.getExam(ws.course).room
             if(ws.videoroomHandle.id && room){
                 let ev = await ws.videoroomHandle.listParticipants(room)
                 if(ev.plugindata){
@@ -292,10 +292,10 @@ const janus = async (server) => {
     async function manageDestroyMessage(ws,object){
         console.log("Received destroy message")
         if(ws.role === 'teacher'){
-            let exam = currentExams.getExam(object.course)
+            let exam = await currentExams.getExam(object.course)
             if(exam){
                 let room = exam.room
-                currentExams.removeExam(object.course)
+                await currentExams.removeExam(object.course)
                 await janusAdminAPI.destroyRoom(room)
             }
             let body = {
