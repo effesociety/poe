@@ -69,20 +69,7 @@ userRouter.post(
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
 
-          courses = user.courses.map(async course => {
-            if(await currentExams.getExam(course) !== null){
-              return {
-                "name": course,
-                "examActive": true
-              }
-            }
-            else{
-              return {
-                "name": course,
-                "examActive": false
-              }             
-            }
-          })
+          var courses = []
 
           if(helper.isTeacher(user)){
             res.status(200).json({
@@ -159,20 +146,22 @@ userRouter.post(
           res.cookie('token', token, { httpOnly: true })
           console.log("Logged user:\n",user)
 
-          courses = user.courses.map(async course => {
-            if(await currentExams.getExam(course) !== null){
-              return {
+          var courses = [];
+          for await(course of user.courses){
+            let exam = await currentExams.getExam(course)
+            if(exam){
+              courses.push({
                 "name": course,
                 "examActive": true
-              }
+              })
             }
             else{
-              return {
+              courses.push({
                 "name": course,
                 "examActive": false
-              }             
+              })             
             }
-          })
+          }
 
           if(helper.isTeacher(user)){
             const teacherCourses = await helper.checkTests(courses)
@@ -222,21 +211,22 @@ userRouter.get(
       if(user){
         console.log("Authentication user",user.email)
         
-        courses = user.courses.map(async course => {
-          if(await currentExams.getExam(course) !== null){
-            return {
+        var courses = [];
+        for await(course of user.courses){
+          let exam = await currentExams.getExam(course)
+          if(exam){
+            courses.push({
               "name": course,
               "examActive": true
-            }
+            })
           }
           else{
-            return {
+            courses.push({
               "name": course,
               "examActive": false
-            }             
+            })             
           }
-        })
-        console.log(courses)
+        }
         if(helper.isTeacher(user)){
           const teacherCourses = await helper.checkTests(courses)
           res.status(200).json({

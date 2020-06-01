@@ -41,10 +41,11 @@ class CurrentExams{
         try{
             let exam = await examsSchema.findOne({course})
             if(!exam){
-                let e = {
+
+                let e = new examsSchema({
                     course,
                     room
-                }
+                })
                 await e.save()
             }
         }
