@@ -58,7 +58,23 @@ async function getTest(name){
   try{
     let course = await coursesSchema.findOne({name})
     if(course.test){
-      return course.test.questions
+      //Simple shuffling of the questions
+      let questionsID = Object.keys(course.test.questions).map((id) => {
+        return id
+      });
+      questionsID.sort(function (a, b) {return Math.random() - 0.5;}); //Shuffling the order of the questions
+
+      const questions = questionsID.map((id) => {
+        let options = course.test.questions[id].options;
+        options.sort(function (a, b) {return Math.random() - 0.5;}); //Shuffling the order of the options for each question
+        const question = {
+          "question": course.test.questions[id].question,
+          "options": options
+        }
+        return question
+      })
+
+      return questions
     }
   }
   catch(e){
