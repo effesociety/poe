@@ -113,9 +113,6 @@ const janus = async (server) => {
         }
 
         wss.clients.forEach(ws => {
-            console.log("Printing cose")
-            console.log(ws.videoroomHandle)
-            console.log(ws.subscriberHandles)
             if(ws.videoroomHandle && ws.videoroomHandle.id === object.sender){
                 ws.send(JSON.stringify(body))
                 return
@@ -272,13 +269,19 @@ const janus = async (server) => {
                 "message": "answer",
                 "jsep": remote.jsep,
                 "publisherID": ws.videoroomHandle.id
-            }
-            /*
-            ws.send(JSON.stringify(body))
-            */            
+            }         
             
             if(ws.role === 'teacher'){
                 ws.send(JSON.stringify(body))
+
+                let exam = await currentExams.getExam(ws.course);
+                if(exam){
+                    wss.clients.forEach(websocket => {
+                        if(websocket.role === "student" && websocket.course === ws.course){
+                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
+                        }
+                    })
+                }
             }
             else if(ws.role === 'student'){
                 let test = await Helpers.getTest(ws.course)
@@ -359,18 +362,14 @@ const janus = async (server) => {
     async function manageCompleteMessage(ws,object){
         console.log("Received complete message")
         if(ws.role === 'student'){
-            console.log("Your answers:\n",object)
-            let course = await Helper.checkCourse(ws.course)
+            let course = await Helpers.checkCourse(ws.course)
             if(course){
                 console.log("[",course.name,"] Test completed")
                 let counter = 0
-                const response = Object.keys(object).map(id => {
+                const response = Object.keys(object.answers).map(id => {
                     let question = course.test.questions[id]
-                    console.log("Question:",question)
-                    let answer = object[id]
-                    console.log("Your answer:",answer)
+                    let answer = object.answers[id]
                     let correctAnswer = course.test.answers[id]
-                    console.log("Correct answer:",correctAnswer)
                     
                     let res = {
                         "question": question,
@@ -386,35 +385,11 @@ const janus = async (server) => {
                     else{
                         res.answer = Object.assign({"correct": false}, res.answer)
                     }
-                    console.log(res)
                     return res;
-                    /*
-                    if(answer === correctAnswer){
-                        counter += 1
-                        return {
-                            "question": question,
-                            "answer": {
-                                "correctAnswer": correctAnswer,
-                                "yourAnswer": answer,
-                                "correct": true
-                            }
-                        }
-                    }
-                    else {
-                        return {
-                            "question": question,
-                            "answer": {
-                                "correctAnswer": correctAnswer,
-                                "yourAnswer": answer,
-                                "correct": false
-                            }
-                        }
-                    }
-                    */
                 })
 
                 const report = {
-                    "answers": Object.keys(object).length,
+                    "answers": Object.keys(course.test.answers).length,
                     "correctAnswers": counter
                 }
                 
@@ -422,7 +397,8 @@ const janus = async (server) => {
                     "message": "completed",
                     "test": response,
                     "report": report
-                }  
+                }
+                console.log(report)  
                 ws.send(JSON.stringify(body))              
             }
         }

@@ -48,6 +48,14 @@ class Exam extends React.Component{
         this.setState({
             "activeQuestion": activeQuestion
         })
+        
+        let answers = {};
+        Object.keys(this.props.test).forEach(key => {
+            answers[key] = ""
+        })
+        this.setState({
+            answers: answers
+        })
     }
 
     changeActiveQuestion(key){
@@ -56,8 +64,9 @@ class Exam extends React.Component{
         })
     }
 
-    setAnswer(id,answer){
+    setAnswer(key,answer){
         let answers = this.state.answers;
+        let id = this.props.test[key].id
         answers[id] = answer;
 
         this.setState({
@@ -84,7 +93,7 @@ class Exam extends React.Component{
         var question
         if(this.state.activeQuestion){
             if(this.state.activeQuestion !== "-1"){
-                question = (<Question key={this.state.activeQuestion} id={this.state.activeQuestion} question={this.props.test[this.state.activeQuestion].question} options={this.props.test[this.state.activeQuestion].options} value={this.state.answers[this.state.activeQuestion]} setAnswer={this.setAnswer} />)
+                question = (<Question key={this.state.activeQuestion} id={this.state.activeQuestion} question={this.props.test[this.state.activeQuestion].question} options={this.props.test[this.state.activeQuestion].options} value={this.state.answers[this.props.test[this.state.activeQuestion].id]} setAnswer={this.setAnswer} />)
             }
             else{
                 question = (

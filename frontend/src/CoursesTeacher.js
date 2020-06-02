@@ -137,7 +137,7 @@ class CoursesTeacher extends React.Component{
             mystream : null,
             streams: {}
         })
-        janus.destroy();
+        janus.destroy(true);
     }
 
     async destroyExam(course){

@@ -51,10 +51,13 @@ class Janus {
     return o;
   }
 
-  destroy(){
+  destroy(closeWebsocket){
     //Closing everything
-    if(this.websocket){
+    if(closeWebsocket && this.websocket){
       this.websocket.close();
+      this.websocket = undefined; 
+      clearTimeout(this.keepAliveID);
+      this.keepAliveID = undefined;
     }
     if(this.publisherConn){
       if(this.mystream){
@@ -70,11 +73,9 @@ class Janus {
       }
       this.subscriberConn[subscriberID].close();
     })
-    clearTimeout(this.keepAliveID);
 
     //Resetting everything to default values without destroying the object itself
     //This way we can keep using .init() before every action
-    this.websocket = undefined; 
     this.publisherConn = undefined; 
     this.subscriberConn = {}; 
     this.streams = {}; 
@@ -85,7 +86,6 @@ class Janus {
     this.candidates = {} 
     this.SDP = {};
 
-    this.keepAliveID = undefined;
   }
 
   //Just for Heroku to send keepalive messages every 30 seconds
@@ -234,6 +234,15 @@ class Janus {
         }
       })
     })
+  }
+
+  completeExam(answers){
+    let body = {
+      "message": "complete",
+      "answers": answers,
+      "course": this.course
+    }
+    this.websocket.send(JSON.stringify(body))
   }
 
   publish(){
@@ -401,63 +410,6 @@ class Janus {
       }
       this.websocket.send(JSON.stringify(body))
     }
-	  /*
-    console.log("onIceCandidateHandler");
-    console.log("Printing candidate....")
-    console.log(ev.candidate) 
-    if(this.SDP[subscriberID]){
-      if(ev.candidate && ev.candidate.candidate.length > 0){
-
-        let candidate = {
-          "candidate": ev.candidate.candidate,
-          "sdpMid": ev.candidate.sdpMid,
-          "sdpMLineIndex": ev.candidate.sdpMLineIndex
-        };
-        let body = {
-          "message": "trickle",
-          "candidate": candidate,
-          "subscriberID": subscriberID,
-          "course": this.course
-        };
-        this.websocket.send(JSON.stringify(body));
-      }
-      else{
-        console.log("No candidate")
-        let body = {
-          "message": "trickle",
-          "completed": true,
-          "subscriberID": subscriberID,
-          "course": this.course
-        }
-        this.websocket.send(JSON.stringify(body))
-      }
-      if(this.candidates.length>0){
-        console.log("this.candidates.length:", this.candidates.length);
-        for(let i = 0; i<this.candidates.length; i++){
-          console.log("sending saved candidate number: ",i+1)
-          let body = {
-            "message": "trickle",
-            "candidate": this.candidates[i],
-            "subscriberID": subscriberID,
-            "course": this.course
-          };
-          this.websocket.send(JSON.stringify(body))
-        }
-        console.log("Cleaning candidates array")	
-        this.candidates = [];
-      }
-    }
-    else if(ev.candidate){
-      console.log("SDP not sent yet")
-      let candidate = {
-        "candidate": ev.candidate.candidate,
-        "sdpMid": ev.candidate.sdpMid,
-        "sdpMLineIndex": ev.candidate.sdpMLineIndex
-      };
-      //this.subscriberConn[subscriberID].addIceCandidate(candidate)
-      this.candidates.push(candidate);
-    }
-    */
   }  
 
   async onNegotiationNeededHandler() {

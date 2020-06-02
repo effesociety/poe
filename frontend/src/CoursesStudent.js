@@ -2,6 +2,7 @@ import React from 'react'
 import janus from './Janus'
 import Stream from './Stream'
 import Exam from './Exam'
+import Results from './Results'
 import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Dialog, IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
@@ -14,16 +15,19 @@ class CoursesStudent extends React.Component{
             teacherStream: null,
             isFull: false,
             openExamDialog: false,
+            openResultsDialog: false,
             overflow: "inherit",
-            test: null
+            test: null,
+            results: null
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
+        this.closeResultsDialog = this.closeResultsDialog.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
         this.goFull = this.goFull.bind(this);
         this.changeFullScreen = this.changeFullScreen.bind(this);
-        this.completeExam = this.completeExam.bind(this);
+        this.completeExam = this.completeExam.bind(this)
     }
 
     async enroll(course){
@@ -131,21 +135,40 @@ class CoursesStudent extends React.Component{
             openExamDialog: false,
             test: null,
         })
-        janus.destroy();
+        this.fixOverflow(false)
+        janus.destroy(true);
+    }
+
+    closeResultsDialog(){
+        this.setState({
+            openResultsDialog: false
+        })
+        this.fixOverflow(false)
     }
 
     completeExam(answers){
-        janus.websocket.send(answers)
+        janus.completeExam(answers)
+
+        janus.on('completed', (results) => {
+            janus.destroy(true);
+            this.setState({
+                displayRoom: false,
+                mystream : null,
+                streams: {},
+                openExamDialog: false,
+                openResultsDialog: true,
+                results: results
+            })
+        })
     }
 
     fixOverflow(hidden){
         let overflow = hidden ? "hidden" : "inherit";
-        if(overflow !== this.state.overflow){
-            this.setState({
-                overflow: overflow
-            })
-            document.body.style.overflow = this.state.overflow
-        }
+        this.setState({
+            overflow: overflow
+        })
+        document.body.style.overflow = this.state.overflow
+        
     }
 
     render(){
@@ -248,7 +271,6 @@ class CoursesStudent extends React.Component{
 
         var streams;
         if(this.state.displayRoom){
-            this.fixOverflow(true)
             streams = (
                 <Fullscreen enabled={this.state.isFull} onChange={this.changeFullScreen}>
                     <Box className="streams-box">
@@ -260,9 +282,6 @@ class CoursesStudent extends React.Component{
                     </Box>
                 </Fullscreen>
             )
-        }
-        else{
-            this.fixOverflow(false)
         }
                
         return (
@@ -288,6 +307,8 @@ class CoursesStudent extends React.Component{
             </Dialog>
             
             {streams}
+
+            <Results open={this.state.openResultsDialog} results={this.state.results} close={this.closeResultsDialog} />
 
             <Container>
                 {courses}

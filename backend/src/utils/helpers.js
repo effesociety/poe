@@ -69,7 +69,8 @@ async function getTest(name){
         options.sort(function (a, b) {return Math.random() - 0.5;}); //Shuffling the order of the options for each question
         const question = {
           "question": course.test.questions[id].question,
-          "options": options
+          "options": options,
+          "id": id
         }
         return question
       })

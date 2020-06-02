@@ -160,14 +160,13 @@ html,body{
 .make-exam-correct-answer fieldset{
 	border-color: #00c853!important;
 }
-/*
+
 .make-exam-wrong-answer label{
 	color: #c62828!important;
 }
 .make-exam-wrong-answer fieldset{
 	border-color: #c62828!important;
 }
-*/
 .make-exam-remove-question{
 	float:right;
 	margin-bottom: 15px!important;
@@ -192,7 +191,9 @@ html,body{
 }
 .student-exam-card{
 	width: calc(100% - 100px);
-	margin: 40px auto!important;
+	margin: auto!important;
+	top: 80px;
+	position: relative;
 }
 .student-exam-index-box{
 	display: block;
@@ -227,6 +228,12 @@ html,body{
 	margin-top:20px!important;
 	background-color: #009688!important;
 	color: #fff!important;
+}
+.results-icon{
+	width: 20%;
+	height: auto;
+	margin: 30px auto;
+	display: block;
 }
 .team{
 	text-align: center;
