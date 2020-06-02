@@ -123,7 +123,7 @@ const janus = async (server) => {
             
             if(ws.subscriberHandles){
                 for (subscriberID in Object.keys(ws.subscriberHandles)){
-                    if(ws.subscriberHandles[subscriberID] === data.sender){
+                    if(ws.subscriberHandles[subscriberID] === object.sender){
                         body = Object.assign({"subscriberID": subscriberID}, body)
                         ws.send(JSON.stringify(body))
                         return

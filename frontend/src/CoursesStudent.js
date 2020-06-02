@@ -15,7 +15,7 @@ class CoursesStudent extends React.Component{
             isFull: false,
             openExamDialog: false,
             overflow: "inherit",
-            test: null,
+            test: null
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
@@ -23,6 +23,7 @@ class CoursesStudent extends React.Component{
         this.fixOverflow = this.fixOverflow.bind(this);
         this.goFull = this.goFull.bind(this);
         this.changeFullScreen = this.changeFullScreen.bind(this);
+        this.completeExam = this.completeExam.bind(this);
     }
 
     async enroll(course){
@@ -133,6 +134,10 @@ class CoursesStudent extends React.Component{
         janus.destroy();
     }
 
+    completeExam(answers){
+        janus.websocket.send(answers)
+    }
+
     fixOverflow(hidden){
         let overflow = hidden ? "hidden" : "inherit";
         if(overflow !== this.state.overflow){
@@ -238,7 +243,7 @@ class CoursesStudent extends React.Component{
 
         var exam;
         if(this.state.test){
-            exam = (<Exam test={this.state.test} />)
+            exam = (<Exam test={this.state.test} completeExam={this.completeExam} />)
         }
 
         var streams;

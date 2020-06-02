@@ -66,7 +66,7 @@ class Exam extends React.Component{
     }
 
     completeExam(){
-        console.log(this.state.answers)
+        this.props.completeExam(this.state.answers)
     }
 
     render(){
