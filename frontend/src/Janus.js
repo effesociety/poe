@@ -1,6 +1,6 @@
 const websocketURI = process.env.NODE_ENV === "development" ? "ws://localhost:5000/" : "wss://poe-dtlab.herokuapp.com";
-const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"},{urls: "turn:numb.viagenie.ca", username: "webrtc@live.com", credential: "muazkh"}]}
-//const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"}]}
+//const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"},{urls: "turn:numb.viagenie.ca", username: "webrtc@live.com", credential: "muazkh"}]}
+const config = {"iceServers": [{urls: "stun:stun.l.google.com:19302"}]}
 var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 			
 class Janus {
@@ -138,9 +138,11 @@ class Janus {
     //This means that the user wants to send its audio/video stream
     console.log("Got message type ANSWER. Setting Remote Description...")
     this.publisherConn.setRemoteDescription(object.jsep);
-    this.candidates['publisher'].forEach(candidate => {
-      this.publisherConn.addIceCandidate(candidate)
-    })
+    if(this.candidates['publisher']){
+      this.candidates['publisher'].forEach(candidate => {
+        this.publisherConn.addIceCandidate(candidate)
+      })
+    }
   }
 
   async onOfferHandler(object){
@@ -168,9 +170,12 @@ class Janus {
       offerToReceiveVideo: true
     }
 
-    this.candidates[object.subscriberID].forEach(candidate => {
-      this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
-    })
+    if(this.candidates[object.subscriberID]){
+      this.candidates[object.subscriberID].forEach(candidate => {
+        this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
+      })
+    }
+
 
     console.log("Creating answer to send back to the server")
     //Create an answer to send
