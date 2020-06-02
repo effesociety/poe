@@ -138,13 +138,29 @@ const janus = async (server) => {
         console.log("published event")
         console.log(data)
 
+        let publishedRole;
+
+        wss.clients.forEach(ws => {
+            if(ws.videoroomHandle && ws.videoroomHandle.feedID === data.id){
+                publishedRole = ws.role
+            }
+        })
         
         wss.clients.forEach(async ws => {
-            console.log(ws.role)
-            if(ws.role === 'teacher'){
-                let exam = await currentExams.getExam(ws.course)
-                if(exam && exam.room === data.room){
-                    sendOffer(ws,data.room,data.id)
+            if(publishedRole === "student"){
+                if(ws.role === 'teacher'){
+                    let exam = await currentExams.getExam(ws.course)
+                    if(exam && exam.room === data.room){
+                        sendOffer(ws,data.room,data.id)
+                    }
+                }
+            }
+            else if(publishedRole === "teacher"){
+                if(ws.role === "student"){
+                    let exam = await currentExams.getExam(ws.course)
+                    if(exam && exam.room === data.room){
+                        sendOffer(ws,data.room,data.id)
+                    }
                 }
             }
         })
@@ -231,12 +247,6 @@ const janus = async (server) => {
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
                     await ws.videoroomHandle.join(exam.room, "publisher"); 
-                    wss.clients.forEach(websocket => {
-                        if(websocket.role === "teacher" && websocket.course === ws.course){
-                            console.log("Attacching to teacher feed")
-                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
-                        }
-                    })
                 }
                 //@TO-DO: Send some info msg to the client                     
             } 
@@ -278,7 +288,17 @@ const janus = async (server) => {
                 }
                 else{
                     console.log("Test not found")
-                }           
+                }
+                
+                let exam = await currentExams.getExam(ws.course);
+                if(exam){
+                    wss.clients.forEach(websocket => {
+                        if(websocket.role === "teacher" && websocket.course === ws.course){
+                            console.log("Attacching to teacher feed")
+                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
+                        }
+                    })
+                }
             }
             
         }  
