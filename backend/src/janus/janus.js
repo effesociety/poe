@@ -63,7 +63,7 @@ const janus = async (server) => {
                     break
 
                 case 'trickle':
-                    manageTrickeMessage(ws,object)
+                    manageTrickleMessage(ws,object)
                     break
 
                 case 'publish':
@@ -102,6 +102,34 @@ const janus = async (server) => {
                 })
             }
         })
+    })
+
+    janusWrapper.session.on('trickle', (object) => {
+        //data.sender has the pluginID
+        //data.candidate has the ICE candidate
+        let body = {
+            "message": "trickle",
+            "candidate": object.candidate
+        }
+
+        wss.clients.forEach(ws => {
+            console.log("Printing cose")
+            console.log(ws.videoroomHandle)
+            console.log(ws.subscriberHandles)
+            if(ws.videoroomHandle && ws.videoroomHandle.id === object.sender){
+                ws.send(JSON.stringify(body))
+                return
+            }
+            
+            for (subscriberID in Object.keys(ws.subscriberHandles)){
+                if(ws.subscriberHandles[subscriberID] === data.sender){
+                    body = Object.assign({"subscriberID": subscriberID}, body)
+                    ws.send(JSON.stringify(body))
+                    return
+                }
+            }
+        })
+        
     })
 
     janusEventHandler.on('published', (data) => {
@@ -213,7 +241,7 @@ const janus = async (server) => {
         }  
     }
     
-    function manageTrickeMessage(ws,object){
+    function manageTrickleMessage(ws,object){
         console.log("Received trickle message");
         let candidate = object.candidate;
         if(object.subscriberID){
@@ -306,10 +334,75 @@ const janus = async (server) => {
         }
     }
 
-    function manageCompleteMessage(ws,object){
+    async function manageCompleteMessage(ws,object){
         console.log("Received complete message")
         if(ws.role === 'student'){
-            // @TO-DO: implementation
+            console.log("Your answers:\n",object)
+            let course = await Helper.checkCourse(ws.course)
+            if(course){
+                console.log("[",course.name,"] Test completed")
+                let counter = 0
+                const response = Object.keys(object).map(id => {
+                    let question = course.test.questions[id]
+                    console.log("Question:",question)
+                    let answer = object[id]
+                    console.log("Your answer:",answer)
+                    let correctAnswer = course.test.answers[id]
+                    console.log("Correct answer:",correctAnswer)
+                    
+                    let res = {
+                        "question": question,
+                        "answer": {
+                            "correctAnswer": correctAnswer,
+                            "yourAnswer": answer
+                        } 
+                    }
+                    if(answer === correctAnswer){
+                        counter += 1
+                        res.answer = Object.assign({"correct": true}, res.answer)
+                    }
+                    else{
+                        res.answer = Object.assign({"correct": false}, res.answer)
+                    }
+                    console.log(res)
+                    return res;
+                    /*
+                    if(answer === correctAnswer){
+                        counter += 1
+                        return {
+                            "question": question,
+                            "answer": {
+                                "correctAnswer": correctAnswer,
+                                "yourAnswer": answer,
+                                "correct": true
+                            }
+                        }
+                    }
+                    else {
+                        return {
+                            "question": question,
+                            "answer": {
+                                "correctAnswer": correctAnswer,
+                                "yourAnswer": answer,
+                                "correct": false
+                            }
+                        }
+                    }
+                    */
+                })
+
+                const report = {
+                    "answers": Object.keys(object).length,
+                    "correctAnswers": counter
+                }
+                
+                const body = {
+                    "message": "completed",
+                    "test": response,
+                    "report": report
+                }  
+                ws.send(JSON.stringify(body))              
+            }
         }
     }
 

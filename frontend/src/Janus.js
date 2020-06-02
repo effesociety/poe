@@ -13,7 +13,7 @@ class Janus {
     this.course = undefined; //the course to be added to every message sent to the backend
     this.messageHandlers = {}; //handlers for responses received from the backend
 
-    this.candidates = []; //list of candidates not sent yet
+    this.candidates = {}; //list of candidates not sent yet
     this.SDP = {}; //boolean var to keep track if the SDP is already been sent
      //Just to cleanup the setInterval on Heroku
      this.keepAliveID = undefined;
@@ -82,7 +82,7 @@ class Janus {
     this.course = undefined; 
     this.messageHandlers = {}; 
 
-    this.candidates = []; 
+    this.candidates = {} 
     this.SDP = {};
 
     this.keepAliveID = undefined;
@@ -138,6 +138,9 @@ class Janus {
     //This means that the user wants to send its audio/video stream
     console.log("Got message type ANSWER. Setting Remote Description...")
     this.publisherConn.setRemoteDescription(object.jsep);
+    this.candidates['publisher'].forEach(candidate => {
+      this.publisherConn.addIceCandidate(candidate)
+    })
   }
 
   async onOfferHandler(object){
@@ -164,6 +167,10 @@ class Janus {
       offerToReceiveAudio: true,
       offerToReceiveVideo: true
     }
+
+    this.candidates[object.subscriberID].forEach(candidate => {
+      this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
+    })
 
     console.log("Creating answer to send back to the server")
     //Create an answer to send
@@ -281,6 +288,7 @@ class Janus {
   subscriberSetup(){
     this.on('started',this.onStartedHandler.bind(this));
     this.on('offer', this.onOfferHandler.bind(this));
+    this.on('trickle', this.onTrickleHandler.bind(this));
   }
 
   onRemoteFeed(object){
@@ -300,6 +308,36 @@ class Janus {
         resolve(subscriberID)
       }
     })
+  }
+
+  onTrickleHandler(object){
+    console.log("Received Trickle message from backend")
+    //This is about a subscriber RTCPeerConnection
+    if(!object.candidate.completed){
+      if(object.subscriberID){
+        if(this.subscriberConn[object.subscriberID].remoteDescription){
+          this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
+        }
+        else{
+          if(!this.candidates[object.subscriberID]){
+            this.candidates[object.subscriberID] = []
+          }
+          this.candidates[object.subscriberID].push(object.candidate)
+        }
+      }
+      else{
+        //should check if remoteDescription is set
+        if(this.publisherConn.remoteDescription){
+          this.publisherConn.addIceCandidate(object.candidate)
+        }
+        else{
+          if(!this.candidates['publisher']){
+            this.candidates['publisher'] = []
+          }
+          this.candidates['publisher'].push(object.candidate)
+        }
+      }
+    }
   }
 
   async onIceCandidateHandlerPublisher(ev) {
@@ -331,7 +369,34 @@ class Janus {
   }
   
   async onIceCandidateHandlerSubscriber(ev,subscriberID) {
-	  
+    console.log("onIceCandidateHandler");
+    console.log("Printing candidate....")
+    if(ev.candidate && ev.candidate.candidate.length > 0){
+
+      let candidate = {
+        "candidate": ev.candidate.candidate,
+        "sdpMid": ev.candidate.sdpMid,
+        "sdpMLineIndex": ev.candidate.sdpMLineIndex
+      };
+      let body = {
+        "message": "trickle",
+        "candidate": candidate,
+        "subscriberID": subscriberID,
+        "course": this.course
+      };
+      this.websocket.send(JSON.stringify(body));
+    }
+    else{
+      console.log("No candidate")
+      let body = {
+        "message": "trickle",
+        "completed": true,
+        "subscriberID": subscriberID,
+        "course": this.course
+      }
+      this.websocket.send(JSON.stringify(body))
+    }
+	  /*
     console.log("onIceCandidateHandler");
     console.log("Printing candidate....")
     console.log(ev.candidate) 
@@ -387,6 +452,7 @@ class Janus {
       //this.subscriberConn[subscriberID].addIceCandidate(candidate)
       this.candidates.push(candidate);
     }
+    */
   }  
 
   async onNegotiationNeededHandler() {
