@@ -215,8 +215,7 @@ const janus = async (server) => {
 
 
     async function manageStartMessage(ws){
-        console.log("Received start message");   
-        console.log(ws.role)             
+        console.log("Received start message");                
         if(ws.role){
             ws.videoroomHandle = janusWrapper.addHandle();
             await ws.videoroomHandle.attach("janus.plugin.videoroom");
@@ -240,6 +239,7 @@ const janus = async (server) => {
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
                     let retakeExam = await currentExams.verifyRetake(ws.email,exam.room)
+                    console.log("RetakeExam:",retakeExam)
                     if(!retakeExam){
                         exam.students.push(ws.email)
                         await ws.videoroomHandle.join(exam.room, "publisher");
