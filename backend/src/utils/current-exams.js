@@ -67,23 +67,28 @@ class CurrentExams{
         }
     }
 
-    async verifyRetake(student,room){
+    async addStudent(student,room){
         try{
             let exam = await examsSchema.findOne({room})
-            if(exam){
-                if(exam.students.includes(student)){
-                    console.log("Student",student,"has already participated in this exam")
-                    return false
-                }
-                else{
-                    return true
-                }
-            }         
+            if(exam){               
+                console.log("Added student",student,"to exam")
+                exam.students.push(student)
+                await exam.save()                
+            }            
         }
         catch(e){
             console.log(e)
-            return null
-        }    
+        }   
+    }
+
+    verifyRetake(student,exam){
+         if(exam.students.includes(student)){
+             console.log("Student",student,"has already participated in this exam")
+             return false
+         } 
+         else{
+             return true
+         }
     }
 }
 
