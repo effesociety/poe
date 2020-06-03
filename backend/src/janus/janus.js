@@ -240,9 +240,10 @@ const janus = async (server) => {
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
                     let firstTime = await currentExams.verifyRetake(ws.email,exam.room)
-                    console.log("First time:",firstTime)
                     if(firstTime){
                         await ws.videoroomHandle.join(exam.room, "publisher");
+                        exam.students.push(ws.student)
+                        await exam.save()
                     }
                     else{
                         console.log("Impossible to retake exam")
