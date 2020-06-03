@@ -71,11 +71,17 @@ class CurrentExams{
         try{
             let exam = await examsSchema.findOne({room})
             if(exam){
-                return exam.students.includes(student)
-            }
-            else{
-                return null
-            }           
+                if(!exam.students.includes(student)){
+                    console.log("Student",student,"can participate in this exam")
+                    exam.students.push(student)
+                    await exam.save()
+                    return true
+                }
+                else{
+                    console.log("Student",student,"has already participated in this exam")
+                    return false
+                }
+            }         
         }
         catch(e){
             console.log(e)

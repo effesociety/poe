@@ -154,13 +154,13 @@ userRouter.post(
                 "name": course
               } 
               if(user.role === 'student'){
-                let retake = await currentExams.verifyRetake(user.email,exam.room)
-                if(retake){
-                  c = Object.assign({"examActive": false}, c)
+                let firstTime = await currentExams.verifyRetake(user.email,exam.room)
+                if(firstTime){
+                  c = Object.assign({"examActive": true}, c)
                   courses.push(c)
                 }
                 else{
-                  c = Object.assign({"examActive": true}, c)
+                  c = Object.assign({"examActive": false}, c)
                   courses.push(c)
                 }
               }
@@ -233,13 +233,13 @@ userRouter.get(
               "name": course
             } 
             if(user.role === 'student'){
-              let retake = await currentExams.verifyRetake(user.email,exam.room)
-              if(retake){
-                c = Object.assign({"examActive": false}, c)
+              let firstTime = await currentExams.verifyRetake(user.email,exam.room)
+              if(firstTime){
+                c = Object.assign({"examActive": true}, c)
                 courses.push(c)
               }
               else{
-                c = Object.assign({"examActive": true}, c)
+                c = Object.assign({"examActive": false}, c)
                 courses.push(c)
               }
             }
