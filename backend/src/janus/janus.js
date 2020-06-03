@@ -239,8 +239,7 @@ const janus = async (server) => {
                 console.log("Role student")
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
-                    let firstTime = await currentExams.verifyRetake(ws.email,exam)
-                    console.log("First time:",firstTime)
+                    let firstTime = await currentExams.verifyFirstTime(ws.email,exam)
                     if(firstTime){
                         await currentExams.addStudent(ws.email,exam.room)
                         await ws.videoroomHandle.join(exam.room, "publisher")

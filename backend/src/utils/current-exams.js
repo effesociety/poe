@@ -81,7 +81,7 @@ class CurrentExams{
         }   
     }
 
-    verifyRetake(student,exam){
+    verifyFirstTime(student,exam){
          if(exam.students.includes(student)){
              console.log("Student",student,"has already participated in this exam")
              return false

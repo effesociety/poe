@@ -137,6 +137,7 @@ class CoursesStudent extends React.Component{
         })
         this.fixOverflow(false)
         janus.destroy(true);
+        this.props.refresh(true)
     }
 
     closeResultsDialog(){
