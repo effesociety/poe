@@ -14,6 +14,7 @@ const janus = async (server) => {
         user = await Helpers.checkUser(cookies)
         if(user){
             console.log("Set WebSocket",user.email, "role [",user.role,"]")
+            ws.email = user.email
             ws.role = user.role
         }
         else {
@@ -224,11 +225,6 @@ const janus = async (server) => {
                 console.log("Role teacher")
                 let exam = await currentExams.getExam(ws.course);
 
-                console.log("printing exam")
-                console.log(exam)
-                console.log("printing currentExams")
-                console.log(currentExams)
-
                 if(exam){
                     await ws.videoroomHandle.join(exam.room, "publisher");
                 }
@@ -243,7 +239,14 @@ const janus = async (server) => {
                 console.log("Role student")
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
-                    await ws.videoroomHandle.join(exam.room, "publisher"); 
+                    let retakeExam = await currentExams.verifyRetake(ws.email,exam.room)
+                    if(!retakeExam){
+                        exam.students.push(ws.email)
+                        await ws.videoroomHandle.join(exam.room, "publisher");
+                    }
+                    else{
+                        console.log("Impossible to retake exam")
+                    }                        
                 }
                 //@TO-DO: Send some info msg to the client                     
             } 

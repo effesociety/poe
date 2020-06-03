@@ -144,16 +144,30 @@ userRouter.post(
         async (err, token) => {
           if (err) throw err;
           res.cookie('token', token, { httpOnly: true })
-          console.log("Logged user:\n",user)
+          console.log("Logged user",user.email)
 
           var courses = [];
           for await(course of user.courses){
             let exam = await currentExams.getExam(course)
             if(exam){
-              courses.push({
-                "name": course,
-                "examActive": true
-              })
+              let c = {
+                "name": course
+              } 
+              if(user.role === 'student'){
+                let retake = await currentExams.verifyRetake(user.email,exam.room)
+                if(retake){
+                  c = Object.assign({"examActive": false}, c)
+                  courses.push(c)
+                }
+                else{
+                  c = Object.assign({"examActive": true}, c)
+                  courses.push(c)
+                }
+              }
+              else if(user.role === 'teacher'){
+                c = Object.assign({"examActive": true}, c)
+                courses.push(c)
+              } 
             }
             else{
               courses.push({
@@ -215,10 +229,24 @@ userRouter.get(
         for await(course of user.courses){
           let exam = await currentExams.getExam(course)
           if(exam){
-            courses.push({
-              "name": course,
-              "examActive": true
-            })
+            let c = {
+              "name": course
+            } 
+            if(user.role === 'student'){
+              let retake = await currentExams.verifyRetake(user.email,exam.room)
+              if(retake){
+                c = Object.assign({"examActive": false}, c)
+                courses.push(c)
+              }
+              else{
+                c = Object.assign({"examActive": true}, c)
+                courses.push(c)
+              }
+            }
+            else if(user.role === 'teacher'){
+              c = Object.assign({"examActive": true}, c)
+              courses.push(c)
+            }        
           }
           else{
             courses.push({

@@ -66,6 +66,19 @@ class CurrentExams{
             console.log(e)
         }
     }
+
+    async verifyRetake(student,room){
+        try{
+            let exam = await examsSchema.findOne({room})
+            if(exam){
+                return exam.students.includes(student)
+            }            
+        }
+        catch(e){
+            console.log(e)
+            return null
+        }    
+    }
 }
 
 module.exports = new CurrentExams();

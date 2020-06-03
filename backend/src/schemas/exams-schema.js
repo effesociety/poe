@@ -8,6 +8,9 @@ const examsSchema = mongoose.Schema({
     room: {
         type: Number,
         required: true
+    },
+    students: {
+        type: Array
     }
 })
 
