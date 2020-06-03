@@ -24,6 +24,7 @@ const janus = async (server) => {
         }
 
         wss.handleUpgrade(req, ws, head, function(ws) {
+            ws.email = ws._socket.email
             ws.role = ws._socket.role
             wss.emit('connection', ws, req);
           });
@@ -215,7 +216,8 @@ const janus = async (server) => {
 
 
     async function manageStartMessage(ws){
-        console.log("Received start message");                
+        console.log("Received start message");    
+        console.log(ws.email)            
         if(ws.role){
             ws.videoroomHandle = janusWrapper.addHandle();
             await ws.videoroomHandle.attach("janus.plugin.videoroom");
@@ -246,6 +248,7 @@ const janus = async (server) => {
                     }
                     else{
                         console.log("Impossible to retake exam")
+                        ws.close()
                     }                        
                 }
                 //@TO-DO: Send some info msg to the client                     

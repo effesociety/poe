@@ -71,7 +71,6 @@ class CurrentExams{
         try{
             let exam = await examsSchema.findOne({room})
             if(exam){
-                console.log("Verify retake")
                 return exam.students.includes(student)
             }
             else{
