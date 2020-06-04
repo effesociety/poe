@@ -18,4 +18,4 @@ eventsRouter.post("/events", (req,res) => {
   res.sendStatus(200)
 })
 
-module.exports = eventsRouter;
+module.exports = eventsRouter
