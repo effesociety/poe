@@ -170,7 +170,9 @@ class Janus {
       offerToReceiveAudio: true,
       offerToReceiveVideo: true
     }
-
+    console.log("*****provasiprova1******")
+    console.log(object.subscriberID)
+    console.log(this)
     if(this.candidates[object.subscriberID]){
       this.candidates[object.subscriberID].forEach(candidate => {
         console.log("Adding ICE candidate for publisher")
@@ -331,6 +333,9 @@ class Janus {
     //This is about a subscriber RTCPeerConnection
     if(!object.candidate.completed){
       if(object.subscriberID){
+        console.log("******provasiprova2*******")
+        console.log(object.subscriberID)
+        console.log(this)
         if(this.subscriberConn[object.subscriberID].remoteDescription){
           this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
         }
