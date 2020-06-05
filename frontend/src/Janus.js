@@ -336,7 +336,7 @@ class Janus {
         console.log("******provasiprova2*******")
         console.log(object.subscriberID)
         console.log(this)
-        if(this.subscriberConn[object.subscriberID].remoteDescription){
+        if(this.subscriberConn[object.subscriberID] && this.subscriberConn[object.subscriberID].remoteDescription){
           this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
         }
         else{
