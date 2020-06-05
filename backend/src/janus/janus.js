@@ -121,8 +121,16 @@ const janus = async (server) => {
             }
             
             if(ws.subscriberHandles){
-                for (subscriberID in Object.keys(ws.subscriberHandles)){
-                    if(ws.subscriberHandles[subscriberID] && ws.subscriberHandles[subscriberID].id === object.sender){
+                for (let i=0; i<Object.keys(ws.subscriberHandles).length; i++){
+                    let subscriberID = Object.keys(ws.subscriberHandles)[i]
+                    if(ws.subscriberHandles[subscriberID]){
+                        console.log("provasiprova")
+                        console.log(ws.subscriberHandles[subscriberID])
+                        console.log(object.sender)
+                        console.log(typeof(ws.subscriberHandles[subscriberID]))
+                        console.log(typeof(object.sender))
+                    }
+                    if(ws.subscriberHandles[subscriberID].id === object.sender){
                         console.log("Relaying trickle message to subscriber")
                         body = Object.assign({"subscriberID": subscriberID}, body)
                         ws.send(JSON.stringify(body))
