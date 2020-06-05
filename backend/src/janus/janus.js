@@ -107,8 +107,6 @@ const janus = async (server) => {
     })
 
     janusWrapper.session.on('trickle', (object) => {
-
-        console.log("Relaying trickle message from subsccriber")
         //data.sender has the pluginID
         //data.candidate has the ICE candidate
         let body = {
@@ -124,7 +122,9 @@ const janus = async (server) => {
             
             if(ws.subscriberHandles){
                 for (subscriberID in Object.keys(ws.subscriberHandles)){
-                    if(ws.subscriberHandles[subscriberID] === object.sender){
+                    if(ws.subscriberHandles[subscriberID].id === object.sender){
+                        console.log("Printing ws.subscriberHandles[subscriberID]",ws.subscriberHandles[subscriberID])
+                        console.log("Printing object sender",object.sender)
                         body = Object.assign({"subscriberID": subscriberID}, body)
                         ws.send(JSON.stringify(body))
                         return
