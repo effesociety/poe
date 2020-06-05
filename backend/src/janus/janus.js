@@ -121,18 +121,16 @@ const janus = async (server) => {
             }
             
             if(ws.subscriberHandles){
-                console.log("Printing ws.subscriberHandles",ws.subscriberHandles)
-                console.log("Printing object sender",object.sender)
                 for (subscriberID in Object.keys(ws.subscriberHandles)){
                     if(ws.subscriberHandles[subscriberID] && ws.subscriberHandles[subscriberID].id === object.sender){
+                        console.log("Relaying trickle message to subscriber")
                         body = Object.assign({"subscriberID": subscriberID}, body)
                         ws.send(JSON.stringify(body))
                         return
                     }
                 }
             }
-        })
-        
+        })        
     })
 
     janusEventHandler.on('published', (data) => {

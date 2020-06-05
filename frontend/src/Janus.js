@@ -310,7 +310,7 @@ class Janus {
   onRemoteFeed(object){
     return new Promise((resolve) => {
       const subscriberID = object.subscriberID;
-      if(object.subscriberID === subscriberID){
+      if(object.subscriberID == subscriberID){
         resolve(subscriberID)
       }
     })
@@ -319,7 +319,7 @@ class Janus {
   onLeavingFeed(object){
     return new Promise((resolve) => {
       const subscriberID = object.subscriberID;
-      if(object.subscriberID === subscriberID){
+      if(object.subscriberID == subscriberID){
         this.onLeavingHandler(object)
         resolve(subscriberID)
       }
