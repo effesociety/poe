@@ -107,6 +107,8 @@ const janus = async (server) => {
     })
 
     janusWrapper.session.on('trickle', (object) => {
+
+        console.log("Relaying trickle message from subsccriber")
         //data.sender has the pluginID
         //data.candidate has the ICE candidate
         let body = {

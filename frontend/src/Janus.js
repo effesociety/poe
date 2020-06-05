@@ -140,6 +140,7 @@ class Janus {
     this.publisherConn.setRemoteDescription(object.jsep);
     if(this.candidates['publisher']){
       this.candidates['publisher'].forEach(candidate => {
+        console.log("Adding ICE candidate for publisher")
         this.publisherConn.addIceCandidate(candidate)
       })
     }
@@ -172,6 +173,7 @@ class Janus {
 
     if(this.candidates[object.subscriberID]){
       this.candidates[object.subscriberID].forEach(candidate => {
+        console.log("Adding ICE candidate for publisher")
         this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
       })
     }

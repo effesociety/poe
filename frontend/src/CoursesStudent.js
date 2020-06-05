@@ -47,7 +47,7 @@ class CoursesStudent extends React.Component{
             };
             let response = await fetch("/api/courses/enroll", requestOptions);
             if(response.status === 200){
-              this.props.refresh(true);
+              this.props.refresh();
             }
             else{
               alert("An error occurred");
@@ -137,7 +137,7 @@ class CoursesStudent extends React.Component{
         })
         this.fixOverflow(false)
         janus.destroy(true);
-        this.props.refresh(true)
+        this.props.refresh()
     }
 
     closeResultsDialog(){
