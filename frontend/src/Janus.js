@@ -175,7 +175,7 @@ class Janus {
     console.log(this)
     if(this.candidates[object.subscriberID]){
       this.candidates[object.subscriberID].forEach(candidate => {
-        console.log("Adding ICE candidate for publisher")
+        console.log("Adding ICE candidate for subscriber")
         this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
       })
     }
@@ -330,6 +330,7 @@ class Janus {
 
   onTrickleHandler(object){
     console.log("Received Trickle message from backend")
+    console.log(object.candidate)
     //This is about a subscriber RTCPeerConnection
     if(!object.candidate.completed){
       if(object.subscriberID){
@@ -338,6 +339,7 @@ class Janus {
         console.log(this)
         if(this.subscriberConn[object.subscriberID] && this.subscriberConn[object.subscriberID].remoteDescription){
           this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
+          console.log("Adding ICE candidate for subscriber2")
         }
         else{
           if(!this.candidates[object.subscriberID]){
