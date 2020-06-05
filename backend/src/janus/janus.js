@@ -124,7 +124,7 @@ const janus = async (server) => {
                 console.log("Printing ws.subscriberHandles",ws.subscriberHandles)
                 console.log("Printing object sender",object.sender)
                 for (subscriberID in Object.keys(ws.subscriberHandles)){
-                    if(ws.subscriberHandles[subscriberID && ws.subscriberHandles[subscriberID].id === object.sender){
+                    if(ws.subscriberHandles[subscriberID] && ws.subscriberHandles[subscriberID].id === object.sender){
                         body = Object.assign({"subscriberID": subscriberID}, body)
                         ws.send(JSON.stringify(body))
                         return
