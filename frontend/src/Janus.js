@@ -61,15 +61,17 @@ class Janus {
     }
     Object.keys(this.publisherConn).forEach((type) => {
       if(this.mystream[type]){
-        this.mystream[type].getTracks()[0].stop();
-        this.mystream[type].getTracks()[1].stop();
+        for(let i in this.streams[object.subscriberID].getTracks()){
+          this.mystream[type].getTracks()[i].stop(); 
+        }
       }
       this.publisherConn[type].close();
     })
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       if(this.streams[subscriberID]){
-        this.streams[subscriberID].getTracks()[0].stop();
-        this.streams[subscriberID].getTracks()[1].stop();      
+        for(let i in this.streams[object.subscriberID].getTracks()){
+          this.streams[subscriberID].getTracks()[i].stop(); 
+        } 
       }
       this.subscriberConn[subscriberID].close();
     })
