@@ -69,7 +69,7 @@ class Janus {
     })
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       if(this.streams[subscriberID]){
-        for(let i in this.streams[object.subscriberID].getTracks()){
+        for(let i in this.streams[subscriberID].getTracks()){
           this.streams[subscriberID].getTracks()[i].stop(); 
         } 
       }
