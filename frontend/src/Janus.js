@@ -337,7 +337,7 @@ class Janus {
         console.log("Trickle message is for a subscriberConn")
         if(this.subscriberConn[object.subscriberID] && this.subscriberConn[object.subscriberID].remoteDescription){
           console.log("Found a subscriberConn with remoteDescription already set, adding candidate...")
-          console.log(candidate)
+          console.log(object.candidate)
           this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
         }
         else{
