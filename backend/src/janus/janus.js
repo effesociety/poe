@@ -95,8 +95,10 @@ const janus = async (server) => {
         })
 
         ws.on('close', () => {
-            if(ws.videoroomHandle){
-                ws.videoroomHandle.detach()
+            if(ws.publisherHandlers){
+                Object.keys(ws.publisherHandlers).forEach(type => {
+                    ws.publisherHandlers[type].detach()
+                })
             }
             if(ws.subscriberHandle){
                 Object.keys(ws.subscriberHandles).forEach(handle => {
@@ -115,11 +117,18 @@ const janus = async (server) => {
         }
 
         wss.clients.forEach(ws => {
-            if(ws.videoroomHandle && ws.videoroomHandle.id === object.sender){
-                ws.send(JSON.stringify(body))
-                return
+            if(ws.publisherHandlers){
+                for (let i=0; i<Object.keys(ws.publisherHandlers).length; i++){
+                    let type = Object.keys(ws.publisherHandlers)[i]
+                    if(ws.publisherHandlers[type].id === object.sender){
+                        console.log("Relaying trickle message to publisher (" + type + ")")
+                        body = Object.assign({"publisherType": type}, body)
+                        ws.send(JSON.stringify(body))
+                        return
+                    }
+                }
             }
-            
+
             if(ws.subscriberHandles){
                 for (let i=0; i<Object.keys(ws.subscriberHandles).length; i++){
                     let subscriberID = Object.keys(ws.subscriberHandles)[i]
@@ -141,9 +150,11 @@ const janus = async (server) => {
         let publishedRole;
 
         wss.clients.forEach(ws => {
-            if(ws.videoroomHandle && ws.videoroomHandle.feedID === data.id){
-                publishedRole = ws.role
-            }
+            Object.keys(ws.publisherHandlers).forEach(type => {
+                if(ws.publisherHandlers[type] && ws.publisherHandlers[type].feedID === data.id){
+                    publishedRole = ws.role
+                }
+            })
         })
         
         wss.clients.forEach(async ws => {
@@ -185,7 +196,7 @@ const janus = async (server) => {
         .then(participants => {
             console.log("Printing participants")
             console.log(participants)
-            if(participants.length === 0){
+            if(participants && participants.length === 0){
                 janusAdminAPI.destroyRoom(data.room)
                 .then(async () => {
                     var course = await currentExams.getCourse(data.room)
@@ -213,45 +224,48 @@ const janus = async (server) => {
             }        
         })
     })
-
-
-
+    
     async function manageStartMessage(ws){
         console.log("Received start message");          
         if(ws.role){
-            ws.videoroomHandle = janusWrapper.addHandle();
-            await ws.videoroomHandle.attach("janus.plugin.videoroom");
-            
+            if(!ws.publisherHandlers){
+                ws.publisherHandlers = {}
+            }
+            ws.publisherHandlers.userMedia = janusWrapper.addHandle();
+            ws.publisherHandlers.displayMedia = janusWrapper.addHandle();
+            await ws.publisherHandlers.userMedia.attach("janus.plugin.videoroom");
             if(ws.role === 'teacher'){
                 console.log("Role teacher")
                 let exam = await currentExams.getExam(ws.course);
 
                 if(exam){
-                    await ws.videoroomHandle.join(exam.room, "publisher");
+                    await ws.publisherHandlers.userMedia.join(exam.room, "publisher");
                 }
                 else{
                     let room = Math.floor(Math.random()*10000)
-                    await ws.videoroomHandle.createRoom(room)
+                    await ws.publisherHandlers.userMedia.createRoom(room)
                     await currentExams.setExam(ws.course,room)
-                    await ws.videoroomHandle.join(room, "publisher");                       
+                    await ws.publisherHandlers.userMedia.join(room, "publisher");                                          
                 }
             }
             else if(ws.role === 'student'){
                 console.log("Role student")
+                await ws.publisherHandlers.displayMedia.attach("janus.plugin.videoroom");
                 let exam = await currentExams.getExam(ws.course);
                 if(exam){
                     let firstTime = await currentExams.verifyFirstTime(ws.email,exam)
                     if(firstTime){
                         await currentExams.addStudent(ws.email,exam.room)
-                        await ws.videoroomHandle.join(exam.room, "publisher")
+                        await ws.publisherHandlers.userMedia.join(exam.room, "publisher");  
+                        await ws.publisherHandlers.displayMedia.join(exam.room, "publisher");  
                     }
                     else{
                         console.log("Impossible to retake exam")
                         ws.close()
                     }                        
                 }
-                //@TO-DO: Send some info msg to the client                     
-            } 
+                //@TO-DO: Send some info msg to the client                 
+            }            
         }  
     }
     
@@ -261,19 +275,19 @@ const janus = async (server) => {
         if(object.subscriberID){
             ws.subscriberHandles[object.subscriberID].sendTrickle(candidate || null);
         }
-        else if(ws.videoroomHandle){
-            ws.videoroomHandle.sendTrickle(candidate || null);
+        else if(object.publisherType){
+            ws.publisherHandlers[object.publisherType].sendTrickle(candidate || null);
         }
     }
     
     async function managePublishMessage(ws,object){
         console.log("Received publish message");
-        if(ws.videoroomHandle){
-            let remote = await ws.videoroomHandle.publish(object.offer,object.audio,object.video);
+        if(object.publisherType){
+            let remote = await ws.publisherHandlers[object.publisherType].publish(object.offer,object.audio,object.video);
             let body = {
                 "message": "answer",
                 "jsep": remote.jsep,
-                "publisherID": ws.videoroomHandle.id
+                "publisherType": object.publisherType
             }         
             
             if(ws.role === 'teacher'){
@@ -283,7 +297,8 @@ const janus = async (server) => {
                 if(exam){
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "student" && websocket.course === ws.course){
-                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.displayMedia.feedID)
                         }
                     })
                 }
@@ -303,7 +318,7 @@ const janus = async (server) => {
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "teacher" && websocket.course === ws.course){
                             console.log("Attacching to teacher feed")
-                            sendOffer(ws, exam.room, websocket.videoroomHandle.feedID)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID)
                         }
                     })
                 }
@@ -316,8 +331,8 @@ const janus = async (server) => {
         console.log("Received getFeeds message")
         if(ws.role === 'teacher'){
             var room = await currentExams.getExam(ws.course).room
-            if(ws.videoroomHandle.id && room){
-                let ev = await ws.videoroomHandle.listParticipants(room)
+            if(ws.publisherHandlers.userMedia.id && room){
+                let ev = await ws.publisherHandlers.userMedia.listParticipants(room)
                 if(ev.plugindata){
                     if(ev.plugindata.plugin === "janus.plugin.videoroom" && ev.plugindata.data.videoroom === "participants"){
                         if(ev.plugindata.data.participants.length>0){
@@ -336,8 +351,6 @@ const janus = async (server) => {
     
     async function manageSubscribeMessage(ws,object){
         console.log("Received subscribe message")
-        console.log("Printing subscriber ID")
-        console.log(object.subscriberID)
         
         await ws.subscriberHandles[object.subscriberID].start(object.jsep);
         let body = {
@@ -410,23 +423,23 @@ const janus = async (server) => {
     }
 
     async function sendOffer(ws, room, feed){
-        if(feed !== ws.videoroomHandle.feedID){
-            console.log("Printing participant id: ", feed);
-            let subscriberHandle = janusWrapper.addHandle();
-            await subscriberHandle.attach("janus.plugin.videoroom");
-            if(!ws.subscriberHandles){
-                ws.subscriberHandles = {}
-            }
-            ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
-            let object = await subscriberHandle.join(room, "subscriber", feed);
-            let body = {
-                "message": "offer",
-                "jsep": object.jsep,
-                "subscriberID": subscriberHandle.id
-            };
-            console.log("Sending offer to ",subscriberHandle.id)
-            ws.send(JSON.stringify(body));
+        //ws.attachedToTeacher = true; //To avoid double attach
+        console.log("Printing participant id: ", feed);
+        let subscriberHandle = janusWrapper.addHandle();
+        await subscriberHandle.attach("janus.plugin.videoroom");
+        if(!ws.subscriberHandles){
+            ws.subscriberHandles = {}
         }
+        ws.subscriberHandles[subscriberHandle.id] = subscriberHandle;
+        let object = await subscriberHandle.join(room, "subscriber", feed);
+        let body = {
+            "message": "offer",
+            "jsep": object.jsep,
+            "subscriberID": subscriberHandle.id
+        };
+        console.log("Sending offer to ",subscriberHandle.id)
+        ws.send(JSON.stringify(body));      
+
     }
 }
 
