@@ -192,8 +192,10 @@ html,body{
 .student-exam-card{
 	width: calc(100% - 100px);
 	margin: auto!important;
-	top: 80px;
-	position: relative;
+	position: absolute;
+	top: 100px;
+	left: 0;
+	right: 0;
 }
 .student-exam-index-box{
 	display: block;
