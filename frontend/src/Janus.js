@@ -61,7 +61,7 @@ class Janus {
     }
     Object.keys(this.publisherConn).forEach((type) => {
       if(this.mystream[type]){
-        for(let i in this.streams[object.subscriberID].getTracks()){
+        for(let i in this.mystream[type].getTracks()){
           this.mystream[type].getTracks()[i].stop(); 
         }
       }
