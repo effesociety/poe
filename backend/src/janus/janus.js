@@ -135,7 +135,7 @@ const janus = async (server) => {
     })
 
     janusEventHandler.on('published', (data) => {
-        console.log("published event")
+        console.log("Published event")
         console.log(data)
 
         let publishedRole;

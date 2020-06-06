@@ -170,12 +170,12 @@ class Janus {
       offerToReceiveAudio: true,
       offerToReceiveVideo: true
     }
-    console.log("*****provasiprova1******")
-    console.log(object.subscriberID)
-    console.log(this)
+    
     if(this.candidates[object.subscriberID]){
+      console.log("Found candidates that got here before offer msg, adding...")
       this.candidates[object.subscriberID].forEach(candidate => {
         console.log("Adding ICE candidate for subscriber")
+        console.log(candidate)
         this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
       })
     }
@@ -334,14 +334,15 @@ class Janus {
     //This is about a subscriber RTCPeerConnection
     if(!object.candidate.completed){
       if(object.subscriberID){
-        console.log("******provasiprova2*******")
-        console.log(object.subscriberID)
-        console.log(this)
+        console.log("Trickle message is for a subscriberConn")
         if(this.subscriberConn[object.subscriberID] && this.subscriberConn[object.subscriberID].remoteDescription){
+          console.log("Found a subscriberConn with remoteDescription already set, adding candidate...")
+          console.log(candidate)
           this.subscriberConn[object.subscriberID].addIceCandidate(object.candidate)
-          console.log("Adding ICE candidate for subscriber2")
         }
         else{
+          console.log("SubscriberConn or remoteDescrition is not set yet, saving candidate for later")
+          console.log(this.subscriberConn)
           if(!this.candidates[object.subscriberID]){
             this.candidates[object.subscriberID] = []
           }
