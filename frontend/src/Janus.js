@@ -6,10 +6,10 @@ var pc_constraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
 class Janus {
   constructor() {
     this.websocket = undefined; //the WebSocket connection with the backend
-    this.publisherConn = undefined; //the peerConnection as publisher
+    this.publisherConn = {}; //the peerConnection as publisher
     this.subscriberConn = {}; //the peerConnections as subscriber (only available for teachers, students are refused by backend)
     this.streams = {}; //all the remote streams to be displayed (just the teacher feed for the students)
-    this.mystream = undefined; //the local stream
+    this.mystream = {}; //the local stream
     this.course = undefined; //the course to be added to every message sent to the backend
     this.messageHandlers = {}; //handlers for responses received from the backend
 
@@ -59,13 +59,13 @@ class Janus {
       clearTimeout(this.keepAliveID);
       this.keepAliveID = undefined;
     }
-    if(this.publisherConn){
-      if(this.mystream){
-        this.mystream.getTracks()[0].stop();
-        this.mystream.getTracks()[1].stop(); 
-      }     
-      this.publisherConn.close();
-    }
+    Object.keys(this.publisherConn).forEach((type) => {
+      if(this.mystream[type]){
+        this.mystream[type].getTracks()[0].stop();
+        this.mystream[type].getTracks()[1].stop();
+      }
+      this.publisherConn[type].close();
+    })
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       if(this.streams[subscriberID]){
         this.streams[subscriberID].getTracks()[0].stop();
@@ -76,10 +76,10 @@ class Janus {
 
     //Resetting everything to default values without destroying the object itself
     //This way we can keep using .init() before every action
-    this.publisherConn = undefined; 
+    this.publisherConn = {}; 
     this.subscriberConn = {}; 
     this.streams = {}; 
-    this.mystream = undefined; 
+    this.mystream = {}; 
     this.course = undefined; 
     this.messageHandlers = {}; 
 
@@ -104,9 +104,9 @@ class Janus {
   //Close all RTCPeerConnections
   onCloseHandler(){
     console.log("WebSocket closed")
-    if(this.publisherConn){
-      this.publisherConn.close();
-    }
+    Object.keys(this.publisherConn).forEach((type) => {
+      this.publisherConn[type].close();
+    })
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
       this.subscriberConn[subscriberID].close();
     })
@@ -137,11 +137,11 @@ class Janus {
     //object.message is equal to "answer"
     //This means that the user wants to send its audio/video stream
     console.log("Got message type ANSWER. Setting Remote Description...")
-    this.publisherConn.setRemoteDescription(object.jsep);
-    if(this.candidates['publisher']){
-      this.candidates['publisher'].forEach(candidate => {
-        console.log("Adding ICE candidate for publisher")
-        this.publisherConn.addIceCandidate(candidate)
+    this.publisherConn[object.publisherType].setRemoteDescription(object.jsep);
+    if(this.candidates[object.publisherType]){
+      this.candidates[object.publisherType].forEach(candidate => {
+        console.log("Adding ICE candidate for publisher (" + object.publisherType + ")")
+        this.publisherConn[object.publisherType].addIceCandidate(candidate)
       })
     }
   }
@@ -218,8 +218,9 @@ class Janus {
       delete this.subscriberConn[object.subscriberID];
     }
     if(this.streams[object.subscriberID]){
-      this.streams[object.subscriberID].getTracks()[0].stop();
-      this.streams[object.subscriberID].getTracks()[1].stop();      
+      for(let i in this.streams[object.subscriberID].getTracks()){
+        this.streams[object.subscriberID].getTracks()[i].stop(); 
+      }
       delete this.streams[object.subscriberID]
     }
   }
@@ -250,7 +251,7 @@ class Janus {
     this.websocket.send(JSON.stringify(body))
   }
 
-  publish(){
+  async publish(role){
     this.subscriberSetup();
 
     let body = {
@@ -258,22 +259,40 @@ class Janus {
       "course": this.course
     };
     this.websocket.send(JSON.stringify(body));
-  
-    this.publisherConn = new RTCPeerConnection(config,pc_constraints);
-    this.publisherConn.onicecandidate = this.onIceCandidateHandlerPublisher.bind(this);
-    this.publisherConn.onnegotiationneeded = this.onNegotiationNeededHandler.bind(this);	
-    this.userMediaSetup()
-    //this.on('answer', this.onAnswerHandler.bind(this))
+
+    if(role == 'teacher'){
+      await this.publishMedia('userMedia');
+    }
+    else if(role === 'student'){
+      await this.publishMedia('userMedia');
+      let test = await this.publishMedia('displayMedia');
+      return test;
+    }
+    
+  }
+
+  publishMedia(type){  
+    console.log("PUBLISH MEDIA WITH TYPE", type)
+    this.publisherConn[type] = new RTCPeerConnection(config,pc_constraints);
+    this.publisherConn[type].onicecandidate = (ev) => {
+      this.onIceCandidateHandlerPublisher(ev,type)
+    }
+    this.publisherConn[type].onnegotiationneeded = () => {
+      this.onNegotiationNeededHandler(type)
+    }
+    this.mediaSetup(type)
 
     return new Promise((resolve) => {
       this.on('answer',(object) => {
         this.onAnswerHandler(object);
-        if(object.test){
-          resolve(object.test) //the questions for the student
+        if(object.publisherType === type){
+          if(object.test){
+            resolve(object.test) //the questions for the student
+          }
+          else{
+            resolve()
+          }   
         }
-        else{
-          resolve()
-        }        
       })
     })
   }
@@ -291,16 +310,37 @@ class Janus {
     this.on('leaving', this.onLeavingHandler.bind(this))
   }
 
-  async userMediaSetup() {
-    var media = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    if(this.publisherConn.iceConnectionState !== 'closed'){
-      this.mystream = media;
-      media.getTracks().forEach((track) => {
-          this.publisherConn.addTrack(track, media)
+  async mediaSetup(type) {
+    if(type === "userMedia"){
+      console.log("MEDIA SETUP WITH TYPE userMedia")
+      var media = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
       });
+      if(this.publisherConn.iceConnectionState !== 'closed'){
+        this.mystream[type] = media;
+        media.getTracks().forEach((track) => {
+          console.log("Adding webcam track")
+            this.publisherConn[type].addTrack(track)
+        });
+      }
+    }
+    else if (type === 'displayMedia'){
+      console.log("MEDIA SETUP WITH TYPE displayMedia")
+      let constraints = {}
+      constraints.video = {}
+      constraints.video.width = 640;
+      constraints.video.height = 480;
+      constraints.video.frameRate = 30;
+
+      var screen = await navigator.mediaDevices.getDisplayMedia({constraints})
+      if(this.publisherConn[type].iceConnectionState !== 'closed'){
+        this.mystream[type] = screen
+        screen.getTracks().forEach((track) => {
+          console.log("Adding screen track")
+          this.publisherConn[type].addTrack(track)
+        })
+      }
     }
   }
 
@@ -349,22 +389,22 @@ class Janus {
           this.candidates[object.subscriberID].push(object.candidate)
         }
       }
-      else{
+      else if(object.publisherType){
         //should check if remoteDescription is set
-        if(this.publisherConn.remoteDescription){
-          this.publisherConn.addIceCandidate(object.candidate)
+        if(this.publisherConn[object.publisherType].remoteDescription){
+          this.publisherConn[object.publisherType].addIceCandidate(object.candidate)
         }
         else{
-          if(!this.candidates['publisher']){
-            this.candidates['publisher'] = []
+          if(!this.candidates[[object.publisherType]]){
+            this.candidates[[object.publisherType]] = []
           }
-          this.candidates['publisher'].push(object.candidate)
+          this.candidates[[object.publisherType]].push(object.candidate)
         }
       }
     }
   }
 
-  async onIceCandidateHandlerPublisher(ev) {
+  async onIceCandidateHandlerPublisher(ev, publisherType) {
     console.log("onIceCandidateHandler");
   	console.log("Printing candidate....")
   	console.log(ev.candidate)
@@ -377,7 +417,8 @@ class Janus {
       let body = {
         "message": "trickle",
         "candidate": candidate,
-        "course": this.course
+        "course": this.course,
+        "publisherType": publisherType
       };
       this.websocket.send(JSON.stringify(body));
     }
@@ -386,7 +427,8 @@ class Janus {
       let body = {
         "message": "trickle",
         "completed": true,
-        "course": this.course
+        "course": this.course,
+        "publisherType": publisherType
       }
       this.websocket.send(JSON.stringify(body));
     }
@@ -422,26 +464,34 @@ class Janus {
     }
   }  
 
-  async onNegotiationNeededHandler() {
-    console.log("onNegotiationNeededHandler");
+  async onNegotiationNeededHandler(type) {
+    console.log("onNegotiationNeededHandler for " + type);
 
-    let offer = await this.publisherConn.createOffer();
+    let offer = await this.publisherConn[type].createOffer();
     console.log("Printing offer...")
     console.log(offer)
-    this.publisherConn.setLocalDescription(offer);
+    this.publisherConn[type].setLocalDescription(offer);
 
     let body = {
       "message": "publish",
       "offer": offer,
       "audio": true, //@TO-D: Not true by default!
       "video": true, //@TO-D: Not true by default!
-      "course": this.course
+      "course": this.course,
+      "publisherType": type
     };
+
+    if(type === "displayMedia"){
+      body.audio = false
+    }
     this.websocket.send(JSON.stringify(body));
   }
 
   onTrackHandler(ev, subscriberID){
     console.log("On Add Stream event")
+    
+    console.log(ev)
+    console.log(ev.streams[0])
     this.streams[subscriberID]=ev.streams[0] 
   }
 }

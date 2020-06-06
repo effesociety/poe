@@ -89,12 +89,12 @@ class CoursesTeacher extends React.Component{
         })
 
         await janus.init(course)
-        await janus.publish()
+        await janus.publish('teacher')
         this.props.refresh(); //To make appear the "Stop exam" btn
         this.goFull();
         if(janus.mystream && !this.state.mystream){
             let mystream = {
-                "media": janus.mystream,
+                "media": janus.mystream['userMedia'],
                 "bigscreen": true
             }
 
