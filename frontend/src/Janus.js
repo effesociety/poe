@@ -342,7 +342,8 @@ class Janus {
         }
         else{
           console.log("SubscriberConn or remoteDescrition is not set yet, saving candidate for later")
-          console.log(this.subscriberConn)
+          console.log(this.subscriberConn[object.subscriberID])
+          console.log(this.subscriberConn[object.subscriberID].remoteDescription)
           if(!this.candidates[object.subscriberID]){
             this.candidates[object.subscriberID] = []
           }
