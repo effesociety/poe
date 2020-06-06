@@ -165,21 +165,22 @@ class Janus {
 
     console.log("Setting Remote Description for Remote Feed")
     //Setup remote description with the JSEP received
-    this.subscriberConn[object.subscriberID].setRemoteDescription(object.jsep);
+    this.subscriberConn[object.subscriberID].setRemoteDescription(object.jsep)
+    .then(() => {
+      if(this.candidates[object.subscriberID]){
+        console.log("Found candidates that got here before offer msg, adding...")
+        this.candidates[object.subscriberID].forEach(candidate => {
+          console.log("Adding ICE candidate for subscriber")
+          console.log(candidate)
+          this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
+        })
+      }
+    })  
+
     var mediaConstraints = {
       offerToReceiveAudio: true,
       offerToReceiveVideo: true
     }
-    
-    if(this.candidates[object.subscriberID]){
-      console.log("Found candidates that got here before offer msg, adding...")
-      this.candidates[object.subscriberID].forEach(candidate => {
-        console.log("Adding ICE candidate for subscriber")
-        console.log(candidate)
-        this.subscriberConn[object.subscriberID].addIceCandidate(candidate)
-      })
-    }
-
 
     console.log("Creating answer to send back to the server")
     //Create an answer to send
