@@ -1,5 +1,6 @@
 import React from 'react';
-import Box from '@material-ui/core/Grid'
+import {Box, IconButton} from '@material-ui/core';
+import CachedIcon from '@material-ui/icons/Cached';
 
 class Stream extends React.Component{
     constructor(props) {
@@ -20,14 +21,23 @@ class Stream extends React.Component{
 
     render(){
         let screenSize = this.props.bigscreen ? "bigscreen" : "smallscreen";
+        let swapIcon;
+        if(screenSize === "bigscreen" && this.props.id){
+            swapIcon = (
+                <IconButton aria-label="delete" className="exam-btn-swap" onClick={() => this.props.swapView(this.props.id)}>
+                    <CachedIcon />
+                </IconButton>
+            )
+        }
 
         return (
-            <Box className={screenSize} onClick={() => {
-                if(this.props.changeSize) {
-                    this.props.changeSize(this.props.id || null)
-                }
-            }}>
-                <video ref={this.videoRef} autoPlay />
+            <Box className={screenSize} >
+                {swapIcon}
+                <video ref={this.videoRef} onClick={() => {
+                    if(this.props.changeSize) {
+                        this.props.changeSize(this.props.id || null)
+                    }
+                }} autoPlay />
             </Box>
                 
         )

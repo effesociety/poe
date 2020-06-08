@@ -97,6 +97,19 @@ html,body{
 	display: block!important;
 	width: auto!important;
 }
+.exam-btn-swap{
+	z-index: 10000;
+	color: #fff!important;
+	position: absolute!important;
+	left: 20px;
+	top: 20px;
+}
+.exam-btn-swap:hover{
+	background: rgba(0,0,0,0.4)!important;
+}
+.exam-btn-swap span svg{
+	font-size: 3rem;
+}
 .exam-btn-stop{
 	z-index: 10000;
 	color: #fff!important;

@@ -32,6 +32,7 @@ class CoursesTeacher extends React.Component{
         this.closeExam = this.closeExam.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
         this.changeSize = this.changeSize.bind(this);
+        this.swapView = this.swapView.bind(this);
         this.goFull = this.goFull.bind(this);
     }
 
@@ -105,25 +106,30 @@ class CoursesTeacher extends React.Component{
 
         janus.on('subscribed', async (object) => {
             console.log("Subscribed")
-            var id = await janus.onRemoteFeed(object)
-            let stream = {
-                "media" : janus.streams[id],
-                "bigscreen": false
-            }
+            let res = await janus.onRemoteFeed(object)
+            let user = res[0];
+            let type = res[1];            
 
-            this.setState(update(this.state,{
-                streams: {
-                    [id]: {
-                        $set: stream
-                    }
+            //If another stream adds (screen or webcam) the views doesn't change
+            if(!this.state.streams[user]){
+                let stream = {
+                    "media" : janus.streams[user][type].stream,
+                    "bigscreen": false
                 }
-            }))
+                this.setState(update(this.state,{
+                    streams: {
+                        [user]: {
+                            $set: stream
+                        }
+                    }
+                }))
+            }
         })
         
         janus.on('leaving', async (object) => {
-            var id = await janus.onLeavingFeed(object)
+            var user = await janus.onLeavingFeed(object)
             let streams = this.state.streams;
-            delete streams[id];
+            delete streams[user];
             this.setState({
                 streams: streams
             })
@@ -208,6 +214,22 @@ class CoursesTeacher extends React.Component{
                     }
                 }
             }))
+        }
+    }
+
+    swapView(id){
+        let type = this.state.streams[id] === janus.streams[id]['userMedia'].stream ? 'displayMedia' : 'userMedia';
+
+        console.log("SWAPVIEW")
+        console.log("ID:",id)
+        console.log("TYPE:",type)
+
+        if(janus.streams[id][type]){
+            let streams = this.state.streams
+            streams[id] = janus.streams[id][type].stream
+            this.setState({
+                streams: streams
+            })
         }
     }
 
@@ -298,7 +320,7 @@ class CoursesTeacher extends React.Component{
         if(Object.keys(this.state.streams) !== 0){
             remoteStreams = Object.keys(this.state.streams).map((stream,i) => {
                     return (
-                        <Stream id={stream} stream={this.state.streams[stream].media} bigscreen={this.state.streams[stream].bigscreen} key={i} changeSize={this.changeSize}/>
+                        <Stream id={stream} stream={this.state.streams[stream].media} bigscreen={this.state.streams[stream].bigscreen} key={i} changeSize={this.changeSize} swapView={this.swapView}/>
                     )
             })
         }      

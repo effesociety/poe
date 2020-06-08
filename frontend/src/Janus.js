@@ -67,12 +67,14 @@ class Janus {
       }
       this.publisherConn[type].close();
     })
+    Object.keys(this.streams).forEach((user) => {
+      Object.keys(this.streams[user]).forEach((type) => {
+        for(let i in this.streams[user][type].stream.getTracks()){
+          this.streams[user][type].stream.getTracks()[i].stop();
+        }
+      })
+    })
     Object.keys(this.subscriberConn).forEach((subscriberID) => {
-      if(this.streams[subscriberID]){
-        for(let i in this.streams[subscriberID].getTracks()){
-          this.streams[subscriberID].getTracks()[i].stop(); 
-        } 
-      }
       this.subscriberConn[subscriberID].close();
     })
 
@@ -157,7 +159,7 @@ class Janus {
 
     //Define what happens onTrack
     this.subscriberConn[object.subscriberID].ontrack = (ev) => {
-      this.onTrackHandler(ev,object.subscriberID);
+      this.onTrackHandler(ev,object.user,object.type,object.subscriberID);
     }
     
     //Define what happens every time there is a ICE candidate
@@ -219,12 +221,16 @@ class Janus {
       this.subscriberConn[object.subscriberID].close();
       delete this.subscriberConn[object.subscriberID];
     }
-    if(this.streams[object.subscriberID]){
-      for(let i in this.streams[object.subscriberID].getTracks()){
-        this.streams[object.subscriberID].getTracks()[i].stop(); 
-      }
-      delete this.streams[object.subscriberID]
-    }
+    Object.keys(this.streams).forEach((user) => {
+      Object.keys(this.streams[user]).forEach((type) => {
+        if(this.streams[user][type].subscriberID == object.subscriberID){
+          for(let i in this.streams[user][type].stream.getTracks()){
+            this.streams[user][type].stream.getTracks()[i].stop();
+          }
+        }
+        delete this.streams[user][type]
+      })
+    })
   }
 
   
@@ -354,19 +360,24 @@ class Janus {
 
   onRemoteFeed(object){
     return new Promise((resolve) => {
-      const subscriberID = object.subscriberID;
-      if(object.subscriberID == subscriberID){
-        resolve(subscriberID)
+      for(let user of Object.keys(this.streams)){
+        for(let type of Object.keys(this.streams[user])){
+          if(this.streams[user][type].subscriberID == object.subscriberID){
+            resolve([user,type])
+          }
+        }
       }
     })
   }
 
   onLeavingFeed(object){
     return new Promise((resolve) => {
-      const subscriberID = object.subscriberID;
-      if(object.subscriberID == subscriberID){
-        this.onLeavingHandler(object)
-        resolve(subscriberID)
+      for(let user of Object.keys(this.streams)){
+        for(let type of Object.keys(this.streams[user])){
+          if(this.streams[user][type].subscriberID == object.subscriberID){
+            resolve(user)
+          }
+        }
       }
     })
   }
@@ -489,12 +500,18 @@ class Janus {
     this.websocket.send(JSON.stringify(body));
   }
 
-  onTrackHandler(ev, subscriberID){
+  onTrackHandler(ev, user, type, subscriberID){
     console.log("On Add Stream event")
-    
-    console.log(ev)
-    console.log(ev.streams[0])
-    this.streams[subscriberID]=ev.streams[0] 
+
+    if(!this.streams[user]){
+      this.streams[user] = {}
+    }
+    if(!this.streams[user][type]){
+      this.streams[user][type] = {}
+    }
+
+    this.streams[user][type].stream=ev.streams[0];
+    this.streams[user][type].subscriberID = subscriberID; 
   }
 }
 

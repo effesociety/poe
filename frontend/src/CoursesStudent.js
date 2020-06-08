@@ -73,10 +73,14 @@ class CoursesStudent extends React.Component{
         this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
-            var id = await janus.onRemoteFeed(object)
-            this.setState({
-                teacherStream: janus.streams[id]
-            })
+            let res = await janus.onRemoteFeed(object)
+            let user = res[0];
+            let type = res[1];
+            if(!this.state.teacherStream){
+                this.setState({
+                    teacherStream: janus.streams[user][type].stream
+                })
+            }
         })
 
         janus.on('leaving', async (object) => {

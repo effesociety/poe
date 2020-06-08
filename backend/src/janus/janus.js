@@ -148,11 +148,15 @@ const janus = async (server) => {
         console.log(data)
 
         let publishedRole;
+        let type;
+        let user;
 
         wss.clients.forEach(ws => {
-            Object.keys(ws.publisherHandlers).forEach(type => {
-                if(ws.publisherHandlers[type] && ws.publisherHandlers[type].feedID === data.id){
+            Object.keys(ws.publisherHandlers).forEach(t => {
+                if(ws.publisherHandlers[t] && ws.publisherHandlers[t].feedID === data.id){
                     publishedRole = ws.role
+                    type = t
+                    user = ws.email
                 }
             })
         })
@@ -162,7 +166,7 @@ const janus = async (server) => {
                 if(ws.role === 'teacher'){
                     let exam = await currentExams.getExam(ws.course)
                     if(exam && exam.room === data.room){
-                        sendOffer(ws,data.room,data.id)
+                        sendOffer(ws,data.room,data.id,type,user)
                     }
                 }
             }
@@ -170,7 +174,7 @@ const janus = async (server) => {
                 if(ws.role === "student"){
                     let exam = await currentExams.getExam(ws.course)
                     if(exam && exam.room === data.room){
-                        sendOffer(ws,data.room,data.id)
+                        sendOffer(ws,data.room,data.id,type,user)
                     }
                 }
             }
@@ -297,8 +301,8 @@ const janus = async (server) => {
                 if(exam){
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "student" && websocket.course === ws.course){
-                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID)
-                            sendOffer(ws, exam.room, websocket.publisherHandlers.displayMedia.feedID)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID,"userMedia", websocket.email)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.displayMedia.feedID,"displayMedia", websocket.email)
                         }
                     })
                 }
@@ -318,7 +322,7 @@ const janus = async (server) => {
                     wss.clients.forEach(websocket => {
                         if(websocket.role === "teacher" && websocket.course === ws.course){
                             console.log("Attacching to teacher feed")
-                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID)
+                            sendOffer(ws, exam.room, websocket.publisherHandlers.userMedia.feedID,"userMedia", websocket.email)
                         }
                     })
                 }
@@ -327,6 +331,7 @@ const janus = async (server) => {
         }  
     }
     
+    //NOT USED
     async function manageGetFeedsMessage(ws){
         console.log("Received getFeeds message")
         if(ws.role === 'teacher'){
@@ -422,7 +427,7 @@ const janus = async (server) => {
         }
     }
 
-    async function sendOffer(ws, room, feed){
+    async function sendOffer(ws, room, feed, type, user){
         //ws.attachedToTeacher = true; //To avoid double attach
         console.log("Printing participant id: ", feed);
         let subscriberHandle = janusWrapper.addHandle();
@@ -435,7 +440,9 @@ const janus = async (server) => {
         let body = {
             "message": "offer",
             "jsep": object.jsep,
-            "subscriberID": subscriberHandle.id
+            "subscriberID": subscriberHandle.id,
+            "user": user,
+            "type": type
         };
         console.log("Sending offer to ",subscriberHandle.id)
         ws.send(JSON.stringify(body));      
