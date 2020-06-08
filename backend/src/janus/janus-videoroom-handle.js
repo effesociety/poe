@@ -96,7 +96,7 @@ module.exports = class JanusVideoroomHandle{
         let body = {
             "request": "create",
             "room": room,
-            "max_publishers": 150,
+            "publishers": 150,
             "permanent": false,
             "bitrate": 64000,
             "fir_freq": 10
