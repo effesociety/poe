@@ -218,15 +218,10 @@ class CoursesTeacher extends React.Component{
     }
 
     swapView(id){
-        let type = this.state.streams[id] === janus.streams[id]['userMedia'].stream ? 'displayMedia' : 'userMedia';
-
-        console.log("SWAPVIEW")
-        console.log("ID:",id)
-        console.log("TYPE:",type)
-
+        let type = this.state.streams[id].media === janus.streams[id]['userMedia'].stream ? 'displayMedia' : 'userMedia';
         if(janus.streams[id][type]){
             let streams = this.state.streams
-            streams[id] = janus.streams[id][type].stream
+            streams[id].media = janus.streams[id][type].stream
             this.setState({
                 streams: streams
             })
