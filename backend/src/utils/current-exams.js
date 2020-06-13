@@ -38,42 +38,36 @@ class CurrentExams{
     }
 
     async setExam(course,room){
-        try{
-            let exam = await examsSchema.findOne({course})
-            if(!exam){
-
-                let e = new examsSchema({
-                    course,
-                    room
-                })
-                await e.save()
-            }
+        let exam = await this.getExam(course)
+        if(!exam){
+            let e = new examsSchema({
+                course,
+                room,
+                stopping: false,
+            })
+            await e.save()
         }
-        catch(e){
-            console.log(e)
-        }
-
     }
 
-    async removeExam(course){
-        try{
-            let exam = await examsSchema.findOne({course})
-            if(exam){
-                exam.remove()
-            }            
-        }
-        catch(e){
-            console.log(e)
-        }
+    async removeExam(course){    
+        let exam = await this.getExam(course)
+        if(exam){
+            exam.remove()
+        }       
     }
 
     async addStudent(student,room){
         try{
             let exam = await examsSchema.findOne({room})
-            if(exam){               
-                console.log("Added student",student,"to exam")
-                exam.students.push(student)
-                await exam.save()                
+            if(exam){  
+                let data = {}
+                data[student] = {
+                    'completed': false,
+                    'report': null    
+                }
+                exam.students = Object.assign(data, exam.students)
+                await exam.save()
+                console.log("Added student",student,"to exam")            
             }            
         }
         catch(e){
@@ -82,13 +76,81 @@ class CurrentExams{
     }
 
     verifyFirstTime(student,exam){
-         if(exam.students.includes(student)){
-             console.log("Student",student,"has already participated in this exam")
-             return false
-         } 
-         else{
-             return true
-         }
+        if(exam.students){
+            if(student in exam.students){
+                console.log("Student",student,"has already participated in this exam")
+                return false
+            } 
+            else{
+                return true
+            }
+        }
+        else{
+            return true
+        }
+    }
+
+    async completeExam(course,student,report){
+        let exam = await this.getExam(course)
+        if(exam && exam.students){
+            if(student in exam.students){
+                console.log("Student", student, "complete exam")
+                let data = {}
+                data[student] = {
+                    'completed': true
+                }
+                if(report){
+                    data[student] = Object.assign({"report": report}, data[student])
+                }
+                delete exam.students[student]
+                exam.students = Object.assign(data, exam.students)
+                await exam.save()
+            }
+        }
+    }
+
+    async stopExam(course){
+        let exam = await this.getExam(course)
+        if(exam){
+            console.log("[",course,"] Exam stopped")
+            exam.stopping = true
+            await exam.save()
+        }        
+    }
+
+    getReports(exam){
+        let reports = {}
+        if(exam && exam.students){
+            for(let i = 0; i<Object.keys(exam.students).length; i++){
+                let key = Object.keys(exam.students)[i]
+                let data = {}
+                data[key] = exam.students[key].report
+                reports = Object.assign(data,reports)
+            }
+            return reports
+        }
+    }
+
+    async getNumStudents(course,clients){
+        let students = 0       
+        let exam = await this.getExam(course)
+        if(exam && exam.students){
+            for(let i = 0; i<Object.keys(exam.students).length; i++){
+                let key = Object.keys(exam.students)[i]
+                if(!exam.students[key].completed && clients.includes(key)){
+                    students += 1
+                }
+            }
+            return students
+        }
+        else{
+            return 0
+        }           
+    }
+
+    async getStopping(course){
+        let exam = await this.getExam(course)
+        return exam.stopping
     }
 }
 

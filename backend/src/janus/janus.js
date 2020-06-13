@@ -195,7 +195,7 @@ const janus = async (server) => {
                 })
             }        
         })
-        
+        /*
         janusAdminAPI.listParticipants(data.room)
         .then(participants => {
             console.log("Printing participants")
@@ -210,7 +210,8 @@ const janus = async (server) => {
         })  
         .catch(err => {
             console.log(err)
-        })     
+        })
+        */     
     })
 
     janusEventHandler.on('subscribed', (data) => {
@@ -364,21 +365,22 @@ const janus = async (server) => {
         }
         ws.send(JSON.stringify(body))
     }
-    
+  
     async function manageDestroyMessage(ws,object){
         console.log("Received destroy message")
         if(ws.role === 'teacher'){
-            let exam = await currentExams.getExam(object.course)
-            if(exam){
-                let room = exam.room
-                await currentExams.removeExam(object.course)
-                await janusAdminAPI.destroyRoom(room)
+            currentExams.stopExam(object.course)
+            let clients = []
+            for(ws of wss.clients){
+                clients.push(ws.email)
             }
-            let body = {
-                "message": "destroyed",
-                "course": object.course
+            let numStudents = await currentExams.getNumStudents(object.course,clients)
+            if(numStudents === 0){
+                sendReport(ws, object.course)
             }
-            ws.send(JSON.stringify(body))
+            else{
+                forceComplete(object.course)
+            }
         }
     }
 
@@ -421,8 +423,23 @@ const janus = async (server) => {
                     "test": response,
                     "report": report
                 }
-                console.log(report)  
-                ws.send(JSON.stringify(body))              
+
+                ws.send(JSON.stringify(body))
+                await currentExams.completeExam(object.course, ws.email, report)
+                let stopping = await currentExams.getStopping(object.course)
+                let clients = []
+                for(ws of wss.clients){
+                    clients.push(ws.email)
+                }
+                let numStudents = await currentExams.getNumStudents(object.course,clients)
+                if(stopping && numStudents === 0){
+                    wss.clients.forEach(ws => {
+                        if(ws.role === "teacher" && ws.course === object.course){
+                            sendReport(ws, object.course)
+                        }
+                    })
+                }
+                              
             }
         }
     }
@@ -447,6 +464,36 @@ const janus = async (server) => {
         console.log("Sending offer to ",subscriberHandle.id)
         ws.send(JSON.stringify(body));      
 
+    }
+
+    async function sendReport(ws, course){
+        let exam = await currentExams.getExam(course)
+        if(exam){
+            const reports = currentExams.getReports(exam)
+            let room = exam.room
+            await currentExams.removeExam(course)
+            await janusAdminAPI.destroyRoom(room)
+            let body = {
+                "message": "destroyed",
+                "course": course,
+                "reports": reports
+            }
+            ws.send(JSON.stringify(body))
+        }
+    }
+
+    async function forceComplete(course){
+        const exam = await currentExams.getExam(course);
+        let body = {
+            "message": "forceComplete"
+        }
+        if(exam && exam.students){
+            wss.clients.forEach(ws => {
+                if(ws.email in exam.students){
+                    ws.send(JSON.stringify(body))
+                }
+            })
+        }
     }
 }
 

@@ -58,6 +58,12 @@ class Exam extends React.Component{
         })
     }
 
+    componentDidUpdate(){
+        if(this.props.forceComplete){
+            this.props.completeExam(this.state.answers)
+        }
+    }
+
     changeActiveQuestion(key){
         this.setState({
             "activeQuestion": key

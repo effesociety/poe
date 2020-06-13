@@ -10,7 +10,11 @@ const examsSchema = mongoose.Schema({
         required: true
     },
     students: {
-        type: Array
+        type: Object
+    },
+    stopping: {
+        type: Boolean,
+        required: true
     }
 })
 

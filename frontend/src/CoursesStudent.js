@@ -18,7 +18,8 @@ class CoursesStudent extends React.Component{
             openResultsDialog: false,
             overflow: "inherit",
             test: null,
-            results: null
+            results: null,
+            forceComplete: false
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
@@ -89,6 +90,12 @@ class CoursesStudent extends React.Component{
                 teacherStream: null
             })
         })
+
+        janus.on('forceComplete', () => {
+            this.setState({
+                forceComplete: true
+            })
+        })
     }
 
     goFull() {
@@ -156,6 +163,7 @@ class CoursesStudent extends React.Component{
 
         janus.on('completed', (results) => {
             janus.destroy(true);
+            this.props.refresh();
             this.setState({
                 displayRoom: false,
                 mystream : null,
@@ -173,7 +181,6 @@ class CoursesStudent extends React.Component{
             overflow: overflow
         })
         document.body.style.overflow = this.state.overflow
-        
     }
 
     render(){
@@ -271,7 +278,7 @@ class CoursesStudent extends React.Component{
 
         var exam;
         if(this.state.test){
-            exam = (<Exam test={this.state.test} completeExam={this.completeExam} />)
+            exam = (<Exam test={this.state.test} completeExam={this.completeExam} forceComplete={this.state.forceComplete}/>)
         }
 
         var streams;

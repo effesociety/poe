@@ -232,7 +232,6 @@ class Janus {
       })
     })
   }
-
   
   destroyExam(course){
     let body = {
