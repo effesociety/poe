@@ -243,7 +243,7 @@ class Janus {
     return new Promise((resolve) => {
       this.on('destroyed',(object) => {
         if(object.course === course){
-          resolve()
+          resolve(object.reports)
         }
       })
     })

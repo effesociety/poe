@@ -3,6 +3,7 @@ import CourseForm from './CourseForm'
 import ExamMaker from './ExamMaker'
 import janus from './Janus'
 import Stream from './Stream'
+import Summary from './Summary'
 import update from 'react-addons-update';
 import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab, IconButton } from '@material-ui/core';
@@ -20,7 +21,9 @@ class CoursesTeacher extends React.Component{
             isFull: false,
             isCreating: false,
             examCreation: null,
-            currentTest: null
+            currentTest: null,
+            reports: {},
+            openSummaryDialog: false
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -34,6 +37,7 @@ class CoursesTeacher extends React.Component{
         this.changeSize = this.changeSize.bind(this);
         this.swapView = this.swapView.bind(this);
         this.goFull = this.goFull.bind(this);
+        this.closeSummaryDialog = this.closeSummaryDialog.bind(this);
     }
 
     closeForm(refresh){
@@ -149,7 +153,11 @@ class CoursesTeacher extends React.Component{
 
     async destroyExam(course){
         await janus.init(course)
-        await janus.destroyExam(course);
+        let reports = await janus.destroyExam(course);
+        this.setState({
+            reports: reports,
+            openSummaryDialog: true
+        })
         this.props.refresh()
     }
 
@@ -166,6 +174,12 @@ class CoursesTeacher extends React.Component{
             isCreating: false,
             examCreation: null,
             currentTest: null
+        })
+    }
+
+    closeSummaryDialog(){
+        this.setState({
+            openSummaryDialog: false
         })
     }
 
@@ -346,6 +360,7 @@ class CoursesTeacher extends React.Component{
 
             <CourseForm open={this.state.openForm} closeForm={this.closeForm} />
 
+            <Summary open={this.state.openSummaryDialog} reports={this.state.reports} close={this.closeSummaryDialog} />
 
             <ExamMaker open={this.state.isCreating} close={this.closeManageTest} course={this.state.examCreation} test={this.state.currentTest}/>
 

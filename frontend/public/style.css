@@ -250,6 +250,18 @@ html,body{
 	margin: 30px auto;
 	display: block;
 }
+.summary-h2{
+	margin-top:20px!important;
+}
+.summary-icon{
+	width: 20%;
+	height: auto;
+	margin: 30px auto;
+	display: block;	
+}
+.summary-container-table{
+	margin-bottom:20px;
+}
 .team{
 	text-align: center;
 	padding: 30px 0;
