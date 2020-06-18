@@ -85,6 +85,9 @@ html,body{
 .course-btn-start{
 	background-color:#009688!important;
 }
+.course-btn-history{
+	background-color: #607d8b!important;
+}
 .course-btn-make{
 	background-color: #2196f3!important;
 }
@@ -173,7 +176,6 @@ html,body{
 .make-exam-correct-answer fieldset{
 	border-color: #00c853!important;
 }
-
 .make-exam-wrong-answer label{
 	color: #c62828!important;
 }
@@ -195,6 +197,31 @@ html,body{
 	background-color: #009688!important;
 	color: #fff!important;
 	margin-bottom: 20px!important;
+}
+.exam-history-grid-container{
+	padding:0 20px
+}
+.exam-history-grid-item{
+	margin:0 10px!important;
+	margin-bottom: 20px!important;
+}
+.exam-history-h4{
+	display: block!important;
+	margin:20px 0!important;
+}
+.exam-history-goback{
+	position: absolute;
+	left: 20px;
+	top: 20px;
+	font-size: 2rem!important;
+	cursor: pointer;
+}
+.exam-history-btn{
+	background-color:#009688!important;
+	color:#fff!important;
+	display: block!important;
+	margin:auto!important;
+	margin-top:10px!important;
 }
 .student-exam-box{
 	width: 100%;

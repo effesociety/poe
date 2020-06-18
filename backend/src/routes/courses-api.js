@@ -169,4 +169,39 @@ coursesRouter.post(
   }
 )
 
+coursesRouter.post(
+  "/history",
+  async (req,res) => {
+    var cookies = cookie.parse(req.headers.cookie || '')
+    var name = req.body.name;
+    helper.checkUser(cookies).then(async user => {
+        if(user && user.role === 'teacher'){
+          try{
+              let course = await helper.checkCourse(name)
+              if(course){
+                  console.log("Got history for exam:",name)
+                  res.status(200).json({
+                      history: course.history
+                  })
+              }
+              else{
+                  console.log("Exam not found")
+                  res.status(400).json({
+                    message: "Error"
+                  })
+              }
+          }
+          catch(e){
+              console.log(e)
+          }
+        }
+        else{
+          res.status(400).json({
+              message: "No valid token provided in the request"
+            })
+        }
+    })
+  }
+)
+
 module.exports = coursesRouter

@@ -1,6 +1,7 @@
 import React from 'react'
 import CourseForm from './CourseForm'
 import ExamMaker from './ExamMaker'
+import ExamHistory from './ExamHistory'
 import janus from './Janus'
 import Stream from './Stream'
 import Summary from './Summary'
@@ -23,7 +24,9 @@ class CoursesTeacher extends React.Component{
             examCreation: null,
             currentTest: null,
             reports: {},
-            openSummaryDialog: false
+            openSummaryDialog: false,
+            openExamHistoryDialog: false,
+            history: []
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -38,6 +41,8 @@ class CoursesTeacher extends React.Component{
         this.swapView = this.swapView.bind(this);
         this.goFull = this.goFull.bind(this);
         this.closeSummaryDialog = this.closeSummaryDialog.bind(this);
+        this.getHistory = this.getHistory.bind(this);
+        this.closeExamHistoryDialog = this.closeExamHistoryDialog.bind(this);
     }
 
     closeForm(refresh){
@@ -183,6 +188,40 @@ class CoursesTeacher extends React.Component{
         })
     }
 
+    async getHistory(course){
+        try{
+            const requestOptions = {
+                method: "POST",
+                headers: {
+                  "Accept": "application/json",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    "name": course
+                }),
+                credentials: 'include'
+            };
+            let response = await fetch("/api/courses/history", requestOptions);
+            if(response){
+                let result = await response.json();
+                this.setState({
+                    history: result.history,
+                    openExamHistoryDialog: true,
+                })
+            }
+        }
+        catch(e){
+            console.log(e)
+        }
+    }
+
+    closeExamHistoryDialog(){
+        this.setState({
+            history: [],
+            openExamHistoryDialog: false
+        })
+    }
+
     fixOverflow(hidden){
         let overflow = hidden ? "hidden" : "inherit";
         document.body.style.overflow = overflow
@@ -280,6 +319,9 @@ class CoursesTeacher extends React.Component{
                                     Start exam
                                 </Button>
                                 {stopExam}
+                                <Button className="course-btn course-btn-history" onClick={() => this.getHistory(course.name)}>
+                                    History
+                                </Button>
                             </CardContent>
                         </Card>
                     </Grid>
@@ -363,6 +405,8 @@ class CoursesTeacher extends React.Component{
             <Summary open={this.state.openSummaryDialog} reports={this.state.reports} close={this.closeSummaryDialog} />
 
             <ExamMaker open={this.state.isCreating} close={this.closeManageTest} course={this.state.examCreation} test={this.state.currentTest}/>
+
+            <ExamHistory open={this.state.openExamHistoryDialog} close={this.closeExamHistoryDialog} history={this.state.history} />
 
             <Container>
                 {courses}

@@ -425,7 +425,7 @@ const janus = async (server) => {
                 }
 
                 ws.send(JSON.stringify(body))
-                await currentExams.completeExam(object.course, ws.email, report)
+                await currentExams.completeExam(object.course, ws.email, report, response)
                 let stopping = await currentExams.getStopping(object.course)
                 let clients = []
                 for(ws of wss.clients){
@@ -469,6 +469,19 @@ const janus = async (server) => {
     async function sendReport(ws, course){
         let exam = await currentExams.getExam(course)
         if(exam){
+
+            let students = {}
+            Object.keys(exam.students).forEach(student => {
+                students[student] = {
+                    "report": exam.students[student].report,
+                    "responses": exam.students[student].response
+                }
+            })
+            const examHistory = {
+                "timestamp": Date.now(),
+                "students": students
+            }
+            Helpers.saveExamHistory(examHistory, course)
             const reports = currentExams.getReports(exam)
             let room = exam.room
             await currentExams.removeExam(course)

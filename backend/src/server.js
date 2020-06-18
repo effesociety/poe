@@ -3,7 +3,7 @@ const app = express()
 const path = require('path')
 const mongo = require('./utils/db')
 const apiRouter = express.Router()
-const { userRoutes, coursesRoutes, eventsRoutes } = require('./routes/api')
+const { userRoutes, coursesRoutes, eventsRoutes, examsRoutes } = require('./routes/api')
 const janus = require('./janus/janus')
 
 //Setup for ENV variables

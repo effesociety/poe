@@ -90,7 +90,7 @@ class CurrentExams{
         }
     }
 
-    async completeExam(course,student,report){
+    async completeExam(course,student,report,response){
         let exam = await this.getExam(course)
         if(exam && exam.students){
             if(student in exam.students){
@@ -101,6 +101,9 @@ class CurrentExams{
                 }
                 if(report){
                     data[student] = Object.assign({"report": report}, data[student])
+                }
+                if(response){
+                    data[student] = Object.assign({"response": response}, data[student])
                 }
                 delete exam.students[student]
                 exam.students = Object.assign(data, exam.students)

@@ -145,6 +145,25 @@ async function removeDeletedCourse(courseName){
   }
 }
 
+async function saveExamHistory(examHistory, name){
+  try{
+    let course = await coursesSchema.findOne({name})
+    if(course){
+      let history = course.history;
+      if(!history){
+        history = []
+      }
+      history.push(examHistory);
+      course.history = history;
+      course.save();
+    }
+  }
+  catch(e){
+    console.log(e)
+  }
+
+}
+
 const EventEmitter = require('events')
 const commonEmitter = new EventEmitter()
 
@@ -158,3 +177,4 @@ exports.removeDeletedCourse = removeDeletedCourse
 exports.commonEmitter = commonEmitter
 exports.getAllCourses = getAllCourses
 exports.getOtherCourses = getOtherCourses
+exports.saveExamHistory = saveExamHistory

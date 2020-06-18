@@ -15,6 +15,9 @@ const coursesSchema = mongoose.Schema({
   },
   test:{
     type: Object
+  },
+  history:{
+    type: Array
   }
 })
 
