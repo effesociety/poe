@@ -270,15 +270,19 @@ class CoursesTeacher extends React.Component{
             })
         }
         else{
-            let stream = {
-                "media": this.state.streams[streamID].media,
-                "bigscreen": true
+            let streams = this.state.streams
+
+            Object.keys(this.state.streams).forEach((id) => {
+                if(this.state.streams[id].bigscreen && id !== streamID){
+                    streams[id].bigscreen = false
+                }
+                if(id === streamID){
+                    streams[id].bigscreen = true
+                }
             }
+
             let mystream = this.state.mystream
             mystream['bigscreen'] = false
-
-            let streams = this.state.streams
-            streams[streamID] = stream;
 
             this.setState({
                 "streams": streams,
