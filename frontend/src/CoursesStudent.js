@@ -112,6 +112,7 @@ class CoursesStudent extends React.Component{
     }
 
     changeFullScreen(isFull){
+        console.log("CHANGE FULL SCREEN FN")
         this.setState({
             isFull: isFull
         })
