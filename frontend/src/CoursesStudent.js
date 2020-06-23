@@ -74,10 +74,7 @@ class CoursesStudent extends React.Component{
                 })
            }
         ) 
-        
-
-
-        
+                
         //this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
