@@ -82,11 +82,12 @@ class CoursesStudent extends React.Component{
             let res = await janus.onRemoteFeed(object)
             let user = res[0];
             let type = res[1];
-            if(!this.state.teacherStream){
+            /*if(!this.state.teacherStream){
                 this.setState({
                     teacherStream: janus.streams[user][type].stream
                 })
             }
+            */
         })
 
         janus.on('leaving', async (object) => {
