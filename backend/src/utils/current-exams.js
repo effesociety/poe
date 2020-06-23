@@ -125,10 +125,12 @@ class CurrentExams{
         let reports = {}
         if(exam && exam.students){
             for(let i = 0; i<Object.keys(exam.students).length; i++){
-                let key = Object.keys(exam.students)[i]
-                let data = {}
-                data[key] = exam.students[key].report
-                reports = Object.assign(data,reports)
+                if(exam.students[i].completed){
+                    let key = Object.keys(exam.students)[i]
+                    let data = {}
+                    data[key] = exam.students[key].report
+                    reports = Object.assign(data,reports)
+                }
             }
             return reports
         }

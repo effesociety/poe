@@ -143,13 +143,6 @@ class CoursesTeacher extends React.Component{
                 streams: streams
             })
         })
-
-        setInterval(() => {
-            console.log("Printing this.state.streams")
-            console.log(this.state.streams)
-            console.log("Printing this.state.mystream")
-            console.log(this.state.mystream)
-        }, 2000)
     }
 
     closeExam(){
