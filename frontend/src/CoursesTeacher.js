@@ -228,6 +228,12 @@ class CoursesTeacher extends React.Component{
     }
 
     changeSize(streamID){        
+        console.log("Printing streamID")
+        console.log(streamID)
+        console.log("Printing this.state.streams")
+        console.log(this.state.streams)
+        console.log("Printing this.state.mystream")
+        console.log(this.state.mystream)
         if(streamID === null){
             Object.keys(this.state.streams).forEach((id) => {
                 if(this.state.streams[id].bigscreen){
