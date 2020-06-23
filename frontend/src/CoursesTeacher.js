@@ -279,7 +279,7 @@ class CoursesTeacher extends React.Component{
                 if(id === streamID){
                     streams[id].bigscreen = true
                 }
-            }
+            })
 
             let mystream = this.state.mystream
             mystream['bigscreen'] = false
