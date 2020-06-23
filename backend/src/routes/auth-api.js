@@ -19,7 +19,7 @@ userRouter.post(
     check("email", "Please enter a valid email")
       .not()
       .isEmpty()
-      .isMail(),
+      .isEmail(),
     check("password", "Please enter a valid password").isLength({
       min: 4
     })
@@ -101,7 +101,7 @@ userRouter.post(
 userRouter.post(
   "/login",
   [
-    check("email", "Please enter a valid email").not().isEmpty().isMail(),
+    check("email", "Please enter a valid email").not().isEmpty().isEmail(),
     check("password", "Please enter a valid password").isLength({
       min: 4
     })
