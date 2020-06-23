@@ -68,9 +68,14 @@ class CoursesStudent extends React.Component{
 
         await janus.init(course)
         let test = await janus.publish('student')
+        
         this.setState({
-            test: test
-        }, () => this.goFull())
+            test: test,
+            displayRoom: true, 
+            isFull: true,
+            openExamDialog: false
+        })
+        
         //this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
