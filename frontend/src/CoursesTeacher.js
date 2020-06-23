@@ -142,8 +142,14 @@ class CoursesTeacher extends React.Component{
             this.setState({
                 streams: streams
             })
-        
         })
+
+        setInterval(() => {
+            console.log("Printing this.state.streams")
+            console.log(this.state.streams)
+            console.log("Printing this.state.mystream")
+            console.log(this.state.mystream)
+        }, 2000)
     }
 
     closeExam(){
@@ -228,12 +234,6 @@ class CoursesTeacher extends React.Component{
     }
 
     changeSize(streamID){        
-        console.log("Printing streamID")
-        console.log(streamID)
-        console.log("Printing this.state.streams")
-        console.log(this.state.streams)
-        console.log("Printing this.state.mystream")
-        console.log(this.state.mystream)
         if(streamID === null){
             Object.keys(this.state.streams).forEach((id) => {
                 if(this.state.streams[id].bigscreen){
@@ -241,6 +241,18 @@ class CoursesTeacher extends React.Component{
                         "media": this.state.streams[id].media,
                         "bigscreen": false
                     }
+                    let mystream = this.state.mystream
+                    mystream['bigscreen'] = true;
+
+                    let streams = this.state.streams;
+                    streams[id] = stream
+
+                    this.setState({
+                        "streams": streams,
+                        "mystream": mystream
+                    })
+                    
+                    /*
                     this.setState(update(this.state,{
                         mystream: {
                             ["bigscreen"]: {
@@ -253,6 +265,7 @@ class CoursesTeacher extends React.Component{
                             }
                         }
                     }))
+                    */
                 }
             })
         }
@@ -261,6 +274,18 @@ class CoursesTeacher extends React.Component{
                 "media": this.state.streams[streamID].media,
                 "bigscreen": true
             }
+            let mystream = this.state.mystream
+            mystream['bigscreen'] = false
+
+            let streams = this.state.streams
+            streams[streamID] = stream;
+
+            this.setState({
+                "streams": streams,
+                "mystream": mystream
+            })
+
+            /*
             this.setState(update(this.state,{
                 mystream: {
                     ["bigscreen"]: {
@@ -273,6 +298,7 @@ class CoursesTeacher extends React.Component{
                     }
                 }
             }))
+            */
         }
     }
 
