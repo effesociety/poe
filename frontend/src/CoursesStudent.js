@@ -70,8 +70,8 @@ class CoursesStudent extends React.Component{
         let test = await janus.publish('student')
         this.setState({
             test: test
-        })
-        this.goFull();
+        }, () => this.goFull())
+        //this.goFull();
         janus.on('subscribed', async (object) => {
             console.log("Subscribed event")
             let res = await janus.onRemoteFeed(object)
