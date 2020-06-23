@@ -472,9 +472,11 @@ const janus = async (server) => {
 
             let students = {}
             Object.keys(exam.students).forEach(student => {
-                students[student] = {
-                    "report": exam.students[student].report,
-                    "responses": exam.students[student].response
+                if(exam.students[student].completed){
+                    students[student] = {
+                        "report": exam.students[student].report,
+                        "responses": exam.students[student].response
+                    }
                 }
             })
             const examHistory = {
