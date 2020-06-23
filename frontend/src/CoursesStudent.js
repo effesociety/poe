@@ -66,7 +66,7 @@ class CoursesStudent extends React.Component{
             displayRoom: true, 
             isFull: true,
             openExamDialog: false
-        },() => {
+        },async () => {
             await janus.init(course)
             let test = await janus.publish('student')
             this.setState({
@@ -81,12 +81,12 @@ class CoursesStudent extends React.Component{
             let res = await janus.onRemoteFeed(object)
             let user = res[0];
             let type = res[1];
-            /*if(!this.state.teacherStream){
+            if(!this.state.teacherStream){
                 this.setState({
                     teacherStream: janus.streams[user][type].stream
                 })
             }
-            */
+            
         })
 
         janus.on('leaving', async (object) => {
