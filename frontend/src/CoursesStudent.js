@@ -83,18 +83,18 @@ class CoursesStudent extends React.Component{
             displayRoom: true
         }, () => {
             this.setState({
-                isFull: true;
-                openExamDialog:false;
+                isFull: true,
+                openExamDialog:false,
             }, async () => {
                 await janus.init(course)
                 let test = await janus.publish('student')
-                console.log("Before")
                 this.setState({
                     test: test,
                     isFull: true,
                     openExamDialog: false
                 })
            })
+        }
         )   
                 
         //this.goFull();
