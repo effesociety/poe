@@ -4,6 +4,7 @@ import Stream from './Stream'
 import Exam from './Exam'
 import Results from './Results'
 import Fullscreen from "react-full-screen";
+import CustomSnackbar from './CustomSnackbar';
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Dialog, IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -19,7 +20,9 @@ class CoursesStudent extends React.Component{
             overflow: "inherit",
             test: null,
             results: null,
-            forceComplete: false
+            forceComplete: false,
+            openSnackbar: true,
+            msgSnackbar: ""
         }
         this.enroll = this.enroll.bind(this);
         this.startExam = this.startExam.bind(this);
@@ -28,8 +31,16 @@ class CoursesStudent extends React.Component{
         this.fixOverflow = this.fixOverflow.bind(this);
         this.goFull = this.goFull.bind(this);
         this.changeFullScreen = this.changeFullScreen.bind(this);
-        this.completeExam = this.completeExam.bind(this)
+        this.completeExam = this.completeExam.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
+
+    handleCloseSnackbar(){
+		this.setState({
+			openSnackbar: false,
+			msgSnackbar: "",
+		})
+	}
 
     async enroll(course){
         this.setState({
@@ -51,11 +62,17 @@ class CoursesStudent extends React.Component{
               this.props.refresh();
             }
             else{
-              alert("An error occurred");
+                this.setState({
+                    openSnackbar: true,
+                    msgSnackbar: "Error, enroll not completed",
+                })
             }
           } 
           catch (err) {
-            alert("An error occurred");
+            this.setState({
+                openSnackbar: true,
+                msgSnackbar: "An error occurred",
+            })
             console.log("An error occurred")
             console.log(err);
           }        
@@ -304,6 +321,8 @@ class CoursesStudent extends React.Component{
                
         return (
         <Box className="course-box">
+            <CustomSnackbar open={this.state.openSnackbar} msg={this.state.msgSnackbar} severity="error" closeSnackbar={this.handleCloseSnackbar}/>
+
             <Dialog open={this.state.openExamDialog} fullWidth={true} maxWidth="sm">
                 <Container>
                     <Typography variant="h4" align="center" className="fullscreen-dialog-h4">

@@ -1,4 +1,5 @@
 import React from "react";
+import CustomSnackbar from './CustomSnackbar';
 import { Box, Dialog, Typography, Avatar, Button, TextField, Grid, Container} from '@material-ui/core';
 import LockOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
 
@@ -32,6 +33,8 @@ class LoginForm extends React.Component {
     this.state = {
       buttonDisabled: false,
       open: false,
+      openSnackbar: false,
+			msgSnackbar: ""
     };
 
     this.doLogin = this.doLogin.bind(this);
@@ -40,10 +43,11 @@ class LoginForm extends React.Component {
     this.openForm = this.openForm.bind(this);
     this.closeForm = this.closeForm.bind(this);
     this.resetForm = this.resetForm.bind(this);
+    this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this)
     this.email = React.createRef();
     this.password = React.createRef();
-
   }
+  
   openForm() {
     this.setState({
       open: true,
@@ -59,6 +63,13 @@ class LoginForm extends React.Component {
       buttonDisabled: false,
     });
   }
+
+  handleCloseSnackbar(){
+		this.setState({
+			openSnackbar: false,
+			msgSnackbar: "",
+		})
+	}
 
   async doLogin() {
     this.setState({
@@ -87,13 +98,19 @@ class LoginForm extends React.Component {
       }
       else{
         this.resetForm();
-        alert("An error occurred");
+        this.setState({
+          openSnackbar: true,
+          msgSnackbar: "Wrong email or password",
+        })
       }
     } 
     catch (err) {
-      console.log("An error occurred")
       console.log(err);
       this.resetForm();
+      this.setState({
+        openSnackbar: true,
+        msgSnackbar: "An error occurred",
+      })
     }
   }
 
@@ -124,13 +141,19 @@ class LoginForm extends React.Component {
       }
       else{
         this.resetForm();
-        alert("An error occurred");
+        this.setState({
+          openSnackbar: true,
+          msgSnackbar: "Insert a valid email",
+        })
       }
     } 
     catch (err) {
-      console.log("An error occurred")
       console.log(err);
       this.resetForm();
+      this.setState({
+        openSnackbar: true,
+        msgSnackbar: "An error occurred",
+      })
     }
   }
 
@@ -151,13 +174,19 @@ class LoginForm extends React.Component {
       }
       else{
         this.resetForm();
-        alert("An error occurred");
+        this.setState({
+          openSnackbar: true,
+          msgSnackbar: "Logout failed",
+        })
       }
     } 
     catch (err) {
-      console.log("An error occurred")
       console.log(err);
       this.resetForm();
+      this.setState({
+        openSnackbar: true,
+        msgSnackbar: "An error occurred",
+      })
     }
   } 
 
@@ -187,6 +216,8 @@ class LoginForm extends React.Component {
 
     return (
       <div>
+        <CustomSnackbar open={this.state.openSnackbar} msg={this.state.msgSnackbar} severity="error" closeSnackbar={this.handleCloseSnackbar}/>
+        
         {userInfo}
         <Dialog open={this.state.open} onClose={this.closeForm} aria-labelledby="form-dialog-title">
           <Container fixed>

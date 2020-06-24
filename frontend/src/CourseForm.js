@@ -1,4 +1,5 @@
 import React from "react";
+import CustomSnackbar from './CustomSnackbar';
 import { Box, Dialog, Typography, Avatar, Button, TextField, Grid, Container } from "@material-ui/core";
 import GroupIcon from '@material-ui/icons/Group';
 
@@ -26,7 +27,20 @@ class CourseForm extends React.Component {
     super(props);
     this.doCreate = this.doCreate.bind(this);
     this.courseName = React.createRef();
+    this.state = {
+      openSnackbar: false,
+			msgSnackbar: ""
+    };
+
+    this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this)
   }
+  
+  handleCloseSnackbar(){
+		this.setState({
+			openSnackbar: false,
+			msgSnackbar: "",
+		})
+	}
 
   async doCreate() {
     this.setState({
@@ -49,19 +63,26 @@ class CourseForm extends React.Component {
         this.props.closeForm(true);
       }
       else{
-        alert("An error occurred");
+        this.setState({
+          openSnackbar: true,
+          msgSnackbar: "Error in course creation",
+        })
       }
     } 
     catch (err) {
-      alert("An error occurred");
-      console.log("An error occurred")
       console.log(err);
+      this.setState({
+        openSnackbar: true,
+        msgSnackbar: "An error occurred",
+      })
     }
   }
 
   render() {
     return (
       <div>
+        <CustomSnackbar open={this.state.openSnackbar} msg={this.state.msgSnackbar} severity="error" closeSnackbar={this.handleCloseSnackbar}/>
+
         <Dialog open={this.props.open} onClose={this.props.closeForm} aria-labelledby="form-dialog-title">
           <Container fixed style={styles.dialogContainer} >
             <Box>

@@ -8,6 +8,7 @@ import Summary from './Summary'
 import update from 'react-addons-update';
 import Fullscreen from "react-full-screen";
 import {Grid, Container, Box, Card, CardContent, Button, Typography, Fab, IconButton } from '@material-ui/core';
+import CustomSnackbar from './CustomSnackbar';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -26,7 +27,9 @@ class CoursesTeacher extends React.Component{
             reports: {},
             openSummaryDialog: false,
             openExamHistoryDialog: false,
-            history: []
+            history: [],
+            openSnackbar: true,
+            msgSnackbar: ""
         };
         this.closeForm = this.closeForm.bind(this);
         this.openForm = this.openForm.bind(this);
@@ -36,6 +39,7 @@ class CoursesTeacher extends React.Component{
         this.closeManageTest = this.closeManageTest.bind(this);
         this.destroyExam = this.destroyExam.bind(this);
         this.closeExam = this.closeExam.bind(this);
+        this.checkBigscreen = this.checkBigscreen.bind(this);
         this.fixOverflow = this.fixOverflow.bind(this);
         this.changeSize = this.changeSize.bind(this);
         this.swapView = this.swapView.bind(this);
@@ -43,6 +47,7 @@ class CoursesTeacher extends React.Component{
         this.closeSummaryDialog = this.closeSummaryDialog.bind(this);
         this.getHistory = this.getHistory.bind(this);
         this.closeExamHistoryDialog = this.closeExamHistoryDialog.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this)
     }
 
     closeForm(refresh){
@@ -66,6 +71,13 @@ class CoursesTeacher extends React.Component{
         });
     }
 
+    handleCloseSnackbar(){
+		this.setState({
+			openSnackbar: false,
+			msgSnackbar: "",
+		})
+	}
+
     async destroyCourse(course){
           try {
             const requestOptions = {
@@ -83,11 +95,17 @@ class CoursesTeacher extends React.Component{
               this.closeForm(true);
             }
             else{
-              alert("An error occurred");
+                this.setState({
+                    openSnackbar: true,
+                    msgSnackbar: "Error occurred: course not destroyed",
+                  })
             }
           } 
           catch (err) {
-            alert("An error occurred");
+            this.setState({
+                openSnackbar: true,
+                msgSnackbar: "An error occurred",
+            })
             console.log("An error occurred")
             console.log(err);
           }
@@ -185,6 +203,40 @@ class CoursesTeacher extends React.Component{
         this.setState({
             openSummaryDialog: false
         })
+    }
+
+    checkBigscreen(type){
+        let bigscreen = false;
+        if(type === 'student'){
+            for(let i = 0; i<Object.keys(this.state.streams).length; i++){
+                let key = Object.keys(this.state.streams)[i];
+                if(this.state.streams[key].bigscreen){
+                    bigscreen = true;
+                }
+            }
+        }
+        else if(type === 'teacher'){
+            if(this.state.mystream.bigscreen){
+                bigscreen = true;
+            }
+        }
+
+        if(!bigscreen){
+            if(type === 'student'){
+                let streams = this.state.streams;
+                streams[Object.keys(streams)[0]].bigscreen = true;
+                this.setState({
+                    streams: streams
+                })
+            }
+            else if(type === 'teacher'){
+                let mystream = this.state.mystream;
+                mystream.bigscreen = true;
+                this.setState({
+                    mystream: mystream
+                })
+            }
+        }
     }
 
     async getHistory(course){
@@ -403,7 +455,17 @@ class CoursesTeacher extends React.Component{
                         <Stream id={stream} stream={this.state.streams[stream].media} bigscreen={this.state.streams[stream].bigscreen} key={i} changeSize={this.changeSize} swapView={this.swapView}/>
                     )
             })
-        }      
+        }
+        
+        var visibleStreams;
+        if(remoteStreams !== null && remoteStreams !== undefined){
+            this.checkBigscreen('student');
+            visibleStreams = remoteStreams;
+        }
+        else{
+            this.checkBigscreen('teacher');
+            visibleStreams = localStream;
+        }
 
         var streams;
         if(this.state.displayRoom){
@@ -414,8 +476,7 @@ class CoursesTeacher extends React.Component{
                         <IconButton aria-label="delete" onClick={this.closeExam} className="exam-btn-stop">
                             <CloseIcon />
                         </IconButton>
-                        {localStream}
-                        {remoteStreams}
+                        {visibleStreams}
                     </Box>
                 </Fullscreen>
             )
@@ -426,6 +487,8 @@ class CoursesTeacher extends React.Component{
         
         return (
         <Box className="course-box">
+
+            <CustomSnackbar open={this.state.openSnackbar} msg={this.state.msgSnackbar} severity="error" closeSnackbar={this.handleCloseSnackbar}/>
 
             {streams}
 

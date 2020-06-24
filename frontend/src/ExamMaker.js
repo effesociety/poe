@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Dialog, Typography, Fab, TextField, Container, Button } from "@material-ui/core";
+import CustomSnackbar from './CustomSnackbar'
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
 
@@ -43,8 +44,11 @@ class ExamMaker extends React.Component {
     super(props);
     this.state = {
       "questions": {},
-      "answers": {}
+      "answers": {},
+      "openSnackbar": true,
+      "msgSnackbar": ""
     }
+    this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this)
     this.addQuestion = this.addQuestion.bind(this);
     this.uploadExam = this.uploadExam.bind(this);
     this.setQuestion = this.setQuestion.bind(this);
@@ -120,6 +124,13 @@ class ExamMaker extends React.Component {
     })
   }
 
+  handleCloseSnackbar(){
+		this.setState({
+			openSnackbar: false,
+			msgSnackbar: "",
+		})
+	}
+
   async uploadExam(){
     let body = {
       questions: this.state.questions, //The questions with ALL the answers
@@ -141,11 +152,17 @@ class ExamMaker extends React.Component {
       }
       else{
         this.props.close()
-        alert("An error occurred");
+        this.setState({
+          openSnackbar: true,
+          msgSnackbar: "An error occurred in the upload",
+        })
       }
     } 
     catch (err) {
-      alert("An error occurred");
+      this.setState({
+        openSnackbar: true,
+        msgSnackbar: "An error occurred",
+      })
       console.log("An error occurred")
       console.log(err);
     }
@@ -158,6 +175,8 @@ class ExamMaker extends React.Component {
 
     return (
       <div>
+        <CustomSnackbar open={this.state.openSnackbar} msg={this.state.msgSnackbar} severity="error" closeSnackbar={this.handleCloseSnackbar}/>
+
         <Dialog open={this.props.open} onEnter={this.onEnter} onClose={this.onClose} fullWidth={true}
         maxWidth="md" aria-labelledby="form-dialog-title">
           <Container>
