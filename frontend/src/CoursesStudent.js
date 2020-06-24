@@ -21,7 +21,7 @@ class CoursesStudent extends React.Component{
             test: null,
             results: null,
             forceComplete: false,
-            openSnackbar: true,
+            openSnackbar: false,
             msgSnackbar: ""
         }
         this.enroll = this.enroll.bind(this);

@@ -28,7 +28,7 @@ class CoursesTeacher extends React.Component{
             openSummaryDialog: false,
             openExamHistoryDialog: false,
             history: [],
-            openSnackbar: true,
+            openSnackbar: false,
             msgSnackbar: ""
         };
         this.closeForm = this.closeForm.bind(this);
@@ -458,11 +458,11 @@ class CoursesTeacher extends React.Component{
         }
         
         var visibleStreams;
-        if(remoteStreams !== null && remoteStreams !== undefined){
+        if(remoteStreams !== null && remoteStreams !== undefined && remoteStreams.length > 0){
             this.checkBigscreen('student');
             visibleStreams = remoteStreams;
         }
-        else{
+        else if(localStream !== null && localStream !== undefined){
             this.checkBigscreen('teacher');
             visibleStreams = localStream;
         }

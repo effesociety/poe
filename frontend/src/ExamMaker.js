@@ -45,7 +45,7 @@ class ExamMaker extends React.Component {
     this.state = {
       "questions": {},
       "answers": {},
-      "openSnackbar": true,
+      "openSnackbar": false,
       "msgSnackbar": ""
     }
     this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this)
