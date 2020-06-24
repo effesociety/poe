@@ -31,6 +31,7 @@ class CoursesStudent extends React.Component{
         this.fixOverflow = this.fixOverflow.bind(this);
         this.goFull = this.goFull.bind(this);
         this.changeFullScreen = this.changeFullScreen.bind(this);
+        this.checkIsFull = this.checkIsFull.bind(this);
         this.completeExam = this.completeExam.bind(this);
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
@@ -81,19 +82,15 @@ class CoursesStudent extends React.Component{
     async startExam(course){
         this.setState({
             displayRoom: true
-        }, async () => {
-                await janus.init(course)
-                let test = await janus.publish('student')
-                this.setState({
-                    test: test
-                }, () => {
-                    this.setState({
-                        isFull: true,
-                        openExamDialog: false
-                    })
-                })
-           }
-        ) 
+        })
+        
+        await janus.init(course)
+        let test = await janus.publish('student')
+        this.setState({
+            test: test,
+            isFull: true,
+            openExamDialog: false
+        },this.checkIsFull)
                 
         //this.goFull();
         janus.on('subscribed', async (object) => {
@@ -131,8 +128,22 @@ class CoursesStudent extends React.Component{
         });
     }
 
+    checkIsFull(){
+        let id = setInterval(() => {
+            if(document.fullscreenElement === null){
+                this.setState({
+                    isFull: true
+                })
+            }
+            else{
+                clearInterval(id)
+                console.log("Fullscreen mode correctly enabled")
+                return
+            }
+        }, 1000)
+    }
+
     changeFullScreen(isFull){
-        console.log("CHANGE FULL SCREEN FN")
         this.setState({
             isFull: isFull
         })
