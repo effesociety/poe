@@ -84,11 +84,13 @@ class CoursesStudent extends React.Component{
         }, async () => {
                 await janus.init(course)
                 let test = await janus.publish('student')
+                console.log("Before")
                 this.setState({
                     test: test,
                     isFull: true,
                     openExamDialog: false
-                })
+                }, () => {console.log("After")})
+                
            }
         ) 
                 
@@ -99,11 +101,10 @@ class CoursesStudent extends React.Component{
             let user = res[0];
             let type = res[1];
             if(!this.state.teacherStream){
-                /*
                 this.setState({
                     teacherStream: janus.streams[user][type].stream
                 })
-                */
+                
             }
             
         })
