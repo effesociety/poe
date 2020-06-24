@@ -81,7 +81,11 @@ class CoursesStudent extends React.Component{
     async startExam(course){
         this.setState({
             displayRoom: true
-        }, async () => {
+        }, () => {
+            this.setState({
+                isFull: true;
+                openExamDialog:false;
+            }, async () => {
                 await janus.init(course)
                 let test = await janus.publish('student')
                 console.log("Before")
@@ -89,10 +93,9 @@ class CoursesStudent extends React.Component{
                     test: test,
                     isFull: true,
                     openExamDialog: false
-                }, () => {console.log("After")})
-                
-           }
-        ) 
+                })
+           })
+        )   
                 
         //this.goFull();
         janus.on('subscribed', async (object) => {
