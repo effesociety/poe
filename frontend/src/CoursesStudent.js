@@ -81,21 +81,19 @@ class CoursesStudent extends React.Component{
     async startExam(course){
         this.setState({
             displayRoom: true
-        }, () => {
-            this.setState({
-                isFull: true,
-                openExamDialog:false,
-            }, async () => {
+        }, async () => {
                 await janus.init(course)
                 let test = await janus.publish('student')
                 this.setState({
-                    test: test,
-                    isFull: true,
-                    openExamDialog: false
+                    test: test
+                }, () => {
+                    this.setState({
+                        isFull: true,
+                        openExamDialog: false
+                    })
                 })
-           })
-        }
-        )   
+           }
+        ) 
                 
         //this.goFull();
         janus.on('subscribed', async (object) => {
@@ -107,7 +105,6 @@ class CoursesStudent extends React.Component{
                 this.setState({
                     teacherStream: janus.streams[user][type].stream
                 })
-                
             }
             
         })
