@@ -471,14 +471,20 @@ const janus = async (server) => {
         if(exam){
 
             let students = {}
-            Object.keys(exam.students).forEach(student => {
-                if(exam.students[student].completed){
-                    students[student] = {
-                        "report": exam.students[student].report,
-                        "responses": exam.students[student].response
+
+            if(exam.students){
+                let keys = Object.keys(exam.students)
+                keys.sort()
+                keys.forEach(student => {
+                    if(exam.students[student].completed){
+                        students[student] = {
+                            "report": exam.students[student].report,
+                            "responses": exam.students[student].response
+                        }
                     }
-                }
-            })
+                })
+            }            
+
             const examHistory = {
                 "timestamp": Date.now(),
                 "students": students
@@ -491,7 +497,7 @@ const janus = async (server) => {
             let body = {
                 "message": "destroyed",
                 "course": course,
-                "reports": reports
+                "reports": reports || {}
             }
             ws.send(JSON.stringify(body))
         }
