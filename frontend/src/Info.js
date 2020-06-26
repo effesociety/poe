@@ -18,12 +18,19 @@ class Info extends React.Component{
                 <Card className="animate__animated animate__slideInUp">
                     <CardContent className="info-card-content">
                         <Typography variant="h3" align="center" gutterBottom>
-                            Lorem ipsum dolor sit amet
+                            What is poe?
                         </Typography>
                         <Grid container>
                             <Grid item sm={12} md={6}>
                                 <Typography variant="subtitle1" align="justify">
-                                    Aenean dolor felis, sagittis ut pulvinar eu, hendrerit ut elit. Praesent ac orci pretium, porttitor justo at, elementum ipsum. Quisque vitae augue lacus. Donec ac cursus diam. Fusce pretium volutpat cursus. In volutpat elit sit amet magna placerat pharetra eu at nulla. Curabitur eu accumsan lectus. Praesent ut justo a neque rhoncus mollis nec eu erat. Curabitur elit leo, sodales et nisi et, vestibulum efficitur tortor. Duis quis venenatis nulla. Phasellus tristique ligula ac odio pharetra auctor. Sed nec dictum risus, sed mollis ipsum. Praesent tincidunt malesuada justo sit amet eleifend. Nulla a magna lacus. Praesent in massa non neque malesuada mollis. Sed nunc metus, tincidunt vitae sagittis ac, imperdiet id massa. Donec dictum dui ut leo fringilla, non posuere odio gravida. Maecenas libero ante, condimentum rhoncus dignissim in, facilisis quis risus. Suspendisse mi massa, mattis at ex ac, hendrerit aliquet augue. Nunc mattis sagittis ultricies.
+                                    POE is a flexible, simple, scalable assessment platform delivered in the cloud.
+                                    The current global health crisis has forced companies and universities towards the new paradigm of online assessment and remote proctoring. We offer you our solution.
+
+                                    Online exams are steadily gaining ground in the e-learning industry. Students, professionals and organizations are interested in digital solutions that can help them facilitate certification of skills without losing the integrity of the exam.
+
+                                    Online proctoring is a digital form of assessment that allows the candidate to take the exam via software, from anywhere. It is important that the procedure
+                                    must be somehow reliable and cheat-proof.
+                                    Thanks to live proctoring, a proctor observes the examinee while doing the exam and when something suspicious is detected, it can intervene to guarantee the authenticity of the examination.
                                 </Typography>
                             </Grid>
                             <Grid item sm={12} md={6}>
@@ -32,7 +39,7 @@ class Info extends React.Component{
                         </Grid>
 
                         <Typography variant="h3" align="center" gutterBottom>
-                            Lorem ipsum dolor sit amet
+                            How it works
                         </Typography>                        
                         <Grid container>
                            <Grid item sm={12} md={6}>
@@ -40,7 +47,23 @@ class Info extends React.Component{
                             </Grid>
                             <Grid item sm={12} md={6}>
                                 <Typography variant="subtitle1" align="justify">
-                                    Sed nunc metus, tincidunt vitae sagittis ac, imperdiet id massa. Donec dictum dui ut leo fringilla, non posuere odio gravida. Maecenas libero ante, condimentum rhoncus dignissim in, facilisis quis risus. Suspendisse mi massa, mattis at ex ac, hendrerit aliquet augue. Nunc mattis sagittis ultricies. Nunc a nulla cursus diam blandit efficitur eu tempor turpis. Nullam tempus, purus in facilisis aliquet, diam nibh ullamcorper leo, at euismod libero risus sit amet lacus. Nulla viverra arcu at euismod sollicitudin. Ut ipsum ante, elementum et odio a, viverra gravida ipsum.  Aenean dolor felis, sagittis ut pulvinar eu, hendrerit ut elit. Praesent ac orci pretium, porttitor justo at, elementum ipsum. Quisque vitae augue lacus. Donec ac cursus diam. Fusce pretium volutpat cursus. In volutpat elit sit amet magna placerat pharetra eu at nulla.
+                                    poe supports Key Stages of Assessment Management:
+                                    <ul>
+                                        <li>Exam creation and delivery</li>
+                                        <li>Post-exam report generation</li>
+                                    </ul>
+
+                                    Some features of our platform: 
+                                    <ul>
+                                        <li>Delivered in the cloud</li>
+                                        <li>No software installation needed</li>
+                                    </ul>
+                                    
+                                    The supervisor can enable and stop the exam session remotely.
+
+                                    The proctor can view the screen on which the candidate is taking the exam to check its behaviour.
+
+                                    While the exam is full screen, it is not available to open something else. If the candidate wants to exit the full screen, he/she is warned and if he/she exits then the exam is terminated.
                                 </Typography>
                             </Grid>
 
